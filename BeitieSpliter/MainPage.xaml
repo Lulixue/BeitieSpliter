@@ -9,26 +9,58 @@
     RequestedTheme="Dark"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid x:Name="Border" Grid.Row="2" Grid.ColumnSpan="2" Margin="10" BorderThickness="{ThemeResource SearchBoxThemePadding}">
+    <Page.Resources>
+        <Style x:Key="LeftFriendly" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style x:Key="HorizontalFriendly" TargetType="FrameworkElement">
+            <Setter Property="Margin" Value="0,5,0,5"/>
+        </Style>
+        <Style x:Key="RadioFriendly" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14.66"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Page.Resources>
+
+
+    <Grid x:Name="Border" Grid.Row="3" Grid.ColumnSpan="2" Margin="10" BorderThickness="{ThemeResource SearchBoxThemePadding}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="7*"/>
+            <RowDefinition Height="20*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="6*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Orientation="Horizontal">
-            <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="Import Beitie File" FontSize="20" Click="OnImportBeitieFile"/>
-            <Button x:Name="ImportBtDir" Width="230" Height="50" Content="Import Beitie Directory" FontSize="20" Click="OnImportBeitieDir"/>
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
+                <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="Import Beitie File" FontSize="20" Click="OnImportBeitieFile"/>
+                <Button x:Name="ImportBtDir" Width="230" Height="50" Content="Import Beitie Directory" FontSize="20" Click="OnImportBeitieDir"/>
+            </StackPanel>
+            
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
+                <TextBox x:Name="FileDirPath" Visibility="Collapsed"  VerticalContentAlignment="Center" FontSize="18" VerticalAlignment="Stretch" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock  Text="行数：" Margin="0,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <ComboBox  x:Name="RowCount" SelectionChanged="RowCount_SelectionChanged"  IsDropDownOpen="True" IsEditable="True" Width="100"/>
+            <TextBlock  Text="列数：" Margin="20,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <ComboBox  x:Name="ColumnCount" SelectionChanged="CoumnCount_SelectionChanged"  IsDropDownOpen="True" IsEditable="True" Width="100" />
         </StackPanel>
         
-        <Border  Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
-            <StackPanel Background="{ThemeResource SystemControlBackgroundListLowBrush}" >
+        <Border  Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
+            <ScrollViewer x:Name="ImageScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible"
+                    ZoomMode="Enabled" >
                 <Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>
-            </StackPanel>
+            </ScrollViewer>
         </Border>
 
-        <TextBox x:Name="PageText" Grid.Row="1" Grid.Column="1" AcceptsReturn="True" Text="释文" VerticalAlignment="Stretch" Margin="3"/>
+        <TextBox x:Name="PageText" Grid.Row="2" Grid.Column="1" AcceptsReturn="True" Text="释文" VerticalAlignment="Stretch" Margin="3"/>
     </Grid>
 </Page>
