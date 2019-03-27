@@ -53,7 +53,7 @@
             <TextBlock  Text="行数：" Margin="0,0,5,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowCount" SelectionChanged="RowCount_SelectionChanged"  IsDropDownOpen="True" IsEditable="True" Width="100"/>
             <TextBlock  Text="列数：" Margin="20,0,5,0" Style="{StaticResource LeftFriendly}" />
-            <ComboBox  x:Name="ColumnCount" SelectionChanged="CoumnCount_SelectionChanged"  IsDropDownOpen="True" IsEditable="True" Width="100" />
+            <ComboBox  x:Name="ColumnCount" SelectionChanged="ColumnCount_SelectionChanged"  IsDropDownOpen="True" IsEditable="True" Width="100" />
         </StackPanel>
         
         <Border x:Name="PageBorder" Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">

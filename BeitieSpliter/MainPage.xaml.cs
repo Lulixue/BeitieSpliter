@@ -27,11 +27,20 @@ using Windows.UI.Core;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
+using Windows.UI.Popups;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace BeitieSpliter
 {
+    public sealed class BeitieGrids
+    {
+        public Point OriginPoint;
+        public Point MaxPoint;
+        public List<float> Widths = new List<float>();
+        public List<float> Heights = new List<float>();
+    }
+
     public sealed class BeitieImage
     {
         private void Sleep(int msTime)
@@ -220,11 +229,90 @@ namespace BeitieSpliter
     {
         private Color BKGD_COLOR = Colors.White;   //画布背景色
         BeitieImage CurrentBtImage;
+        BeitieGrids BtGrids = new BeitieGrids();
+        int ColumnNumber = -1;
+        int RowNumber = -1;
+        int PenWidth = 2;
+        Color PenColor = Colors.White;
 
         public MainPage()
         {
             this.InitializeComponent();
             InitControls();
+        }
+        private void ColumnIllegalHandler(IUICommand command)
+        {
+
+            ColumnCount.SelectedIndex = 3;
+        }
+        private void RowIllegalHandler(IUICommand command)
+        {
+            RowCount.SelectedIndex = 6;
+        }
+        private async void ShowMessageDlg(string msg, bool isColumn)
+        {
+            // Create the message dialog and set its content
+            var messageDialog = new MessageDialog(msg);
+
+            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+            if (isColumn)
+            {
+                messageDialog.Commands.Add(new UICommand(
+                    "关闭", new UICommandInvokedHandler(this.ColumnIllegalHandler)));
+            }
+            else
+            {
+
+                messageDialog.Commands.Add(new UICommand(
+                    "关闭", new UICommandInvokedHandler(this.RowIllegalHandler)));
+            }
+
+            // Set the command that will be invoked by default
+            messageDialog.DefaultCommandIndex = 0;
+
+            // Set the command to be invoked when escape is pressed
+            messageDialog.CancelCommandIndex = 1;
+
+            // Show the message dialog
+            await messageDialog.ShowAsync();
+        }
+
+        public int GetColumnCount()
+        {
+            if (ColumnCount.Text == "")
+            {
+                return -1;
+            }
+
+            int columns = -1;
+            try
+            {
+                columns = int.Parse(ColumnCount.Text);
+            }
+            catch
+            {
+                ShowMessageDlg("列数非法: " + ColumnCount.Text, true);
+            }
+            return columns;
+        }
+
+        public int GetRowCount()
+        {
+            if (RowCount.Text == "")
+            {
+                return -1;
+            }
+
+            int columns = -1;
+            try
+            {
+                columns = int.Parse(RowCount.Text);
+            }
+            catch
+            {
+                ShowMessageDlg("行数非法: " + RowCount.Text, false);
+            }
+            return columns;
         }
 
         void InitControls()
@@ -234,12 +322,37 @@ namespace BeitieSpliter
                 RowCount.Items.Add(i);
                 ColumnCount.Items.Add(i);
             }
-            RowCount.SelectedIndex = 6;
-            ColumnCount.SelectedIndex = 3;
+            RowCount.SelectedIndex = 8;
+            ColumnCount.SelectedIndex = 5;
 
             CurrentPage.Height = ImageScrollViewer.Height;
             CurrentPage.Width = ImageScrollViewer.Width;
         }
+
+        private void InitGrids()
+        {
+            ColumnNumber = GetColumnCount();
+            RowNumber = GetRowCount();
+
+            CurrentPage.Height = CurrentBtImage.resolutionY;
+            CurrentPage.Width = CurrentBtImage.resolutionX;
+
+            BtGrids.OriginPoint = new Point(0, 0);
+            BtGrids.MaxPoint = new Point(CurrentPage.Width, CurrentPage.Height);
+
+            int GridNumber = ColumnNumber * RowNumber;
+            int GridHeight = (int)(CurrentPage.Height / RowNumber);
+            int GridWidth = (int)(CurrentPage.Width / ColumnNumber);
+
+            BtGrids.Heights.Clear();
+            BtGrids.Widths.Clear();
+            for (int i = 0; i < GridNumber; i++)
+            {
+                BtGrids.Heights.Add(GridHeight);
+                BtGrids.Widths.Add(GridWidth);
+            }
+        }
+
 
         private void SetDirFilePath(string path)
         {
@@ -269,9 +382,6 @@ namespace BeitieSpliter
             
         }
 
-
-        
-
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
             FileOpenPicker openPicker = new FileOpenPicker
@@ -289,33 +399,67 @@ namespace BeitieSpliter
                 // Application now has read/write access to the picked file
                 SetDirFilePath("Picked photo: " + file.Path);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
-                
-                CurrentPage.Height = CurrentBtImage.resolutionY;
-                CurrentPage.Width = CurrentBtImage.resolutionX;
+                InitGrids();
                 CurrentPage.Invalidate();
-
             }
             else
             {
                 SetDirFilePath(null);
             }
         }
-
-        private void CoumnCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        
+        private void AssignPoint(Point dst, Point src)
         {
-
+            dst.X = src.X;
+            dst.Y = src.Y;
+        }
+        private void DrawLine(CanvasDrawingSession draw, Point p1, Point p2, Color clr)
+        {
+            Debug.WriteLine("DrawLine: ({0:0.0},{1:0.0})->({2:0.0},{3:0.0}\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
+            draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, clr);
         }
 
-        private void RowCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
         private void PageDrawLines(CanvasDrawingSession draw)
         {
-            int beginX = 0, endX = 0;
-            int beginY = 0, endY = 0;
+            Point LeftTopPnt = new Point();
+            Point LeftBottomPnt = new Point();
+            Point RightTopPnt = new Point();
+            Point RightBottomPnt = new Point();
+            Point RowStartPnt = new Point();
 
-            // 画横线
+            int GridNumber = ColumnNumber * RowNumber;
+
+
+            int index = 0;
+            AssignPoint(LeftTopPnt, BtGrids.OriginPoint);
+            for (int i = 0; i < RowNumber; i++)
+            {
+                AssignPoint(RowStartPnt, LeftTopPnt);
+                for (int j = 0; j < ColumnNumber; j++)
+                {
+                    index = i * ColumnNumber + j;
+                    AssignPoint(RightBottomPnt, LeftTopPnt);
+                    RightBottomPnt.X += BtGrids.Widths[index];
+                    RightBottomPnt.Y += BtGrids.Heights[index];
+
+                    AssignPoint(LeftBottomPnt, LeftTopPnt);
+                    LeftBottomPnt.Y += BtGrids.Heights[index];
+
+
+                    AssignPoint(RightTopPnt, LeftTopPnt);
+                    RightTopPnt.X += BtGrids.Widths[index];
+
+                    // draw Rectangle
+                    DrawLine(draw, LeftTopPnt, LeftBottomPnt, PenColor);
+                    DrawLine(draw, LeftBottomPnt, RightBottomPnt, PenColor);
+                    DrawLine(draw, RightBottomPnt, RightTopPnt, PenColor);
+                    DrawLine(draw, RightTopPnt, LeftTopPnt, PenColor);
+                    AssignPoint(LeftTopPnt, RightTopPnt);
+                }
+                AssignPoint(LeftTopPnt, RowStartPnt);
+                LeftTopPnt.Y += BtGrids.Heights[i * ColumnNumber];
+            }
+            
         }
       
         private void CurrentPage_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
@@ -330,7 +474,7 @@ namespace BeitieSpliter
                 return;
             }
             draw.DrawImage(CurrentBtImage.canvasBmp);
-
+            PageDrawLines(draw);
         }
 
         private void Page_OnUnloaded(object sender, RoutedEventArgs e)
@@ -338,6 +482,17 @@ namespace BeitieSpliter
             Debug.WriteLine(String.Format("Page_OnUnloaded called"));
             CurrentPage.RemoveFromVisualTree();
             CurrentPage = null;
+        }
+
+        private void ColumnCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ColumnNumber = GetColumnCount();
+        }
+
+
+        private void RowCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RowNumber = GetRowCount();
         }
     }
 }
