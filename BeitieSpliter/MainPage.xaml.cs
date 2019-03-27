@@ -68,7 +68,7 @@ namespace BeitieSpliter
         public IRandomAccessStream iras;
         private BinaryReader stmReader;
         private Stream stream;
-        public CanvasBitmap canvasBmp;
+        public CanvasBitmap cvsBmp;
 
         public void Init()
         {
@@ -98,7 +98,7 @@ namespace BeitieSpliter
             stmReader = new BinaryReader(stream, Encoding.ASCII);
 
             iras = await file.OpenAsync(FileAccessMode.Read);
-            canvasBmp = await CanvasBitmap.LoadAsync(creator, iras);
+            cvsBmp = await CanvasBitmap.LoadAsync(creator, iras);
 
 
             //var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
@@ -408,21 +408,21 @@ namespace BeitieSpliter
             }
         }
         
-        private void AssignPoint(Point dst, Point src)
+        private void AssignPoint(ref Point dst, ref Point src)
         {
             dst.X = src.X;
             dst.Y = src.Y;
         }
         private void DrawLine(CanvasDrawingSession draw, Point p1, Point p2, Color clr)
         {
-            Debug.WriteLine("DrawLine: ({0:0.0},{1:0.0})->({2:0.0},{3:0.0}\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
+            Debug.WriteLine("DrawLine: ({0:0},{1:0})->({2:0},{3:0})\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
             draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, clr);
         }
 
         private void PageDrawLines(CanvasDrawingSession draw)
         {
             Point LeftTopPnt = new Point();
-            Point LeftBottomPnt = new Point();
+            Point LeftBottomPnt = new Point(1,2);
             Point RightTopPnt = new Point();
             Point RightBottomPnt = new Point();
             Point RowStartPnt = new Point();
@@ -431,22 +431,22 @@ namespace BeitieSpliter
 
 
             int index = 0;
-            AssignPoint(LeftTopPnt, BtGrids.OriginPoint);
+            AssignPoint(ref LeftTopPnt, ref BtGrids.OriginPoint);
             for (int i = 0; i < RowNumber; i++)
             {
-                AssignPoint(RowStartPnt, LeftTopPnt);
+                AssignPoint(ref RowStartPnt, ref LeftTopPnt);
                 for (int j = 0; j < ColumnNumber; j++)
                 {
                     index = i * ColumnNumber + j;
-                    AssignPoint(RightBottomPnt, LeftTopPnt);
+                    AssignPoint(ref RightBottomPnt, ref LeftTopPnt);
                     RightBottomPnt.X += BtGrids.Widths[index];
                     RightBottomPnt.Y += BtGrids.Heights[index];
 
-                    AssignPoint(LeftBottomPnt, LeftTopPnt);
+                    AssignPoint(ref LeftBottomPnt, ref LeftTopPnt);
                     LeftBottomPnt.Y += BtGrids.Heights[index];
 
 
-                    AssignPoint(RightTopPnt, LeftTopPnt);
+                    AssignPoint(ref RightTopPnt, ref LeftTopPnt);
                     RightTopPnt.X += BtGrids.Widths[index];
 
                     // draw Rectangle
@@ -454,9 +454,10 @@ namespace BeitieSpliter
                     DrawLine(draw, LeftBottomPnt, RightBottomPnt, PenColor);
                     DrawLine(draw, RightBottomPnt, RightTopPnt, PenColor);
                     DrawLine(draw, RightTopPnt, LeftTopPnt, PenColor);
-                    AssignPoint(LeftTopPnt, RightTopPnt);
+                    
+                    AssignPoint(ref LeftTopPnt, ref RightTopPnt);
                 }
-                AssignPoint(LeftTopPnt, RowStartPnt);
+                AssignPoint(ref LeftTopPnt, ref RowStartPnt);
                 LeftTopPnt.Y += BtGrids.Heights[i * ColumnNumber];
             }
             
@@ -473,7 +474,7 @@ namespace BeitieSpliter
                 draw.DrawText("请选择书法字帖图片!", new Vector2(100, 100), Colors.Black);
                 return;
             }
-            draw.DrawImage(CurrentBtImage.canvasBmp);
+            draw.DrawImage(CurrentBtImage.cvsBmp);
             PageDrawLines(draw);
         }
 
