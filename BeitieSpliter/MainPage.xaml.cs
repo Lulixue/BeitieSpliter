@@ -28,6 +28,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
 using Windows.UI.Popups;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -35,8 +38,9 @@ namespace BeitieSpliter
 {
     public sealed class BeitieGrids
     {
+        public double DrawHeight;
+        public double DrawWidth;
         public Point OriginPoint;
-        public Point MaxPoint;
         public List<float> Widths = new List<float>();
         public List<float> Heights = new List<float>();
     }
@@ -224,16 +228,53 @@ namespace BeitieSpliter
             return rx;
         }
     }
+    public class ColorBoxItem
+    {
+        public Color Value { get; set; }
+        public string Text { get; set; }
+        public ColorBoxItem(Color Value, string Text)
+        {
+            this.Value = Value;
+            this.Text = Text;
+        }
+    }
 
-    public sealed partial class MainPage : Page
+
+    public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
         private Color BKGD_COLOR = Colors.White;   //画布背景色
         BeitieImage CurrentBtImage;
         BeitieGrids BtGrids = new BeitieGrids();
         int ColumnNumber = -1;
         int RowNumber = -1;
-        int PenWidth = 2;
+        float PenWidth = 0;
         Color PenColor = Colors.White;
+        Thickness PageMargin = new Thickness();
+
+        private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
+        public ObservableCollection<ColorBoxItem> ColorBoxItems {
+            get { return _ColorBoxItems; }
+            set { Set(ref _ColorBoxItems, value); }
+        }
+
+        private ColorBoxItem _ColorBoxSelectedItem = null;
+        public ColorBoxItem ColorBoxSelectedItem { get { return _ColorBoxSelectedItem; } set { Set(ref _ColorBoxSelectedItem, value); } }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void Set<T>(ref T storage, T value, [CallerMemberName]string propertyName = null)
+        {
+            if (Equals(storage, value))
+            {
+                return;
+            }
+            storage = value;
+            OnPropertyChanged(propertyName);
+        }
+
+        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
 
         public MainPage()
         {
@@ -249,22 +290,22 @@ namespace BeitieSpliter
         {
             RowCount.SelectedIndex = 6;
         }
-        private async void ShowMessageDlg(string msg, bool isColumn)
+        
+        private async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
         {
             // Create the message dialog and set its content
             var messageDialog = new MessageDialog(msg);
 
             // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-            if (isColumn)
+            if (handler != null)
             {
                 messageDialog.Commands.Add(new UICommand(
-                    "关闭", new UICommandInvokedHandler(this.ColumnIllegalHandler)));
+                    "关闭", handler));
             }
             else
             {
-
                 messageDialog.Commands.Add(new UICommand(
-                    "关闭", new UICommandInvokedHandler(this.RowIllegalHandler)));
+                   "关闭", null));
             }
 
             // Set the command that will be invoked by default
@@ -291,7 +332,7 @@ namespace BeitieSpliter
             }
             catch
             {
-                ShowMessageDlg("列数非法: " + ColumnCount.Text, true);
+                ShowMessageDlg("列数非法: " + ColumnCount.Text, new UICommandInvokedHandler(ColumnIllegalHandler));
             }
             return columns;
         }
@@ -310,13 +351,21 @@ namespace BeitieSpliter
             }
             catch
             {
-                ShowMessageDlg("行数非法: " + RowCount.Text, false);
+                ShowMessageDlg("行数非法: " + RowCount.Text, new UICommandInvokedHandler(RowIllegalHandler));
             }
             return columns;
         }
 
         void InitControls()
         {
+            // 添加颜色
+            ColorBoxItems.Add(new ColorBoxItem(Colors.White, "白色"));
+            ColorBoxItems.Add(new ColorBoxItem(Colors.Red, "红色"));
+            ColorBoxItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
+            ColorBoxItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
+            ColorBoxItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
+            ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Text == "白色");
+
             for (int i = 1; i < 20; i++)
             {
                 RowCount.Items.Add(i);
@@ -329,20 +378,25 @@ namespace BeitieSpliter
             CurrentPage.Width = ImageScrollViewer.Width;
         }
 
-        private void InitGrids()
+        private void InitDrawParameters()
         {
+            PenColor = ColorBoxSelectedItem.Value;
+            PenWidth = float.Parse(PenWidthBox.Text);
+
             ColumnNumber = GetColumnCount();
             RowNumber = GetRowCount();
 
             CurrentPage.Height = CurrentBtImage.resolutionY;
             CurrentPage.Width = CurrentBtImage.resolutionX;
 
-            BtGrids.OriginPoint = new Point(0, 0);
-            BtGrids.MaxPoint = new Point(CurrentPage.Width, CurrentPage.Height);
+            BtGrids.DrawHeight = CurrentPage.Height - PageMargin.Top - PageMargin.Bottom;
+            BtGrids.DrawWidth = CurrentPage.Width - PageMargin.Left - PageMargin.Right;
+
+            BtGrids.OriginPoint = new Point(PageMargin.Left, PageMargin.Top);
 
             int GridNumber = ColumnNumber * RowNumber;
-            int GridHeight = (int)(CurrentPage.Height / RowNumber);
-            int GridWidth = (int)(CurrentPage.Width / ColumnNumber);
+            float GridHeight = (float)(BtGrids.DrawHeight / RowNumber);
+            float GridWidth = (float)(BtGrids.DrawWidth / ColumnNumber);
 
             BtGrids.Heights.Clear();
             BtGrids.Widths.Clear();
@@ -399,7 +453,7 @@ namespace BeitieSpliter
                 // Application now has read/write access to the picked file
                 SetDirFilePath("Picked photo: " + file.Path);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
-                InitGrids();
+                InitDrawParameters();
                 CurrentPage.Invalidate();
             }
             else
@@ -413,16 +467,16 @@ namespace BeitieSpliter
             dst.X = src.X;
             dst.Y = src.Y;
         }
-        private void DrawLine(CanvasDrawingSession draw, Point p1, Point p2, Color clr)
+        private void DrawLine(CanvasDrawingSession draw, Point p1, Point p2)
         {
             Debug.WriteLine("DrawLine: ({0:0},{1:0})->({2:0},{3:0})\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
-            draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, clr);
+            draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, PenColor, PenWidth);
         }
 
         private void PageDrawLines(CanvasDrawingSession draw)
         {
             Point LeftTopPnt = new Point();
-            Point LeftBottomPnt = new Point(1,2);
+            Point LeftBottomPnt = new Point();
             Point RightTopPnt = new Point();
             Point RightBottomPnt = new Point();
             Point RowStartPnt = new Point();
@@ -450,10 +504,10 @@ namespace BeitieSpliter
                     RightTopPnt.X += BtGrids.Widths[index];
 
                     // draw Rectangle
-                    DrawLine(draw, LeftTopPnt, LeftBottomPnt, PenColor);
-                    DrawLine(draw, LeftBottomPnt, RightBottomPnt, PenColor);
-                    DrawLine(draw, RightBottomPnt, RightTopPnt, PenColor);
-                    DrawLine(draw, RightTopPnt, LeftTopPnt, PenColor);
+                    DrawLine(draw, LeftTopPnt, LeftBottomPnt);
+                    DrawLine(draw, LeftBottomPnt, RightBottomPnt);
+                    DrawLine(draw, RightBottomPnt, RightTopPnt);
+                    DrawLine(draw, RightTopPnt, LeftTopPnt);
                     
                     AssignPoint(ref LeftTopPnt, ref RightTopPnt);
                 }
@@ -462,6 +516,34 @@ namespace BeitieSpliter
             }
             
         }
+
+        private bool IsColumnRowValid()
+        {
+            if ((RowNumber == -1) ||
+               (ColumnNumber == -1))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private bool IsParametersValid()
+        {
+            if (!IsColumnRowValid())
+            {
+                return false;
+            }
+            if (PenWidth <= 0)
+            {
+                return false;
+            }
+            if ((CurrentPage.Height <= 0) ||
+                (CurrentPage.Width <= 0))
+            {
+                return false;
+            }
+            return true;
+        }
       
         private void CurrentPage_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
         {
@@ -469,9 +551,16 @@ namespace BeitieSpliter
               
             var draw = args.DrawingSession;
 
+            draw.Clear(Colors.Gray);
             if (CurrentBtImage == null)
             {
                 draw.DrawText("请选择书法字帖图片!", new Vector2(100, 100), Colors.Black);
+                return;
+            }
+            if (!IsParametersValid())
+            {
+                draw.Clear(Colors.Black);
+                draw.DrawText("参数错误，请更改参数后重试!", new Vector2(100, 100), Colors.Red);
                 return;
             }
             draw.DrawImage(CurrentBtImage.cvsBmp);
@@ -485,15 +574,120 @@ namespace BeitieSpliter
             CurrentPage = null;
         }
 
+        void UpdateColumnCount()
+        {
+            int columns = GetColumnCount();
+            if (columns == ColumnNumber)
+            {
+                return;
+            }
+            ColumnNumber = columns;
+            if (IsColumnRowValid())
+            {
+                InitDrawParameters();
+            }
+            CurrentPage.Invalidate();
+        }
         private void ColumnCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ColumnNumber = GetColumnCount();
+            UpdateColumnCount();
         }
 
+        private void ColumnCount_LostFocus(object sender, RoutedEventArgs e)
+        {
 
+            UpdateColumnCount();
+        }
+        void UpdateRowCount()
+        {
+
+            int rows = GetRowCount();
+            if (rows == RowNumber)
+            {
+                return;
+            }
+            RowNumber = rows;
+            if (IsColumnRowValid())
+            {
+                InitDrawParameters();
+            }
+            CurrentPage.Invalidate();
+        }
         private void RowCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            RowNumber = GetRowCount();
+            UpdateRowCount();
         }
+        private void RowCount_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UpdateRowCount();
+        }
+
+        private void PenColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            PenColor = ColorBoxSelectedItem.Value;
+            CurrentPage.Invalidate();
+        }
+        
+        private void PenWidthBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void PageMargin_TextChanged(object sender, TextChangedEventArgs e)
+        {
+           
+        }
+
+        private void PageMargin_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string TotalPattern = "([\\d\\.]+),?([\\d\\.]?),?([\\d\\.]?),?([\\d\\.]?)";
+            string pattern = "([\\d\\.]+),?";
+            var textbox = (TextBox)sender;
+            if (Regex.IsMatch(textbox.Text, TotalPattern) && textbox.Text != "")
+            {
+                MatchCollection mc = Regex.Matches(textbox.Text, pattern);
+                if (mc.Count == 1)
+                {
+                    double oneForAllMargin = double.Parse(mc.ElementAt(0).Value);
+                    PageMargin = new Thickness(oneForAllMargin, oneForAllMargin, oneForAllMargin, oneForAllMargin);
+                }
+                else
+                {
+                    double[] margins = { 0.0, 0.0, 0, 0 };
+                    for (int i = 0; i < mc.Count; i++)
+                    {
+                        margins[i] = double.Parse(mc.ElementAt(i).Value);
+                    }
+                    PageMargin = new Thickness(margins[0], margins[1], margins[2], margins[3]);
+
+                }
+
+            }
+            else
+            {
+                PenWidth = 0;
+                textbox.Text = "";
+                ShowMessageDlg("Invalid margin: " + textbox.Text, null);
+            }
+        }
+
+        private void PenWidthBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var textbox = (TextBox)sender;
+            if (Regex.IsMatch(textbox.Text, "^[\\d]+\\.?[\\d]?$") && textbox.Text != "")
+            {
+                PenWidth = float.Parse(PenWidthBox.Text);
+            }
+            else
+            {
+                PenWidth = 0;
+                int pos = textbox.SelectionStart - 1;
+                textbox.Text = textbox.Text.Remove(pos, 1);
+                textbox.SelectionStart = pos;
+                ShowMessageDlg("Invalid pen width: " + textbox.Text, null);
+            }
+            CurrentPage.Invalidate();
+        }
+
     }
 }
