@@ -31,11 +31,21 @@ using Windows.UI.Popups;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Windows.Graphics.Display;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace BeitieSpliter
 {
+    public sealed class Common
+    {
+        public static void Sleep(int msTime)
+        {
+            AutoResetEvent h = new AutoResetEvent(false);
+            h.WaitOne(msTime);
+        }
+    }
+
     public sealed class BeitieGrids
     {
         public double DrawHeight;
@@ -406,8 +416,26 @@ namespace BeitieSpliter
                 BtGrids.Widths.Add(GridWidth);
             }
         }
+        
+        private void RefreshPage()
+        {
+            RefreshPage(0);
+        }
 
-
+        private void RefreshPage(int delayMs)
+        {
+            var t = Task.Run(() =>
+            {
+                if (delayMs > 0)
+                {
+                    Common.Sleep(delayMs);
+                }
+                CurrentPage.Invalidate();
+            }
+           );
+            t.Wait();
+        }
+        
         private void SetDirFilePath(string path)
         {
             if (path != null)
@@ -454,7 +482,7 @@ namespace BeitieSpliter
                 SetDirFilePath("Picked photo: " + file.Path);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
                 InitDrawParameters();
-                CurrentPage.Invalidate();
+                RefreshPage(1);
             }
             else
             {
@@ -563,7 +591,18 @@ namespace BeitieSpliter
                 draw.DrawText("参数错误，请更改参数后重试!", new Vector2(100, 100), Colors.Red);
                 return;
             }
+            if (CurrentBtImage.cvsBmp == null)
+            {
+                draw.Clear(Colors.Black);
+                draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue); 
+                RefreshPage();
+                return;
+            }
+
+
             draw.DrawImage(CurrentBtImage.cvsBmp);
+            //draw.DrawImage(CurrentBtImage.cvsBmp, new Rect(BtGrids.OriginPoint.X, 
+            //    BtGrids.OriginPoint.Y, BtGrids.DrawWidth, BtGrids.DrawHeight));
             PageDrawLines(draw);
         }
 
@@ -586,7 +625,7 @@ namespace BeitieSpliter
             {
                 InitDrawParameters();
             }
-            CurrentPage.Invalidate();
+            RefreshPage();
         }
         private void ColumnCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -659,9 +698,9 @@ namespace BeitieSpliter
                         margins[i] = double.Parse(mc.ElementAt(i).Value);
                     }
                     PageMargin = new Thickness(margins[0], margins[1], margins[2], margins[3]);
-
-                }
-
+                    InitDrawParameters();
+                    CurrentPage.Invalidate();
+                } 
             }
             else
             {
@@ -688,6 +727,33 @@ namespace BeitieSpliter
             }
             CurrentPage.Invalidate();
         }
+        
+        async void SaveWholePage(string name)
+        {
+            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder folder = await applicationFolder.CreateFolderAsync("Picture", CreationCollisionOption.OpenIfExists);
+            StorageFile saveFile = await folder.CreateFileAsync(name, CreationCollisionOption.OpenIfExists);
+            RenderTargetBitmap bitmap = new RenderTargetBitmap();
+            await bitmap.RenderAsync(CurrentPage);
+            var pixelBuffer = await bitmap.GetPixelsAsync();
+            byte[] bytes = pixelBuffer.ToArray();
+            using (var fileStream = await saveFile.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
+                encoder.SetPixelData(BitmapPixelFormat.Bgra8,
+                                    BitmapAlphaMode.Ignore,
+                                    (uint)bitmap.PixelWidth,
+                                    (uint)bitmap.PixelHeight,
+                                    DisplayInformation.GetForCurrentView().LogicalDpi,
+                                    DisplayInformation.GetForCurrentView().LogicalDpi,
+                                    pixelBuffer.ToArray());
+                await encoder.FlushAsync();
+            }
+        }
 
+        private void OnSaveSplitImages(object sender, RoutedEventArgs e)
+        {
+            SaveWholePage("canvas.jpg");
+        }
     }
 }

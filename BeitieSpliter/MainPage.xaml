@@ -46,8 +46,8 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
-                <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="Import Beitie File" FontSize="20" Click="OnImportBeitieFile"/>
-                <Button x:Name="ImportBtDir" Width="230" Height="50" Content="Import Beitie Directory" FontSize="20" Click="OnImportBeitieDir"/>
+                <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="Import Beitie File" FontSize="18" Click="OnImportBeitieFile"/>
+                <Button x:Name="ImportBtDir" Width="230" Height="50" Content="Import Beitie Directory" FontSize="18" Click="OnImportBeitieDir"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
@@ -55,17 +55,20 @@
             </StackPanel>
         </StackPanel>
 
+        <Button Grid.Row="0" Grid.Column="1"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="Save Split Images" FontSize="18" Click="OnSaveSplitImages"/>
+       
+        
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock  Text="行数：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <ComboBox  x:Name="RowCount"  Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
+            <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
                        LostFocus="RowCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
             <TextBlock  Text="列数：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <ComboBox  x:Name="ColumnCount" Margin="0,3,0,0" SelectionChanged="ColumnCount_SelectionChanged"  
+            <ComboBox  x:Name="ColumnCount"  Margin="0,3,0,0" SelectionChanged="ColumnCount_SelectionChanged"  
                        LostFocus="ColumnCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70" />
             <TextBlock  Text="裁边：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PageMarginsBox"  Text="0,0,0,0" TextChanged="PageMargin_TextChanged" 
+            <TextBox  x:Name="PageMarginsBox" Text="0,0,0,0" TextChanged="PageMargin_TextChanged" 
                       LostFocus="PageMargin_LostFocus"
                       Width="130" FontSize="14" Style="{StaticResource LeftFriendlyBox}" />
             <TextBlock  Text="画笔颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
@@ -92,9 +95,9 @@
                 <!--<Canvas Name="CurrentPage" RenderTransformOrigin="0.5,0.5"/>-->
                 <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
-
         </Border>
 
-        <TextBox x:Name="PageText" Grid.Row="2" Grid.Column="1" AcceptsReturn="True" Text="释文" VerticalAlignment="Stretch" Margin="3"/>
+        <canvas:CanvasControl x:Name="SingleChar" ClearColor="Gray" Visibility="Collapsed"/>
+        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="2" Grid.Column="1" AcceptsReturn="True" Text="" VerticalAlignment="Stretch" Margin="3"/>
     </Grid>
 </Page>
