@@ -33,6 +33,11 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Windows.Graphics.Display;
 
+/* Open CV: */
+//using EMGU.CV;
+//using Emgu.CV.CvEnum;
+//using Emgu.CV.Structure;
+
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace BeitieSpliter
@@ -92,8 +97,7 @@ namespace BeitieSpliter
                 }
             );
             t.Wait();
-
-
+             
             //await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
             //() =>
             //{

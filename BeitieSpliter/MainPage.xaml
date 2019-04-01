@@ -97,7 +97,6 @@
             </ScrollViewer>
         </Border>
 
-        <canvas:CanvasControl x:Name="SingleChar" ClearColor="Gray" Visibility="Collapsed"/>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="2" Grid.Column="1" AcceptsReturn="True" Text="" VerticalAlignment="Stretch" Margin="3"/>
     </Grid>
 </Page>
