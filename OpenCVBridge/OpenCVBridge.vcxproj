@@ -224,7 +224,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-   <ImportGroup Label="ExtensionTargets">
+  <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\OpenCV.Win.Core.310.6.1\build\native\opencv.win.core.targets" Condition="Exists('..\packages\OpenCV.Win.Core.310.6.1\build\native\opencv.win.core.targets')" />
     <Import Project="..\packages\OpenCV.Win.ImgProc.310.6.1\build\native\opencv.win.imgproc.targets" Condition="Exists('..\packages\OpenCV.Win.ImgProc.310.6.1\build\native\opencv.win.imgproc.targets')" />
     <Import Project="..\packages\OpenCV.Win.Video.310.6.1\build\native\opencv.win.video.targets" Condition="Exists('..\packages\OpenCV.Win.Video.310.6.1\build\native\opencv.win.video.targets')" />

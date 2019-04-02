@@ -9,16 +9,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCVBridge", "OpenCVBridg
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
 		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|ARM = Release|ARM
 		Release|ARM64 = Release|ARM64
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|ARM.ActiveCfg = Debug|ARM
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|ARM.Build.0 = Debug|ARM
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|ARM.Deploy.0 = Debug|ARM
@@ -31,6 +34,7 @@ Global
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|x86.ActiveCfg = Debug|x86
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|x86.Build.0 = Debug|x86
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Debug|x86.Deploy.0 = Debug|x86
+		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|Any CPU.ActiveCfg = Release|x86
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|ARM.ActiveCfg = Release|ARM
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|ARM.Build.0 = Release|ARM
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|ARM.Deploy.0 = Release|ARM
@@ -43,6 +47,7 @@ Global
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|x86.ActiveCfg = Release|x86
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|x86.Build.0 = Release|x86
 		{5CDF5B92-59D6-470D-8271-924AE75F5FF8}.Release|x86.Deploy.0 = Release|x86
+		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|ARM.ActiveCfg = Debug|ARM
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|ARM.Build.0 = Debug|ARM
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|ARM64.ActiveCfg = Debug|Win32
@@ -50,6 +55,7 @@ Global
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|x64.Build.0 = Debug|x64
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|x86.ActiveCfg = Debug|Win32
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Debug|x86.Build.0 = Debug|Win32
+		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Release|Any CPU.ActiveCfg = Release|Win32
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Release|ARM.ActiveCfg = Release|ARM
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Release|ARM.Build.0 = Release|ARM
 		{E3FB9A34-F801-5FBF-9F13-D88151B6C03E}.Release|ARM64.ActiveCfg = Release|Win32

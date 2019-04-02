@@ -99,6 +99,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <UseDotNetNativeToolchain>false</UseDotNetNativeToolchain>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -171,6 +172,7 @@
     <ProjectReference Include="..\OpenCVBridge\OpenCVBridge.vcxproj">
       <Project>{e3fb9a34-f801-5fbf-9f13-d88151b6c03e}</Project>
       <Name>OpenCVBridge</Name>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

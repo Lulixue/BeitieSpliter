@@ -26,6 +26,10 @@ namespace OpenCVBridge
         void Blur(
             Windows::Graphics::Imaging::SoftwareBitmap^ input,
             Windows::Graphics::Imaging::SoftwareBitmap^ output);
+        void Crop(
+            Windows::Graphics::Imaging::SoftwareBitmap^ input,
+            Windows::Graphics::Imaging::SoftwareBitmap^ output,
+            double left, double top, double right, double bottom);
         void HoughLines(
             Windows::Graphics::Imaging::SoftwareBitmap^ input,
             Windows::Graphics::Imaging::SoftwareBitmap^ output);
@@ -47,6 +51,7 @@ namespace OpenCVBridge
         bool GetPointerToPixelData(Windows::Graphics::Imaging::SoftwareBitmap^ bitmap,
             unsigned char** pPixelData, unsigned int* capacity);
 
+        bool TryConvert(Windows::Graphics::Imaging::SoftwareBitmap^ from, cv::Mat& convertedMat, cv::Rect &roi);
         bool TryConvert(Windows::Graphics::Imaging::SoftwareBitmap^ from, cv::Mat& convertedMat);
     };
 }

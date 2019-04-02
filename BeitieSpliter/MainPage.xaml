@@ -34,11 +34,13 @@
     </Page.Resources>
 
 
-    <Grid x:Name="RootGrid" Grid.Row="3" Grid.ColumnSpan="2" Margin="10" BorderThickness="{ThemeResource SearchBoxThemePadding}">
+    <Grid x:Name="RootGrid" Grid.Row="5" Grid.ColumnSpan="2" Margin="10" BorderThickness="{ThemeResource SearchBoxThemePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>
-            <RowDefinition Height="20*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="17.5*"/>
+            <RowDefinition Height="1.5*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
@@ -50,8 +52,9 @@
                 <Button x:Name="ImportBtDir" Width="230" Height="50" Content="Import Beitie Directory" FontSize="18" Click="OnImportBeitieDir"/>
             </StackPanel>
 
-            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
-                <TextBox x:Name="FileDirPath" Visibility="Collapsed"  VerticalContentAlignment="Center" FontSize="18" VerticalAlignment="Stretch" />
+            <StackPanel VerticalAlignment="Center" Margin="0,0,10,0" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
+                <TextBox x:Name="FileDirPath" Visibility="Visible"  VerticalContentAlignment="Center"  IsSpellCheckEnabled="False"
+                         MaxWidth="500" FontSize="18" VerticalAlignment="Stretch" />
             </StackPanel>
         </StackPanel>
 
@@ -68,7 +71,7 @@
                        LostFocus="ColumnCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70" />
             <TextBlock  Text="裁边：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PageMarginsBox" Text="0,0,0,0" TextChanged="PageMargin_TextChanged" 
+            <TextBox  x:Name="PageMarginsBox" Text="10,10,200,300" TextChanged="PageMargin_TextChanged" 
                       LostFocus="PageMargin_LostFocus"
                       Width="130" FontSize="14" Style="{StaticResource LeftFriendlyBox}" />
             <TextBlock  Text="画笔颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
@@ -85,7 +88,7 @@
 
         </StackPanel>
 
-        <Border x:Name="PageBorder" Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
+        <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
             <ScrollViewer x:Name="ImageScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible"
                     ZoomMode="Enabled">
 
@@ -96,7 +99,10 @@
                 <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
         </Border>
+        <TextBox x:Name="TieName" Grid.Row="2" Grid.Column="1" Margin="3" FontSize="16" PlaceholderText="输入帖的名称" MinWidth="50"  MaxWidth="200"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="3" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
+                     Text="" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap" IsSpellCheckEnabled="False"/>
+        <TextBlock x:Name="TextParsedData" Grid.Row="4" Grid.Column="1" Text="" FontSize="12" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap"/>
 
-        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="2" Grid.Column="1" AcceptsReturn="True" Text="" VerticalAlignment="Stretch" Margin="3"/>
     </Grid>
 </Page>

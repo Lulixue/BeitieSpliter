@@ -32,6 +32,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Windows.Graphics.Display;
+using OpenCVBridge;
 
 /* Open CV: */
 //using EMGU.CV;
@@ -50,6 +51,25 @@ namespace BeitieSpliter
             h.WaitOne(msTime);
         }
     }
+    
+    public sealed class BeitieElement
+    {
+        public BeitieElement(BeitieElementType t, string cont)
+        {
+            type = t;
+            content = cont;
+        }
+        public enum BeitieElementType
+        {
+            Zi,
+            Quezi,
+            Yinzhang,
+            Kongbai,
+            Other
+        }
+        public BeitieElementType type;
+        public string content;
+    }
 
     public sealed class BeitieGrids
     {
@@ -58,6 +78,7 @@ namespace BeitieSpliter
         public Point OriginPoint;
         public List<float> Widths = new List<float>();
         public List<float> Heights = new List<float>();
+        public List<BeitieElement> Elements = new List<BeitieElement>();
     }
 
     public sealed class BeitieImage
@@ -294,6 +315,7 @@ namespace BeitieSpliter
         {
             this.InitializeComponent();
             InitControls();
+            InitMaps();
         }
         private void ColumnIllegalHandler(IUICommand command)
         {
@@ -304,7 +326,7 @@ namespace BeitieSpliter
         {
             RowCount.SelectedIndex = 6;
         }
-        
+
         private async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
         {
             // Create the message dialog and set its content
@@ -399,6 +421,7 @@ namespace BeitieSpliter
 
             ColumnNumber = GetColumnCount();
             RowNumber = GetRowCount();
+            InitPageMargin();
 
             CurrentPage.Height = CurrentBtImage.resolutionY;
             CurrentPage.Width = CurrentBtImage.resolutionX;
@@ -419,8 +442,11 @@ namespace BeitieSpliter
                 BtGrids.Heights.Add(GridHeight);
                 BtGrids.Widths.Add(GridWidth);
             }
+            Debug.WriteLine("Image Parameter:\n col/row: ({0},{1}), resolution: ({2:0},{3:0})\n " +
+                "PageMargin:({4},{5},{6},{7}", ColumnNumber, RowNumber, CurrentBtImage.resolutionX,
+                CurrentBtImage.resolutionX, PageMargin.Left, PageMargin.Top, PageMargin.Right, PageMargin.Bottom);
         }
-        
+
         private void RefreshPage()
         {
             RefreshPage(0);
@@ -439,7 +465,7 @@ namespace BeitieSpliter
            );
             t.Wait();
         }
-        
+
         private void SetDirFilePath(string path)
         {
             if (path != null)
@@ -462,10 +488,10 @@ namespace BeitieSpliter
         {
 
         }
-        
+
         private void DrawPage(StorageFile file)
         {
-            
+
         }
 
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
@@ -483,7 +509,7 @@ namespace BeitieSpliter
             if (file != null)
             {
                 // Application now has read/write access to the picked file
-                SetDirFilePath("Picked photo: " + file.Path);
+                SetDirFilePath("图片: " + file.Path);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
                 InitDrawParameters();
                 RefreshPage(1);
@@ -493,7 +519,7 @@ namespace BeitieSpliter
                 SetDirFilePath(null);
             }
         }
-        
+
         private void AssignPoint(ref Point dst, ref Point src)
         {
             dst.X = src.X;
@@ -501,7 +527,7 @@ namespace BeitieSpliter
         }
         private void DrawLine(CanvasDrawingSession draw, Point p1, Point p2)
         {
-            Debug.WriteLine("DrawLine: ({0:0},{1:0})->({2:0},{3:0})\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
+            //Debug.WriteLine("DrawLine: ({0:0},{1:0})->({2:0},{3:0})\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
             draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, PenColor, PenWidth);
         }
 
@@ -514,8 +540,6 @@ namespace BeitieSpliter
             Point RowStartPnt = new Point();
 
             int GridNumber = ColumnNumber * RowNumber;
-
-
             int index = 0;
             AssignPoint(ref LeftTopPnt, ref BtGrids.OriginPoint);
             for (int i = 0; i < RowNumber; i++)
@@ -540,13 +564,13 @@ namespace BeitieSpliter
                     DrawLine(draw, LeftBottomPnt, RightBottomPnt);
                     DrawLine(draw, RightBottomPnt, RightTopPnt);
                     DrawLine(draw, RightTopPnt, LeftTopPnt);
-                    
+
                     AssignPoint(ref LeftTopPnt, ref RightTopPnt);
                 }
                 AssignPoint(ref LeftTopPnt, ref RowStartPnt);
                 LeftTopPnt.Y += BtGrids.Heights[i * ColumnNumber];
             }
-            
+
         }
 
         private bool IsColumnRowValid()
@@ -576,11 +600,11 @@ namespace BeitieSpliter
             }
             return true;
         }
-      
+
         private void CurrentPage_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
         {
             Debug.WriteLine(String.Format("CurrentPage_OnDraw called"));
-              
+
             var draw = args.DrawingSession;
 
             draw.Clear(Colors.Gray);
@@ -598,16 +622,13 @@ namespace BeitieSpliter
             if (CurrentBtImage.cvsBmp == null)
             {
                 draw.Clear(Colors.Black);
-                draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue); 
+                draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue);
                 RefreshPage();
                 return;
             }
 
-
             draw.DrawImage(CurrentBtImage.cvsBmp);
-            //draw.DrawImage(CurrentBtImage.cvsBmp, new Rect(BtGrids.OriginPoint.X, 
-            //    BtGrids.OriginPoint.Y, BtGrids.DrawWidth, BtGrids.DrawHeight));
-            PageDrawLines(draw);
+            //PageDrawLines(draw);
         }
 
         private void Page_OnUnloaded(object sender, RoutedEventArgs e)
@@ -638,7 +659,6 @@ namespace BeitieSpliter
 
         private void ColumnCount_LostFocus(object sender, RoutedEventArgs e)
         {
-
             UpdateColumnCount();
         }
         void UpdateRowCount()
@@ -670,7 +690,7 @@ namespace BeitieSpliter
             PenColor = ColorBoxSelectedItem.Value;
             CurrentPage.Invalidate();
         }
-        
+
         private void PenWidthBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
@@ -678,33 +698,37 @@ namespace BeitieSpliter
 
         private void PageMargin_TextChanged(object sender, TextChangedEventArgs e)
         {
-           
+
+        }
+        private void InitPageMargin()
+        {
+            string pattern = "([\\d\\.]+),?";
+            MatchCollection mc = Regex.Matches(PageMarginsBox.Text, pattern);
+            if (mc.Count == 1)
+            {
+                double oneForAllMargin = double.Parse(mc.ElementAt(0).Value);
+                PageMargin = new Thickness(oneForAllMargin, oneForAllMargin, oneForAllMargin, oneForAllMargin);
+            }
+            else
+            {
+                double[] margins = { 0.0, 0.0, 0, 0 };
+                for (int i = 0; i < mc.Count; i++)
+                {
+                    margins[i] = double.Parse(mc.ElementAt(i).Value);
+                }
+                PageMargin = new Thickness(margins[0], margins[1], margins[2], margins[3]);
+            }
         }
 
         private void PageMargin_LostFocus(object sender, RoutedEventArgs e)
         {
             string TotalPattern = "([\\d\\.]+),?([\\d\\.]?),?([\\d\\.]?),?([\\d\\.]?)";
-            string pattern = "([\\d\\.]+),?";
             var textbox = (TextBox)sender;
             if (Regex.IsMatch(textbox.Text, TotalPattern) && textbox.Text != "")
             {
-                MatchCollection mc = Regex.Matches(textbox.Text, pattern);
-                if (mc.Count == 1)
-                {
-                    double oneForAllMargin = double.Parse(mc.ElementAt(0).Value);
-                    PageMargin = new Thickness(oneForAllMargin, oneForAllMargin, oneForAllMargin, oneForAllMargin);
-                }
-                else
-                {
-                    double[] margins = { 0.0, 0.0, 0, 0 };
-                    for (int i = 0; i < mc.Count; i++)
-                    {
-                        margins[i] = double.Parse(mc.ElementAt(i).Value);
-                    }
-                    PageMargin = new Thickness(margins[0], margins[1], margins[2], margins[3]);
-                    InitDrawParameters();
-                    CurrentPage.Invalidate();
-                } 
+                InitDrawParameters();
+                //CurrentPage.Invalidate();
+                OnSaveSplitImages(null, null);
             }
             else
             {
@@ -731,19 +755,19 @@ namespace BeitieSpliter
             }
             CurrentPage.Invalidate();
         }
-        
+
         async void SaveWholePage(string name)
         {
             StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
             StorageFolder folder = await applicationFolder.CreateFolderAsync("Picture", CreationCollisionOption.OpenIfExists);
-            StorageFile saveFile = await folder.CreateFileAsync(name, CreationCollisionOption.OpenIfExists);
+            StorageFile saveFile = await folder.CreateFileAsync(name, CreationCollisionOption.ReplaceExisting);
             RenderTargetBitmap bitmap = new RenderTargetBitmap();
             await bitmap.RenderAsync(CurrentPage);
             var pixelBuffer = await bitmap.GetPixelsAsync();
             byte[] bytes = pixelBuffer.ToArray();
             using (var fileStream = await saveFile.OpenAsync(FileAccessMode.ReadWrite))
             {
-                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
+                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fileStream);
                 encoder.SetPixelData(BitmapPixelFormat.Bgra8,
                                     BitmapAlphaMode.Ignore,
                                     (uint)bitmap.PixelWidth,
@@ -751,13 +775,300 @@ namespace BeitieSpliter
                                     DisplayInformation.GetForCurrentView().LogicalDpi,
                                     DisplayInformation.GetForCurrentView().LogicalDpi,
                                     pixelBuffer.ToArray());
+
                 await encoder.FlushAsync();
             }
         }
 
-        private void OnSaveSplitImages(object sender, RoutedEventArgs e)
+        async Task<SoftwareBitmap> GetSoftwareBitmap(string name)
         {
-            SaveWholePage("canvas.jpg");
+            SoftwareBitmap softwareBitmap;
+            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder folder = await applicationFolder.CreateFolderAsync("Picture", CreationCollisionOption.OpenIfExists);
+            StorageFile inputFile = await folder.CreateFileAsync(name, CreationCollisionOption.OpenIfExists);
+
+            using (IRandomAccessStream stream = await inputFile.OpenAsync(FileAccessMode.Read))
+            {
+                // Create the decoder from the stream
+                BitmapDecoder decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.JpegDecoderId, stream);
+
+                // Get the SoftwareBitmap representation of the file
+                softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+            }
+
+            return softwareBitmap;
+        }
+
+
+        enum OperationType
+        {
+            Crop,
+            Blur,
+            HoughLines,
+            Contours,
+            Histogram,
+            MotionDetector
+        }
+        private OpenCVHelper _helper = new OpenCVHelper();
+        OperationType currentOperation = OperationType.Crop;
+        CanvasBitmap cvsBmpBak = null;
+        bool pageRedrawed = false;
+
+        void UpdateCanvasBmp(CanvasBitmap bmp)
+        {
+            CurrentBtImage.cvsBmp = bmp;
+            CurrentBtImage.resolutionY = (float)bmp.Bounds.Height;
+            CurrentBtImage.resolutionX = (float)bmp.Bounds.Width;
+            Debug.WriteLine("New Bitmap: {0:0},{1:0}", CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
+            InitDrawParameters();
+        }
+
+        private async void SaveSoftwareBitmapToFile(SoftwareBitmap softwareBitmap, string dir, string filename)
+        {
+            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder folder = await applicationFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+            StorageFile outputFile = await folder.CreateFileAsync(filename, CreationCollisionOption.OpenIfExists);
+
+            using (IRandomAccessStream stream = await outputFile.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                // Create an encoder with the desired format
+                BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+
+                // Set the software bitmap
+                encoder.SetSoftwareBitmap(softwareBitmap);
+
+                // Set additional encoding parameters, if needed
+                //encoder.BitmapTransform.ScaledWidth = 320;
+                //encoder.BitmapTransform.ScaledHeight = 240;
+                //encoder.BitmapTransform.Rotation = Windows.Graphics.Imaging.BitmapRotation.Clockwise90Degrees;
+                //encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Fant;
+                encoder.IsThumbnailGenerated = true;
+
+                try
+                {
+                    await encoder.FlushAsync();
+                }
+                catch (Exception err)
+                {
+                    const int WINCODEC_ERR_UNSUPPORTEDOPERATION = unchecked((int)0x88982F81);
+                    switch (err.HResult)
+                    {
+                        case WINCODEC_ERR_UNSUPPORTEDOPERATION:
+                            // If the encoder does not support writing a thumbnail, then try again
+                            // but disable thumbnail generation.
+                            encoder.IsThumbnailGenerated = false;
+                            break;
+                        default:
+                            throw;
+                    }
+                }
+
+                if (encoder.IsThumbnailGenerated == false)
+                {
+                    await encoder.FlushAsync();
+                }
+            }
+        }
+
+        private async void OnSaveSplitImages(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("OnSaveSplitImages: Operation:{0}", currentOperation);
+            BitmapAlphaMode mode = BitmapAlphaMode.Premultiplied;
+
+
+            if (CurrentBtImage == null)
+            {
+                return;
+            }
+            SoftwareBitmap originalBitmap = null;
+            if (cvsBmpBak == null)
+            {
+                SaveWholePage("canvas.jpg");
+            }
+            else if (!pageRedrawed)
+            {
+                UpdateCanvasBmp(cvsBmpBak);
+                RefreshPage(50);
+                pageRedrawed = true;
+                return;
+            }
+            else
+            {
+                pageRedrawed = false;
+            }
+
+
+            RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap();
+            await renderTargetBitmap.RenderAsync(CurrentPage);
+            var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
+
+            var inputBitmap = SoftwareBitmap.CreateCopyFromBuffer(pixelBuffer,
+                                                     BitmapPixelFormat.Bgra8,
+                                                     renderTargetBitmap.PixelWidth,
+                                                     renderTargetBitmap.PixelHeight,
+                                                     BitmapAlphaMode.Premultiplied);
+
+            //var inputBitmap = await GetSoftwareBitmap("canvas.jpg");
+            if (cvsBmpBak == null)
+            {
+                var iBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
+                    (int)CurrentBtImage.cvsBmp.SizeInPixels.Width, (int)CurrentBtImage.cvsBmp.SizeInPixels.Height, mode);
+                cvsBmpBak = CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, iBmp);
+                cvsBmpBak.CopyPixelsFromBitmap(CurrentBtImage.cvsBmp);
+                //return;
+            }
+            if (inputBitmap != null)
+            {
+                // The XAML Image control can only display images in BRGA8 format with premultiplied or no alpha
+                // The frame reader as configured in this sample gives BGRA8 with straight alpha, so need to convert it
+                originalBitmap = /*inputBitmap;// */SoftwareBitmap.Convert(inputBitmap, BitmapPixelFormat.Bgra8, mode);
+
+                SoftwareBitmap outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
+                    originalBitmap.PixelWidth, originalBitmap.PixelHeight, mode);
+
+                // Operate on the image in the manner chosen by the user.
+                if (currentOperation == OperationType.Blur)
+                {
+                    _helper.Blur(originalBitmap, outputBitmap);
+                }
+                else if (currentOperation == OperationType.HoughLines)
+                {
+                    _helper.HoughLines(originalBitmap, outputBitmap);
+                }
+                else if (currentOperation == OperationType.Contours)
+                {
+                    _helper.Contours(originalBitmap, outputBitmap);
+                }
+                else if (currentOperation == OperationType.Histogram)
+                {
+                    _helper.Histogram(originalBitmap, outputBitmap);
+                }
+                else if (currentOperation == OperationType.MotionDetector)
+                {
+                    _helper.MotionDetector(originalBitmap, outputBitmap);
+                }
+                else if (currentOperation == OperationType.Crop)
+                {
+                    outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
+                        (int)PageMargin.Right, (int)PageMargin.Bottom, mode);
+                    _helper.Crop(originalBitmap, outputBitmap, PageMargin.Left, PageMargin.Top, PageMargin.Right, PageMargin.Bottom);
+                }
+                currentOperation++;
+                if (currentOperation > OperationType.MotionDetector)
+                {
+                    currentOperation = OperationType.Crop;
+                }
+                SaveSoftwareBitmapToFile(outputBitmap, "Dmr", "show.jpg");
+                UpdateCanvasBmp(CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap));
+                RefreshPage(100);
+            }
+        }
+        private List<char> IGNORED_CHARS = new List<char>();
+        
+        private void InitMaps()
+        {
+            IGNORED_CHARS.Add(',');
+            IGNORED_CHARS.Add('.');
+            IGNORED_CHARS.Add(';');
+
+            IGNORED_CHARS.Add('，');
+            IGNORED_CHARS.Add('。');
+            IGNORED_CHARS.Add('；');
+            IGNORED_CHARS.Add('、');
+        }
+
+        private void SetStatisticsOfPageText()
+        {
+            int totalElements = BtGrids.Elements.Count;
+            int CharCount = 0;
+            int LostCharCount = 0;
+            int SpaceCount = 0;
+            int SealCount = 0;
+            int OtherCount = 0;
+            for (int i = 0; i < totalElements; i++)
+            {
+                switch (BtGrids.Elements[i].type)
+                {
+                    case BeitieElement.BeitieElementType.Kongbai:
+                        SpaceCount++;
+                        break;
+                    case BeitieElement.BeitieElementType.Zi:
+                        CharCount++;
+                        break;
+                    case BeitieElement.BeitieElementType.Quezi:
+                        LostCharCount++;
+                        break;
+                    case BeitieElement.BeitieElementType.Yinzhang:
+                        SealCount++;
+                        break;
+                    default:
+                        OtherCount++;
+                        break;
+                }
+            }
+            TextParsedData.Text = string.Format("字：{0},阙字({5})：{1}, 印章({6})：{2},空白({7}): {3}, 其他({8}): {4}",
+                CharCount, LostCharCount, SealCount, SpaceCount, OtherCount,
+                "{缺}", "{印:}", "{}", "{XX}");
+        }
+
+        private void PageText_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string txt = PageText.Text;
+            int length = txt.Length;
+            char single;
+            bool specialTypeDetected = false;
+            StringBuilder sb = new StringBuilder();
+
+            BtGrids.Elements.Clear();
+            for (int i = 0; i < length; i++)
+            {
+                single = txt[i];
+                if (IGNORED_CHARS.Contains(single))
+                {
+                    continue;
+                }
+                else if (single == '□')
+                {
+                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Kongbai, new string(single, 1)));
+                }
+                else if (single == '{')
+                {
+                    specialTypeDetected = true;
+                }
+                else if (single == '}')
+                {
+                    specialTypeDetected = false;
+                    string name = sb.ToString();
+                    BeitieElement.BeitieElementType type;
+                    if (name.Contains("印"))
+                    {
+                        type = BeitieElement.BeitieElementType.Yinzhang;
+                    }
+                    else if (name.Length == 0)
+                    {
+                        type = BeitieElement.BeitieElementType.Kongbai;
+                    }
+                    else if (name.Contains("缺"))
+                    {
+                        type = BeitieElement.BeitieElementType.Quezi;
+                    }
+                    else
+                    {
+                        type = BeitieElement.BeitieElementType.Other;
+                    }
+                    BtGrids.Elements.Add(new BeitieElement(type, name));
+
+                }
+                else if (specialTypeDetected)
+                {
+                    sb.Append(single);
+                }
+                else
+                {
+                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1)));
+                }
+            }
+            SetStatisticsOfPageText();
         }
     }
 }

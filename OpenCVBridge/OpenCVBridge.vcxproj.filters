@@ -16,5 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="$(MSBuildThisFileDirectory)\x64\*.dll" />
+    <None Include="$(MSBuildThisFileDirectory)\x64\*.dll" />
+    <None Include="$(MSBuildThisFileDirectory)\x64\*.dll" />
+    <None Include="$(MSBuildThisFileDirectory)\x64\*.dll" />
+    <None Include="$(MSBuildThisFileDirectory)\x64\*.dll" />
   </ItemGroup>
 </Project>

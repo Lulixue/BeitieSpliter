@@ -23,6 +23,23 @@ using namespace Windows::Storage::Streams;
 using namespace Windows::Foundation;
 
 using namespace cv;
+/* Open CV: */
+//using namespace Emgu::CV;
+//using namespace Emgu::CV::CvEnum;
+//using namespace Emgu::CV::Structure;
+void TRACE_(const char *format, ...)
+{
+    va_list args;
+    char buf[512] = { 0 };
+    int nBuf;
+    va_start(args, format);
+    nBuf = _vsnprintf_s(buf, ARRAYSIZE(buf), ARRAYSIZE(buf) - 1, format, args);
+    va_end(args);
+
+    OutputDebugStringA(buf);
+
+}
+
 
 OpenCVHelper::OpenCVHelper()
 {
@@ -56,6 +73,48 @@ void OpenCVHelper::MotionDetector(SoftwareBitmap^ input, SoftwareBitmap^ output)
     Mat element = getStructuringElement(MORPH_RECT, cv::Size(3, 3));
     erode(temp, temp, element);
     temp.copyTo(outputMat);
+}
+
+void OpenCVHelper::Crop(
+    Windows::Graphics::Imaging::SoftwareBitmap^ input,
+    Windows::Graphics::Imaging::SoftwareBitmap^ output,
+    double left, double top, double right, double bottom)
+{
+    cv::Size wholeSize;
+    cv::Point pnt;
+    Mat inputMat, outputMat;
+    if (!(TryConvert(input, inputMat) && TryConvert(output, outputMat)))
+    {
+        TRACE_("TryConvert failed!\n");
+        return;
+    }
+
+    //inputMat.copyTo(outputMat);
+    inputMat.locateROI(wholeSize, pnt);
+    TRACE_("input size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
+        inputMat.cols, inputMat.rows);
+
+    cv::Rect rc((int)top, (int)left, (int)right, (int)bottom);
+    Mat image_cut = Mat(inputMat, rc);
+    //outputMat = inputMat(cv::Rect((int)top, (int)left, (int)right, (int)bottom));
+    image_cut.locateROI(wholeSize, pnt);
+    TRACE_("image_cut size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
+        image_cut.cols, image_cut.rows);
+
+    Mat image_copy = image_cut.clone();
+    image_copy.copyTo(outputMat);
+
+    outputMat.locateROI(wholeSize, pnt);
+    TRACE_("output size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
+        outputMat.cols, outputMat.rows);
+
+    return;
+
+    //outputMat = inputMat.adjustROI((int)top, (int)bottom, (int)left, (int)right);
+    /*top = wholeSize.width;
+    bottom = wholeSize.height;
+    left = pnt.x;
+    right = pnt.y;*/
 }
 
 void OpenCVHelper::Histogram(SoftwareBitmap^ input, SoftwareBitmap^ output)
@@ -145,6 +204,17 @@ void OpenCVHelper::HoughLines(SoftwareBitmap^ input, SoftwareBitmap^ output)
         Vec4i l = lines[i];
         line(outputMat, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0, 255, 0, 255), 3, CV_AA);
     }
+}
+
+bool OpenCVBridge::OpenCVHelper::TryConvert(Windows::Graphics::Imaging::SoftwareBitmap ^ from, cv::Mat & convertedMat, cv::Rect & roi)
+{
+    unsigned char* pPixels = nullptr;
+    unsigned int capacity = 0;
+    if (!GetPointerToPixelData(from, &pPixels, &capacity))
+    {
+        return false;
+    } 
+    return false;
 }
 
 bool OpenCVHelper::TryConvert(SoftwareBitmap^ from, Mat& convertedMat)
