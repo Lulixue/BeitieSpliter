@@ -71,7 +71,7 @@
                        LostFocus="ColumnCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70" />
             <TextBlock  Text="裁边：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PageMarginsBox" Text="10,10,200,300" TextChanged="PageMargin_TextChanged" 
+            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1" TextChanged="PageMargin_TextChanged" 
                       LostFocus="PageMargin_LostFocus"
                       Width="130" FontSize="14" Style="{StaticResource LeftFriendlyBox}" />
             <TextBlock  Text="画笔颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
@@ -99,9 +99,13 @@
                 <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
         </Border>
-        <TextBox x:Name="TieName" Grid.Row="2" Grid.Column="1" Margin="3" FontSize="16" PlaceholderText="输入帖的名称" MinWidth="50"  MaxWidth="200"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBox x:Name="TieAlbum" Grid.Row="2" Grid.Column="1" Margin="3" FontSize="14" 
+                 PlaceholderText="输入帖的名称" MinWidth="50"  MaxWidth="200"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" 
+                 Text="董美人墓志"
+                 VerticalAlignment="Center"/>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="3" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
-                     Text="" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap" IsSpellCheckEnabled="False"/>
+                     Text="美人董氏墓志铭{印}{印}，美人姓董，汴州恤宜县人也。祖佛子，齐凉州刺史，敦仁愽洽，标誉乡闾。父后进，俶傥英雄，声驰河渷。美人体质闲华，天" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap" IsSpellCheckEnabled="False"
+                 />
         <TextBlock x:Name="TextParsedData" Grid.Row="4" Grid.Column="1" Text="" FontSize="12" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap"/>
 
     </Grid>

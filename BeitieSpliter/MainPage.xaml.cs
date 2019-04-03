@@ -73,12 +73,33 @@ namespace BeitieSpliter
 
     public sealed class BeitieGrids
     {
-        public double DrawHeight;
-        public double DrawWidth;
-        public Point OriginPoint;
+        public double DrawHeight = 1.0;
+        public double DrawWidth = 1.0;
+        public Point OriginPoint = new Point(0, 0);
+        public int Columns = 0;
+        public int Rows = 0;
         public List<float> Widths = new List<float>();
         public List<float> Heights = new List<float>();
         public List<BeitieElement> Elements = new List<BeitieElement>();
+        public Rect GetRectangle(int row, int col)
+        {
+            Point leftTopPnt = OriginPoint;
+            for (int i = 0; i < col; i++)
+            {
+                int index = ((row-1) * Rows) + i;
+                leftTopPnt.X += Widths[i];
+            }
+            for (int i = 0; i < col; i++)
+            {
+                int index = ((col-1) * Columns) + i;
+                leftTopPnt.Y += Heights[i];
+            }
+            Point rightBottomPnt = leftTopPnt;
+            rightBottomPnt.X += Widths[(row * Columns) + col];
+            rightBottomPnt.Y += Heights[(col * Rows) + row];
+
+            return new Rect(leftTopPnt, rightBottomPnt);
+        }
     }
 
     public sealed class BeitieImage
@@ -423,9 +444,12 @@ namespace BeitieSpliter
             RowNumber = GetRowCount();
             InitPageMargin();
 
+
             CurrentPage.Height = CurrentBtImage.resolutionY;
             CurrentPage.Width = CurrentBtImage.resolutionX;
 
+            BtGrids.Columns = ColumnNumber;
+            BtGrids.Rows = RowNumber;
             BtGrids.DrawHeight = CurrentPage.Height - PageMargin.Top - PageMargin.Bottom;
             BtGrids.DrawWidth = CurrentPage.Width - PageMargin.Left - PageMargin.Right;
 
@@ -444,7 +468,7 @@ namespace BeitieSpliter
             }
             Debug.WriteLine("Image Parameter:\n col/row: ({0},{1}), resolution: ({2:0},{3:0})\n " +
                 "PageMargin:({4},{5},{6},{7}", ColumnNumber, RowNumber, CurrentBtImage.resolutionX,
-                CurrentBtImage.resolutionX, PageMargin.Left, PageMargin.Top, PageMargin.Right, PageMargin.Bottom);
+                CurrentBtImage.resolutionY, PageMargin.Left, PageMargin.Top, PageMargin.Right, PageMargin.Bottom);
         }
 
         private void RefreshPage()
@@ -512,6 +536,7 @@ namespace BeitieSpliter
                 SetDirFilePath("图片: " + file.Path);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
                 InitDrawParameters();
+                ParsePageText();
                 RefreshPage(1);
             }
             else
@@ -628,7 +653,7 @@ namespace BeitieSpliter
             }
 
             draw.DrawImage(CurrentBtImage.cvsBmp);
-            //PageDrawLines(draw);
+            PageDrawLines(draw);
         }
 
         private void Page_OnUnloaded(object sender, RoutedEventArgs e)
@@ -727,8 +752,7 @@ namespace BeitieSpliter
             if (Regex.IsMatch(textbox.Text, TotalPattern) && textbox.Text != "")
             {
                 InitDrawParameters();
-                //CurrentPage.Invalidate();
-                OnSaveSplitImages(null, null);
+                CurrentPage.Invalidate();
             }
             else
             {
@@ -780,13 +804,9 @@ namespace BeitieSpliter
             }
         }
 
-        async Task<SoftwareBitmap> GetSoftwareBitmap(string name)
+        async Task<SoftwareBitmap> GetSoftwareBitmap(StorageFile inputFile)
         {
             SoftwareBitmap softwareBitmap;
-            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
-            StorageFolder folder = await applicationFolder.CreateFolderAsync("Picture", CreationCollisionOption.OpenIfExists);
-            StorageFile inputFile = await folder.CreateFileAsync(name, CreationCollisionOption.OpenIfExists);
-
             using (IRandomAccessStream stream = await inputFile.OpenAsync(FileAccessMode.Read))
             {
                 // Create the decoder from the stream
@@ -797,6 +817,15 @@ namespace BeitieSpliter
             }
 
             return softwareBitmap;
+        }
+
+        async Task<SoftwareBitmap> GetSoftwareBitmap(string dir, string name)
+        {
+            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder folder = await applicationFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+            StorageFile inputFile = await folder.CreateFileAsync(name, CreationCollisionOption.OpenIfExists);
+
+            return await GetSoftwareBitmap(inputFile);
         }
 
 
@@ -810,9 +839,6 @@ namespace BeitieSpliter
             MotionDetector
         }
         private OpenCVHelper _helper = new OpenCVHelper();
-        OperationType currentOperation = OperationType.Crop;
-        CanvasBitmap cvsBmpBak = null;
-        bool pageRedrawed = false;
 
         void UpdateCanvasBmp(CanvasBitmap bmp)
         {
@@ -869,98 +895,59 @@ namespace BeitieSpliter
                 }
             }
         }
+        void SaveSingleCropImage(SoftwareBitmap input, Rect roi, string album, string filename)
+        {
+            SoftwareBitmap croppedBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
+                       (int)roi.Width, (int)roi.Height, BitmapAlphaMode.Premultiplied);
+
+            _helper.Crop(input, croppedBmp, (int)roi.Left, (int)roi.Top, (int)roi.Width, (int)roi.Height);
+
+
+            Debug.WriteLine("Save Single Crop Image: {0}, -> {1}\\{2}", roi, album, filename);
+            SaveSoftwareBitmapToFile(croppedBmp, album, filename);
+        }
 
         private async void OnSaveSplitImages(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("OnSaveSplitImages: Operation:{0}", currentOperation);
-            BitmapAlphaMode mode = BitmapAlphaMode.Premultiplied;
-
-
             if (CurrentBtImage == null)
             {
+                ShowMessageDlg("请选择书法碑帖图片!", null);
                 return;
             }
-            SoftwareBitmap originalBitmap = null;
-            if (cvsBmpBak == null)
+            string album = TieAlbum.Text;
+            SoftwareBitmap inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
+            int size = BtGrids.Elements.Count;
+            // 从左到右，自上而下
+            int counter = 0;
+
+            if (album == "")
             {
-                SaveWholePage("canvas.jpg");
+                System.DateTime currentTime = System.DateTime.Now;
+                string filename;
+                filename = currentTime.ToString("yyyyMMdd_HHmmss");
+                album = filename;
             }
-            else if (!pageRedrawed)
+            for (int i = BtGrids.Columns-1; i >= 0; i--)
             {
-                UpdateCanvasBmp(cvsBmpBak);
-                RefreshPage(50);
-                pageRedrawed = true;
-                return;
-            }
-            else
-            {
-                pageRedrawed = false;
-            }
+                for (int j = BtGrids.Rows-1; j >= 0; j--)
+                {
+                    Rect roi = BtGrids.GetRectangle(j, i);
+                    BeitieElement element = BtGrids.Elements[counter++];
+                    string filename = string.Format("{0}-{1}.jpg", counter, element.content);
 
-
-            RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap();
-            await renderTargetBitmap.RenderAsync(CurrentPage);
-            var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
-
-            var inputBitmap = SoftwareBitmap.CreateCopyFromBuffer(pixelBuffer,
-                                                     BitmapPixelFormat.Bgra8,
-                                                     renderTargetBitmap.PixelWidth,
-                                                     renderTargetBitmap.PixelHeight,
-                                                     BitmapAlphaMode.Premultiplied);
-
-            //var inputBitmap = await GetSoftwareBitmap("canvas.jpg");
-            if (cvsBmpBak == null)
-            {
-                var iBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                    (int)CurrentBtImage.cvsBmp.SizeInPixels.Width, (int)CurrentBtImage.cvsBmp.SizeInPixels.Height, mode);
-                cvsBmpBak = CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, iBmp);
-                cvsBmpBak.CopyPixelsFromBitmap(CurrentBtImage.cvsBmp);
-                //return;
-            }
-            if (inputBitmap != null)
-            {
-                // The XAML Image control can only display images in BRGA8 format with premultiplied or no alpha
-                // The frame reader as configured in this sample gives BGRA8 with straight alpha, so need to convert it
-                originalBitmap = /*inputBitmap;// */SoftwareBitmap.Convert(inputBitmap, BitmapPixelFormat.Bgra8, mode);
-
-                SoftwareBitmap outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                    originalBitmap.PixelWidth, originalBitmap.PixelHeight, mode);
-
-                // Operate on the image in the manner chosen by the user.
-                if (currentOperation == OperationType.Blur)
-                {
-                    _helper.Blur(originalBitmap, outputBitmap);
+                    if (element.type == BeitieElement.BeitieElementType.Kongbai)
+                    {
+                        // 
+                    }
+                    try
+                    {
+                        SaveSingleCropImage(inputBitmap, roi, album, filename);
+                    }
+                    catch (Exception err)
+                    {
+                        Debug.WriteLine(err.ToString());
+                    }
                 }
-                else if (currentOperation == OperationType.HoughLines)
-                {
-                    _helper.HoughLines(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OperationType.Contours)
-                {
-                    _helper.Contours(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OperationType.Histogram)
-                {
-                    _helper.Histogram(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OperationType.MotionDetector)
-                {
-                    _helper.MotionDetector(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OperationType.Crop)
-                {
-                    outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                        (int)PageMargin.Right, (int)PageMargin.Bottom, mode);
-                    _helper.Crop(originalBitmap, outputBitmap, PageMargin.Left, PageMargin.Top, PageMargin.Right, PageMargin.Bottom);
-                }
-                currentOperation++;
-                if (currentOperation > OperationType.MotionDetector)
-                {
-                    currentOperation = OperationType.Crop;
-                }
-                SaveSoftwareBitmapToFile(outputBitmap, "Dmr", "show.jpg");
-                UpdateCanvasBmp(CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap));
-                RefreshPage(100);
             }
         }
         private List<char> IGNORED_CHARS = new List<char>();
@@ -1010,8 +997,7 @@ namespace BeitieSpliter
                 CharCount, LostCharCount, SealCount, SpaceCount, OtherCount,
                 "{缺}", "{印:}", "{}", "{XX}");
         }
-
-        private void PageText_LostFocus(object sender, RoutedEventArgs e)
+        private void ParsePageText()
         {
             string txt = PageText.Text;
             int length = txt.Length;
@@ -1057,7 +1043,7 @@ namespace BeitieSpliter
                         type = BeitieElement.BeitieElementType.Other;
                     }
                     BtGrids.Elements.Add(new BeitieElement(type, name));
-
+                    sb.Clear();
                 }
                 else if (specialTypeDetected)
                 {
@@ -1069,6 +1055,11 @@ namespace BeitieSpliter
                 }
             }
             SetStatisticsOfPageText();
+        }
+
+        private void PageText_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ParsePageText();
         }
     }
 }

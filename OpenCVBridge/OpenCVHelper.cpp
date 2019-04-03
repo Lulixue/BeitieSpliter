@@ -78,7 +78,7 @@ void OpenCVHelper::MotionDetector(SoftwareBitmap^ input, SoftwareBitmap^ output)
 void OpenCVHelper::Crop(
     Windows::Graphics::Imaging::SoftwareBitmap^ input,
     Windows::Graphics::Imaging::SoftwareBitmap^ output,
-    double left, double top, double right, double bottom)
+    int x, int y, int width, int height)
 {
     cv::Size wholeSize;
     cv::Point pnt;
@@ -94,7 +94,7 @@ void OpenCVHelper::Crop(
     TRACE_("input size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
         inputMat.cols, inputMat.rows);
 
-    cv::Rect rc((int)top, (int)left, (int)right, (int)bottom);
+    cv::Rect rc((int)x, (int)y, (int)width, (int)height);
     Mat image_cut = Mat(inputMat, rc);
     //outputMat = inputMat(cv::Rect((int)top, (int)left, (int)right, (int)bottom));
     image_cut.locateROI(wholeSize, pnt);
@@ -204,17 +204,6 @@ void OpenCVHelper::HoughLines(SoftwareBitmap^ input, SoftwareBitmap^ output)
         Vec4i l = lines[i];
         line(outputMat, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), Scalar(0, 255, 0, 255), 3, CV_AA);
     }
-}
-
-bool OpenCVBridge::OpenCVHelper::TryConvert(Windows::Graphics::Imaging::SoftwareBitmap ^ from, cv::Mat & convertedMat, cv::Rect & roi)
-{
-    unsigned char* pPixels = nullptr;
-    unsigned int capacity = 0;
-    if (!GetPointerToPixelData(from, &pPixels, &capacity))
-    {
-        return false;
-    } 
-    return false;
 }
 
 bool OpenCVHelper::TryConvert(SoftwareBitmap^ from, Mat& convertedMat)
