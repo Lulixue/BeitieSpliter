@@ -89,7 +89,7 @@ namespace BeitieSpliter
                 int index = ((row-1) * Rows) + i;
                 leftTopPnt.X += Widths[i];
             }
-            for (int i = 0; i < col; i++)
+            for (int i = 0; i < row; i++)
             {
                 int index = ((col-1) * Columns) + i;
                 leftTopPnt.Y += Heights[i];
@@ -929,7 +929,7 @@ namespace BeitieSpliter
             }
             for (int i = BtGrids.Columns-1; i >= 0; i--)
             {
-                for (int j = BtGrids.Rows-1; j >= 0; j--)
+                for (int j = 0; j < BtGrids.Rows; j++)
                 {
                     Rect roi = BtGrids.GetRectangle(j, i);
                     BeitieElement element = BtGrids.Elements[counter++];
