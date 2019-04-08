@@ -33,6 +33,8 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Windows.Graphics.Display;
 using OpenCVBridge;
+using Windows.ApplicationModel.Core;
+using Windows.UI.ViewManagement;
 
 /* Open CV: */
 //using EMGU.CV;
@@ -654,6 +656,7 @@ namespace BeitieSpliter
 
             draw.DrawImage(CurrentBtImage.cvsBmp);
             PageDrawLines(draw);
+            ImageScrollViewer.Scale = new Vector3(1, 1, 1);
         }
 
         private void Page_OnUnloaded(object sender, RoutedEventArgs e)
@@ -903,7 +906,8 @@ namespace BeitieSpliter
             _helper.Crop(input, croppedBmp, (int)roi.Left, (int)roi.Top, (int)roi.Width, (int)roi.Height);
 
 
-            Debug.WriteLine("Save Single Crop Image: {0}, -> {1}\\{2}", roi, album, filename);
+            Debug.WriteLine("Save Single Crop Image: ({0:0},{3:0},{4:0},{5:0}), -> {1}\\{2}", roi.X, album, filename,
+                roi.Y, roi.Width, roi.Height);
             SaveSoftwareBitmapToFile(croppedBmp, album, filename);
         }
 
@@ -932,16 +936,17 @@ namespace BeitieSpliter
                 for (int j = 0; j < BtGrids.Rows; j++)
                 {
                     Rect roi = BtGrids.GetRectangle(j, i);
-                    BeitieElement element = BtGrids.Elements[counter++];
+                    BeitieElement element = BtGrids.Elements[counter];
                     string filename = string.Format("{0}-{1}.jpg", counter, element.content);
 
                     if (element.type == BeitieElement.BeitieElementType.Kongbai)
                     {
-                        // 
+                        continue;
                     }
                     try
                     {
                         SaveSingleCropImage(inputBitmap, roi, album, filename);
+                        counter++;
                     }
                     catch (Exception err)
                     {
@@ -1060,6 +1065,23 @@ namespace BeitieSpliter
         private void PageText_LostFocus(object sender, RoutedEventArgs e)
         {
             ParsePageText();
+        }
+
+        private async void BtnMore_Clicked(object sender, RoutedEventArgs e)
+        {
+            CoreApplicationView newView = CoreApplication.CreateNewView();
+            int newViewId = 0;
+            await newView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                Frame frame = new Frame();
+                frame.Navigate(typeof(GridsConfig), null);
+                Window.Current.Content = frame;
+                // You have to activate the window in order to show it later.
+                Window.Current.Activate();
+
+                newViewId = ApplicationView.GetForCurrentView().Id;
+            });
+            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId);
         }
     }
 }

@@ -6,9 +6,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    RequestedTheme="Dark"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="Auto" Height="Auto">
 
-    <Grid>
+    <Grid  x:Name="SettingsGrid" Grid.Row="2" Grid.ColumnSpan="2" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="7*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="BtnOk" Content="确定" FontSize="14" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="60" Width="100"/>
 
+        </StackPanel>
+        
     </Grid>
 </Page>
