@@ -85,7 +85,7 @@
             <TextBox  x:Name="PenWidthBox" 
                       LostFocus="PenWidthBox_LostFocus"
                       TextChanged="PenWidthBox_TextChanged" Text="1" Width="70" Style="{StaticResource LeftFriendlyBox}" InputScope="Number"  />
-            <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked"/>
+            <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
         </StackPanel>
 
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">

@@ -75,32 +75,26 @@ namespace BeitieSpliter
 
     public sealed class BeitieGrids
     {
+        public float PenWidth = 0;
+        public Color PenColor = Colors.White;
+        public Thickness PageMargin = new Thickness();
+        public BeitieImage BtImageParent = null;
         public double DrawHeight = 1.0;
         public double DrawWidth = 1.0;
         public Point OriginPoint = new Point(0, 0);
         public int Columns = 0;
         public int Rows = 0;
-        public List<float> Widths = new List<float>();
-        public List<float> Heights = new List<float>();
+        public StorageFile ImageFile = null;
+        public List<Rect> ElementRects = new List<Rect>();
+
         public List<BeitieElement> Elements = new List<BeitieElement>();
         public Rect GetRectangle(int row, int col)
         {
-            Point leftTopPnt = OriginPoint;
-            for (int i = 0; i < col; i++)
-            {
-                int index = ((row-1) * Rows) + i;
-                leftTopPnt.X += Widths[i];
-            }
-            for (int i = 0; i < row; i++)
-            {
-                int index = ((col-1) * Columns) + i;
-                leftTopPnt.Y += Heights[i];
-            }
-            Point rightBottomPnt = leftTopPnt;
-            rightBottomPnt.X += Widths[(row * Columns) + col];
-            rightBottomPnt.Y += Heights[(col * Rows) + row];
+            Debug.Assert(row > 0);
+            Debug.Assert(col > 0);
+            int index = (row - 1) * Columns + col - 1;
 
-            return new Rect(leftTopPnt, rightBottomPnt);
+            return ElementRects[index];
         }
     }
 
@@ -305,9 +299,6 @@ namespace BeitieSpliter
         BeitieGrids BtGrids = new BeitieGrids();
         int ColumnNumber = -1;
         int RowNumber = -1;
-        float PenWidth = 0;
-        Color PenColor = Colors.White;
-        Thickness PageMargin = new Thickness();
 
         private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
         public ObservableCollection<ColorBoxItem> ColorBoxItems {
@@ -439,8 +430,11 @@ namespace BeitieSpliter
 
         private void InitDrawParameters()
         {
-            PenColor = ColorBoxSelectedItem.Value;
-            PenWidth = float.Parse(PenWidthBox.Text);
+            BtGrids.ImageFile = CurrentBtImage.file;
+            BtGrids.BtImageParent = CurrentBtImage;
+
+            BtGrids.PenColor = ColorBoxSelectedItem.Value;
+            BtGrids.PenWidth = float.Parse(PenWidthBox.Text);
 
             ColumnNumber = GetColumnCount();
             RowNumber = GetRowCount();
@@ -452,25 +446,30 @@ namespace BeitieSpliter
 
             BtGrids.Columns = ColumnNumber;
             BtGrids.Rows = RowNumber;
-            BtGrids.DrawHeight = CurrentPage.Height - PageMargin.Top - PageMargin.Bottom;
-            BtGrids.DrawWidth = CurrentPage.Width - PageMargin.Left - PageMargin.Right;
+            BtGrids.DrawHeight = CurrentPage.Height - BtGrids.PageMargin.Top - BtGrids.PageMargin.Bottom;
+            BtGrids.DrawWidth = CurrentPage.Width - BtGrids.PageMargin.Left - BtGrids.PageMargin.Right;
 
-            BtGrids.OriginPoint = new Point(PageMargin.Left, PageMargin.Top);
-
-            int GridNumber = ColumnNumber * RowNumber;
+            BtGrids.OriginPoint = new Point(BtGrids.PageMargin.Left, BtGrids.PageMargin.Top);
+            
             float GridHeight = (float)(BtGrids.DrawHeight / RowNumber);
             float GridWidth = (float)(BtGrids.DrawWidth / ColumnNumber);
-
-            BtGrids.Heights.Clear();
-            BtGrids.Widths.Clear();
-            for (int i = 0; i < GridNumber; i++)
+            
+            BtGrids.ElementRects.Clear();
+            Point leftTop = new Point();
+            for (int i = 0; i < RowNumber; i++)
             {
-                BtGrids.Heights.Add(GridHeight);
-                BtGrids.Widths.Add(GridWidth);
+                leftTop = BtGrids.OriginPoint;
+                leftTop.Y += i * GridHeight;
+                for (int j = 0; j < ColumnNumber; j++)
+                {
+                    BtGrids.ElementRects.Add(new Rect(leftTop.X, leftTop.Y, GridWidth, GridHeight));
+                    leftTop.X += GridWidth;
+                }
             }
             Debug.WriteLine("Image Parameter:\n col/row: ({0},{1}), resolution: ({2:0},{3:0})\n " +
-                "PageMargin:({4},{5},{6},{7}", ColumnNumber, RowNumber, CurrentBtImage.resolutionX,
-                CurrentBtImage.resolutionY, PageMargin.Left, PageMargin.Top, PageMargin.Right, PageMargin.Bottom);
+                "PageMargin:({4},{5},{6},{7})", ColumnNumber, RowNumber, CurrentBtImage.resolutionX,
+                CurrentBtImage.resolutionY, BtGrids.PageMargin.Left, BtGrids.PageMargin.Top, 
+                BtGrids.PageMargin.Right, BtGrids.PageMargin.Bottom);
         }
 
         private void RefreshPage()
@@ -537,8 +536,10 @@ namespace BeitieSpliter
                 // Application now has read/write access to the picked file
                 SetDirFilePath("图片: " + file.Path);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
+                
                 InitDrawParameters();
                 ParsePageText();
+                BtnMore.IsEnabled = true;
                 RefreshPage(1);
             }
             else
@@ -555,47 +556,20 @@ namespace BeitieSpliter
         private void DrawLine(CanvasDrawingSession draw, Point p1, Point p2)
         {
             //Debug.WriteLine("DrawLine: ({0:0},{1:0})->({2:0},{3:0})\n", (float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y);
-            draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, PenColor, PenWidth);
+            draw.DrawLine((float)p1.X, (float)p1.Y, (float)p2.X, (float)p2.Y, BtGrids.PenColor, BtGrids.PenWidth);
         }
 
         private void PageDrawLines(CanvasDrawingSession draw)
         {
-            Point LeftTopPnt = new Point();
-            Point LeftBottomPnt = new Point();
-            Point RightTopPnt = new Point();
-            Point RightBottomPnt = new Point();
-            Point RowStartPnt = new Point();
-
             int GridNumber = ColumnNumber * RowNumber;
             int index = 0;
-            AssignPoint(ref LeftTopPnt, ref BtGrids.OriginPoint);
             for (int i = 0; i < RowNumber; i++)
             {
-                AssignPoint(ref RowStartPnt, ref LeftTopPnt);
                 for (int j = 0; j < ColumnNumber; j++)
                 {
                     index = i * ColumnNumber + j;
-                    AssignPoint(ref RightBottomPnt, ref LeftTopPnt);
-                    RightBottomPnt.X += BtGrids.Widths[index];
-                    RightBottomPnt.Y += BtGrids.Heights[index];
-
-                    AssignPoint(ref LeftBottomPnt, ref LeftTopPnt);
-                    LeftBottomPnt.Y += BtGrids.Heights[index];
-
-
-                    AssignPoint(ref RightTopPnt, ref LeftTopPnt);
-                    RightTopPnt.X += BtGrids.Widths[index];
-
-                    // draw Rectangle
-                    DrawLine(draw, LeftTopPnt, LeftBottomPnt);
-                    DrawLine(draw, LeftBottomPnt, RightBottomPnt);
-                    DrawLine(draw, RightBottomPnt, RightTopPnt);
-                    DrawLine(draw, RightTopPnt, LeftTopPnt);
-
-                    AssignPoint(ref LeftTopPnt, ref RightTopPnt);
+                    draw.DrawRectangle(BtGrids.ElementRects[index], BtGrids.PenColor, BtGrids.PenWidth);
                 }
-                AssignPoint(ref LeftTopPnt, ref RowStartPnt);
-                LeftTopPnt.Y += BtGrids.Heights[i * ColumnNumber];
             }
 
         }
@@ -616,7 +590,7 @@ namespace BeitieSpliter
             {
                 return false;
             }
-            if (PenWidth <= 0)
+            if (BtGrids.PenWidth <= 0)
             {
                 return false;
             }
@@ -715,7 +689,7 @@ namespace BeitieSpliter
 
         private void PenColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            PenColor = ColorBoxSelectedItem.Value;
+            BtGrids.PenColor = ColorBoxSelectedItem.Value;
             CurrentPage.Invalidate();
         }
 
@@ -735,7 +709,7 @@ namespace BeitieSpliter
             if (mc.Count == 1)
             {
                 double oneForAllMargin = double.Parse(mc.ElementAt(0).Value);
-                PageMargin = new Thickness(oneForAllMargin, oneForAllMargin, oneForAllMargin, oneForAllMargin);
+                BtGrids.PageMargin = new Thickness(oneForAllMargin, oneForAllMargin, oneForAllMargin, oneForAllMargin);
             }
             else
             {
@@ -744,7 +718,7 @@ namespace BeitieSpliter
                 {
                     margins[i] = double.Parse(mc.ElementAt(i).Value);
                 }
-                PageMargin = new Thickness(margins[0], margins[1], margins[2], margins[3]);
+                BtGrids.PageMargin = new Thickness(margins[0], margins[1], margins[2], margins[3]);
             }
         }
 
@@ -759,7 +733,7 @@ namespace BeitieSpliter
             }
             else
             {
-                PenWidth = 0;
+                BtGrids.PenWidth = 0;
                 textbox.Text = "";
                 ShowMessageDlg("Invalid margin: " + textbox.Text, null);
             }
@@ -770,11 +744,11 @@ namespace BeitieSpliter
             var textbox = (TextBox)sender;
             if (Regex.IsMatch(textbox.Text, "^[\\d]+\\.?[\\d]?$") && textbox.Text != "")
             {
-                PenWidth = float.Parse(PenWidthBox.Text);
+                BtGrids.PenWidth = float.Parse(PenWidthBox.Text);
             }
             else
             {
-                PenWidth = 0;
+                BtGrids.PenWidth = 0;
                 int pos = textbox.SelectionStart - 1;
                 textbox.Text = textbox.Text.Remove(pos, 1);
                 textbox.SelectionStart = pos;
@@ -1074,7 +1048,7 @@ namespace BeitieSpliter
             await newView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 Frame frame = new Frame();
-                frame.Navigate(typeof(GridsConfig), null);
+                frame.Navigate(typeof(GridsConfig), BtGrids);
                 Window.Current.Content = frame;
                 // You have to activate the window in order to show it later.
                 Window.Current.Activate();
