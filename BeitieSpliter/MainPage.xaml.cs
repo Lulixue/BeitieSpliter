@@ -991,11 +991,15 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add(',');
             IGNORED_CHARS.Add('.');
             IGNORED_CHARS.Add(';');
+            IGNORED_CHARS.Add('(');
+            IGNORED_CHARS.Add(')');
 
             IGNORED_CHARS.Add('，');
             IGNORED_CHARS.Add('。');
             IGNORED_CHARS.Add('；');
             IGNORED_CHARS.Add('、');
+            IGNORED_CHARS.Add('（');
+            IGNORED_CHARS.Add('）');
         }
 
         private void SetStatisticsOfPageText()
@@ -1111,7 +1115,7 @@ namespace BeitieSpliter
 
                 newViewId = ApplicationView.GetForCurrentView().Id;
             });
-            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId);
+            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId, ViewSizePreference.UseMore);
         }
     }
 }

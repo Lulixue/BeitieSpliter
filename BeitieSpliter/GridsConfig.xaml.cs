@@ -22,6 +22,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Geometry;
 using System.Threading.Tasks;
 using Windows.UI.Core;
+using Windows.ApplicationModel.Core;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -54,6 +55,7 @@ namespace BeitieSpliter
             SingleElement,
             SingleRow,
             SingleColumn,
+            WholePage,
         }
         OperationType OpType = OperationType.SingleElement;
         BeitieGrids BtGrids = null;
@@ -69,6 +71,11 @@ namespace BeitieSpliter
         public GridsConfig()
         {
             this.InitializeComponent();
+
+            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+
+            // Set XAML element as a draggable region.
         }
 
         private int GetPreviousColRow(int current, int MIN)
@@ -111,7 +118,7 @@ namespace BeitieSpliter
                 {
                     pntLt.X += offset.left;
                     pntRb.X += offset.right;
-                         
+
                     // 每列第一个元素
                     if (pnt.Y == MIN_ROW_COLUMN)
                     {
@@ -137,6 +144,31 @@ namespace BeitieSpliter
                     else if (pnt.Y == BtGrids.Columns)
                     {
                         pntRb.X += offset.right;
+                    }
+                }
+                else if (OperationType.WholePage == OpType)
+                {
+                    revised = true;
+                    if (pnt.X == MIN_ROW_COLUMN)
+                    {
+                        pntLt.Y += offset.top;
+                        revised = false;
+                    }
+                    if (pnt.X == BtGrids.Rows)
+                    {
+                        pntRb.Y += offset.bottom;
+                        revised = false;
+                    }
+                    if (pnt.Y == MIN_ROW_COLUMN)
+                    {
+                        pntLt.X += offset.left;
+                        revised = false;
+                    }
+                    // 右上解
+                    if (pnt.Y == BtGrids.Columns)
+                    {
+                        pntRb.X += offset.right;
+                        revised = false;
                     }
                 }
                 else
@@ -186,10 +218,19 @@ namespace BeitieSpliter
                 NextCol = BtGrids.Columns;
                 minRow = maxRow = SelectedRow;
             }
-            else
+            else if (OperationType.SingleElement == OpType)
             {
+
                 minCol = maxCol = SelectedCol;
                 minRow = maxRow = SelectedRow;
+            }
+            else 
+            {
+                // whole page
+                PreRow = minRow;
+                PreCol = minCol;
+                NextRow = maxRow;
+                NextCol = maxCol;
             }
 
             Rect rcLt = BtGrids.GetRectangle(PreRow, PreCol);
@@ -377,6 +418,8 @@ namespace BeitieSpliter
            
         }
         
+
+
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
@@ -389,6 +432,15 @@ namespace BeitieSpliter
             Rect drawRect = new Rect(pntLt, pntRb);
             draw.DrawRectangle(ToAdjustRect, Colors.Azure , BtGrids.PenWidth);
             draw.DrawRectangle(drawRect, BtGrids.PenColor, BtGrids.PenWidth+1);
+            
+            foreach (Point elem in DrawLineElements)
+            {
+                Rect rc = BtGrids.GetRectangle((int)elem.X, (int)elem.Y);
+                rc.X -= ToAdjustRect.X;
+                rc.Y -= ToAdjustRect.Y;
+
+                draw.DrawRectangle(rc, BtGrids.PenColor, BtGrids.PenWidth);
+            }
         }
 
         private void CurrentItem_OnDraw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
@@ -470,6 +522,18 @@ namespace BeitieSpliter
                     BtnBottomElement.IsEnabled = false;
                     BtnTopElement.IsEnabled = true;
                     BtnRightElement.IsEnabled = true;
+                }
+            }
+            else if (OpWholePage.IsChecked ?? false)
+            {
+
+                OpType = OperationType.WholePage;
+                if (BtnLeftElement != null)
+                {
+                    BtnLeftElement.IsEnabled = false;
+                    BtnBottomElement.IsEnabled = false;
+                    BtnTopElement.IsEnabled = false;
+                    BtnRightElement.IsEnabled = false;
                 }
             }
             Refresh();

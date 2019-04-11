@@ -64,8 +64,9 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
                 <TextBlock  Text="操作对象：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
                 <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"  IsChecked="True"/>
-                <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
                 <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+                <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+                <RadioButton x:Name="OpWholePage" Content="整页" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
             </StackPanel>
         </StackPanel>
 

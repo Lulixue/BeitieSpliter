@@ -53,8 +53,8 @@
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center" Margin="0,0,10,0" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
-                <TextBox x:Name="FileDirPath" Visibility="Visible"  VerticalContentAlignment="Center"  IsSpellCheckEnabled="False"
-                         MaxWidth="500" FontSize="18" VerticalAlignment="Stretch" />
+                <TextBox x:Name="FileDirPath" VerticalContentAlignment="Center"  IsSpellCheckEnabled="False"
+                         MaxWidth="500" FontSize="18" VerticalAlignment="Stretch" Visibility="Collapsed"/>
             </StackPanel>
         </StackPanel>
 
