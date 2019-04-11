@@ -71,6 +71,24 @@ namespace BeitieSpliter
         }
         public BeitieElementType type;
         public string content;
+        public int row = -1;
+        public int col = -1;
+    }
+    public class BeitieGridRect
+    {
+        public BeitieGridRect(Rect rect)
+        {
+            rc = rect;
+            revised = false;
+        }
+        public BeitieGridRect(Rect rect, bool rev)
+        {
+            rc = rect;
+            revised = rev;
+        }
+
+        public Rect rc = new Rect();
+        public bool revised = false;
     }
 
     public sealed class BeitieGrids
@@ -85,16 +103,53 @@ namespace BeitieSpliter
         public int Columns = 0;
         public int Rows = 0;
         public StorageFile ImageFile = null;
-        public List<Rect> ElementRects = new List<Rect>();
+        public List<BeitieGridRect> ElementRects = new List<BeitieGridRect>();
 
         public List<BeitieElement> Elements = new List<BeitieElement>();
-        public Rect GetRectangle(int row, int col)
+        public int ToIndex(int row, int col)
         {
             Debug.Assert(row > 0);
             Debug.Assert(col > 0);
             int index = (row - 1) * Columns + col - 1;
 
-            return ElementRects[index];
+            return index;
+        }
+        public Rect GetRectangle(int row, int col)
+        {
+            return ElementRects[ToIndex(row, col)].rc;
+        }
+        // 古籍：自上而下，从右到左
+        // 现代：自左而右，从上到下
+        public int GetIndex(int row, int col, bool oldStyle)
+        {
+            Debug.Assert(row > 0);
+            Debug.Assert(col > 0);
+            if (!oldStyle)
+            {
+                return ToIndex(row, col);
+            }
+            else
+            {
+                col = Columns - col;
+                int index = col * Rows + row - 1;
+                return index;
+            }
+        }
+        public bool IndexToRowCol(int index, ref int row, ref int col, bool oldStyle)
+        {
+            if (!oldStyle)
+            {
+                row = index / Columns + 1;
+                col = index % Columns + 1;
+            }
+            else
+            {
+                col = Columns - index / Rows;
+                row = index % Rows + 1;
+            }
+            Debug.Assert(row > 0);
+            Debug.Assert(col > 0);
+            return true;
         }
     }
 
@@ -462,7 +517,7 @@ namespace BeitieSpliter
                 leftTop.Y += i * GridHeight;
                 for (int j = 0; j < ColumnNumber; j++)
                 {
-                    BtGrids.ElementRects.Add(new Rect(leftTop.X, leftTop.Y, GridWidth, GridHeight));
+                    BtGrids.ElementRects.Add(new BeitieGridRect(new Rect(leftTop.X, leftTop.Y, GridWidth, GridHeight)));
                     leftTop.X += GridWidth;
                 }
             }
@@ -568,7 +623,7 @@ namespace BeitieSpliter
                 for (int j = 0; j < ColumnNumber; j++)
                 {
                     index = i * ColumnNumber + j;
-                    draw.DrawRectangle(BtGrids.ElementRects[index], BtGrids.PenColor, BtGrids.PenWidth);
+                    draw.DrawRectangle(BtGrids.ElementRects[index].rc, BtGrids.PenColor, BtGrids.PenWidth);
                 }
             }
 
@@ -994,7 +1049,8 @@ namespace BeitieSpliter
                 }
                 else if (single == '□')
                 {
-                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Kongbai, new string(single, 1)));
+                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Kongbai,
+                        new string(single, 1)));
                 }
                 else if (single == '{')
                 {

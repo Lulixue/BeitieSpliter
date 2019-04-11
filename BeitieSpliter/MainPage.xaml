@@ -84,7 +84,7 @@
             <TextBlock  Text="画笔宽度：" Margin="20,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="PenWidthBox" 
                       LostFocus="PenWidthBox_LostFocus"
-                      TextChanged="PenWidthBox_TextChanged" Text="1" Width="70" Style="{StaticResource LeftFriendlyBox}" InputScope="Number"  />
+                      TextChanged="PenWidthBox_TextChanged" Text="3" Width="70" Style="{StaticResource LeftFriendlyBox}" InputScope="Number"  />
             <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
         </StackPanel>
 

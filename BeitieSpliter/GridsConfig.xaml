@@ -38,7 +38,7 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="8*"/>
-            <RowDefinition Height="1*"/> 
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -49,21 +49,35 @@
         <StackPanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Padding="2" >
             <TextBlock  Text="行号：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowNumber" Margin="0,0,0,0"  SelectionChanged="RowNumber_SelectionChanged"  
-                       VerticalAlignment="Center"
+                       VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True"  Width="70"/>
 
             <TextBlock  Text="列号：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="ColumnNumber"  Margin="0,0,0,0" SelectionChanged="ColumnNumber_SelectionChanged"  
-                        VerticalAlignment="Center"
+                        VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True" Width="70" />
+
+            <TextBlock  Text="所有元素：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <ComboBox  x:Name="CurrentElements"  Margin="0,0,0,0" SelectionChanged="CurrentElements_SelectionChanged"  
+                        VerticalAlignment="Center" SelectionChangedTrigger="Committed"
+                       IsDropDownOpen="True" Width="90" />
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
                 <TextBlock  Text="操作对象：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-                <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="14" Margin="5" IsChecked="True" />
-                <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="14" Margin="5"/>
-                <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="14" Margin="5"/>
+                <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"  IsChecked="True"/>
+                <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+                <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
             </StackPanel>
-
         </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
+            <Button Name="BtnTopElement" Content="上一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
+            <Button Name="BtnLeftElement" Content="左一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" >
+            <Button Name="BtnRightElement" Content="右一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
+            <Button Name="BtnBottomElement" Content="下一字" Margin="2"  Background="Green" Click="ElementMove_Clicked"/>
+        </StackPanel>
+
         <StackPanel Grid.Row="0" Grid.Column="3" Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button x:Name="BtnOk" Content="确定" FontSize="14" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="60" Width="100"/>
 
