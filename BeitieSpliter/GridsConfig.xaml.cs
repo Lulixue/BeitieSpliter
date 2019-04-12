@@ -319,6 +319,7 @@ namespace BeitieSpliter
             BtGrids.IndexToRowCol(index, ref row,  ref col, true);
             Debug.Assert(row == 4);
             Debug.Assert(col == 4);
+            Debug.WriteLine("float: {0},{0:F1}", 1.24F, 1.24F);
         }
         void InitControls()
         {
@@ -367,7 +368,8 @@ namespace BeitieSpliter
             ImageBrush imageBrush = new ImageBrush();
             imageBrush.ImageSource = bi;
             imageBrush.Opacity = 0.75;
-
+            UpdateAngle();
+            Operation_Checked(null, null);
             //OperationGrid.MaxWidth = BtGrids.DrawWidth;
             //OperationGrid.MaxHeight = BtGrids.DrawHeight; 
             //OperationGrid.Background = imageBrush;
@@ -485,7 +487,7 @@ namespace BeitieSpliter
 
         private void Operation_Checked(object sender, RoutedEventArgs e)
         {
-            if (OpSingleElement.IsChecked ?? false)
+            if (OpSingleElement?.IsChecked ?? false)
             {
                 OpType = OperationType.SingleElement;
                 if (BtnLeftElement != null)
@@ -500,7 +502,7 @@ namespace BeitieSpliter
                     BtnBottomElement.IsEnabled = true;
                 }
             }
-            else if (OpSingleRow.IsChecked ?? false)
+            else if (OpSingleRow?.IsChecked ?? false)
             {
                 OpType = OperationType.SingleRow;
                 
@@ -514,7 +516,7 @@ namespace BeitieSpliter
                     BtnBottomElement.IsEnabled = true;
                 }
             }
-            else if (OpSingleColumn.IsChecked ?? false)
+            else if (OpSingleColumn?.IsChecked ?? false)
             {
                 OpType = OperationType.SingleColumn;
                 if (BtnLeftElement != null)
@@ -527,7 +529,7 @@ namespace BeitieSpliter
                     BtnRightElement.IsEnabled = true;
                 }
             }
-            else if (OpWholePage.IsChecked ?? false)
+            else if (OpWholePage?.IsChecked ?? false)
             {
 
                 OpType = OperationType.WholePage;
@@ -633,8 +635,32 @@ namespace BeitieSpliter
                 }
             }
         }
+        private /*async*/ void UpdateAngle(bool fromTxtBox = false)
+        {
+            //await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            //   () =>
+            //   {
+            //    }
+            //);
+            if (AngleTxtBox.Text != null)
+            {
+                float angle = float.Parse(AngleTxtBox.Text);
+                if (angle == BtGrids.angle)
+                {
+                    return;
+                }
+                if (fromTxtBox)
+                {
+                    BtGrids.angle = angle;
+                }
+                else
+                {
+                    AngleTxtBox.Text = string.Format("{0:F2}", BtGrids.angle);
+                }
+            }
+        }
 
-        private async void Rotate_Clicked(object sender, RoutedEventArgs e)
+        private async void Rotate_Clicked(object sender, RoutedEventArgs args)
         {
             if (sender == BtnRotateLeft)
             {
@@ -644,7 +670,34 @@ namespace BeitieSpliter
             {
                 BtGrids.angle -= 0.3F;
             }
-            BtGrids.BtImageParent.cvsBmp = await ParentPage.RotateImage(BtGrids.angle);
+            UpdateAngle(false);
+
+            try
+            {
+                BtImage.cvsBmp = await ParentPage.RotateImage(BtGrids.angle);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Exception: " + e.ToString());
+                return;
+            }
+
+            Refresh(true);
+        }
+
+        private async void AngleTextBox_LostFocus(object sender, RoutedEventArgs args)
+        {
+            UpdateAngle(true);
+
+            try
+            {
+                BtImage.cvsBmp = await ParentPage.RotateImage(BtGrids.angle);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Exception: " + e.ToString());
+                return;
+            }
 
             Refresh(true);
         }

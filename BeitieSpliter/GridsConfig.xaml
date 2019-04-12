@@ -33,8 +33,9 @@
         </Style>
     </Page.Resources>
 
-    <Grid  x:Name="SettingsGrid" Grid.Row="4" Grid.ColumnSpan="4" >
+    <Grid  x:Name="SettingsGrid" Grid.Row="5" Grid.ColumnSpan="4" >
         <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="8*"/>
@@ -46,7 +47,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Padding="2" >
+        <StackPanel  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Padding="2" >
             <TextBlock  Text="行号：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowNumber" Margin="0,0,0,0"  SelectionChanged="RowNumber_SelectionChanged"  
                        VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
@@ -61,20 +62,27 @@
             <ComboBox  x:Name="CurrentElements"  Margin="0,0,0,0" SelectionChanged="CurrentElements_SelectionChanged"  
                         VerticalAlignment="Center" SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True" Width="90" />
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
-                <TextBlock  Text="操作对象：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-                <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"  IsChecked="True"/>
-                <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
-                <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
-                <RadioButton x:Name="OpWholePage" Content="整页" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
-            </StackPanel>
-        </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
+            <TextBlock  Text="旋转：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <Button  Margin="5,0"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
+            <TextBox Name="AngleTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="AngleTextBox_LostFocus" InputScope="Number" />
+            <Button  Margin="5,0"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
+
+        </StackPanel>
+        
+        <StackPanel  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock  Text="操作对象：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <RadioButton x:Name="OpWholePage" Content="整页" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" IsChecked="True"/>
+            <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+            <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+            <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
             <Button Name="BtnTopElement" Content="上一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
             <Button Name="BtnLeftElement" Content="左一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" >
+        <StackPanel Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" >
             <Button Name="BtnRightElement" Content="右一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
             <Button Name="BtnBottomElement" Content="下一字" Margin="2"  Background="Green" Click="ElementMove_Clicked"/>
         </StackPanel>
@@ -83,25 +91,25 @@
             <Button x:Name="BtnOk" Content="确定" FontSize="14" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="60" Width="100"/>
 
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
             <Button Margin="2" x:Name="BtnTopMinus" Content="^" Click="Adjust_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
             <Button Margin="2" x:Name="BtnTopAdd" Content="∨" Click="Adjust_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
         </StackPanel>
 
-        <StackPanel  Grid.Row="3" Grid.Column="1" VerticalAlignment="Top" Orientation="Vertical">
+        <StackPanel  Grid.Row="4" Grid.Column="1" VerticalAlignment="Top" Orientation="Vertical">
             <Button Margin="2" x:Name="BtnBottomMinus" Content="^" Click="Adjust_Clicked"  HorizontalAlignment="Stretch" VerticalAlignment="Top" />
             <Button Margin="2" x:Name="BtnBottomAdd" Content="∨" Click="Adjust_Clicked"  HorizontalAlignment="Stretch" VerticalAlignment="Top" />
         </StackPanel>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="0">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="0">
             <Button Margin="2" x:Name="BtnLeftMinus" Content="&lt;" Click="Adjust_Clicked"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
             <Button Margin="2" x:Name="BtnLeftAdd" Content=">" Click="Adjust_Clicked"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
         </StackPanel>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="2">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="2">
             <Button Margin="2" x:Name="BtnRightMinus" Content="&lt;" Click="Adjust_Clicked"  HorizontalAlignment="Left" VerticalAlignment="Stretch" />
             <Button Margin="2" x:Name="BtnRightAdd" Content=">" Click="Adjust_Clicked"  HorizontalAlignment="Left" VerticalAlignment="Stretch" />
         </StackPanel>
 
-        <Border x:Name="ItemBorder" Grid.Row="2" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5" >
+        <Border x:Name="ItemBorder" Grid.Row="3" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5" >
             <ScrollViewer x:Name="ItemScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible"
                     ZoomMode="Enabled">
 
@@ -112,9 +120,6 @@
                 <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
         </Border>
-        <Button Grid.Column="2" Grid.Row="3" Margin="2"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  />
-
-        <Button Grid.Column="0" Grid.Row="3" Margin="2"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  />
-
+       
     </Grid>
 </Page>

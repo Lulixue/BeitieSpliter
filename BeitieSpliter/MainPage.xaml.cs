@@ -938,7 +938,7 @@ namespace BeitieSpliter
             }
             return outputFile;
         }
-        void SaveSingleCropImage(SoftwareBitmap input, Rect roi, string album, string filename)
+        async void SaveSingleCropImage(SoftwareBitmap input, Rect roi, string album, string filename)
         {
             SoftwareBitmap croppedBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
                        (int)roi.Width, (int)roi.Height, BitmapAlphaMode.Premultiplied);
@@ -948,7 +948,7 @@ namespace BeitieSpliter
 
             Debug.WriteLine("Save Single Crop Image: ({0:0},{3:0},{4:0},{5:0}), -> {1}\\{2}", roi.X, album, filename,
                 roi.Y, roi.Width, roi.Height);
-            SaveSoftwareBitmapToFile(croppedBmp, album, filename);
+            await SaveSoftwareBitmapToFile(croppedBmp, album, filename);
         }
 
         private async void OnSaveSplitImages(object sender, RoutedEventArgs e)
@@ -1241,7 +1241,7 @@ namespace BeitieSpliter
                 {
                     currentOperation = OpenCVOperationType.Crop;
                 }
-                SaveSoftwareBitmapToFile(outputBitmap, "Dmr", "show.jpg");
+                await SaveSoftwareBitmapToFile(outputBitmap, "Dmr", "show.jpg");
                 //UpdateCanvasBmp(CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap));
                 UpdateCanvasBmp(await RotateImage(angleRotate));
                 RefreshPage(100);
