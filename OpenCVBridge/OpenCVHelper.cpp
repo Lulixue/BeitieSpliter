@@ -46,6 +46,43 @@ OpenCVHelper::OpenCVHelper()
     pMOG2 = createBackgroundSubtractorMOG2();
 }
 
+void OpenCVBridge::OpenCVHelper::Rotate(Windows::Graphics::Imaging::SoftwareBitmap ^ input, Windows::Graphics::Imaging::SoftwareBitmap ^ output, float angle)
+{ 
+    Mat inputMat, outputMat;
+    if (!(TryConvert(input, inputMat) && TryConvert(output, outputMat)))
+    {
+        return;
+    }
+    cv::Size wholeSize;
+    cv::Point pnt;
+
+    inputMat.locateROI(wholeSize, pnt);
+    TRACE_("input size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
+        outputMat.cols, outputMat.rows);
+
+    outputMat.locateROI(wholeSize, pnt);
+    TRACE_("before output size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
+        outputMat.cols, outputMat.rows);
+
+    Point2f center((float)inputMat.cols / 2, (float)inputMat.rows / 2);
+    Mat rot = cv::getRotationMatrix2D(center, angle, 1);
+    cv::Rect bbox = cv::RotatedRect(center, inputMat.size(), angle).boundingRect();
+
+
+    rot.at<double>(0, 2) += bbox.width / 2.0 - center.x;
+    rot.at<double>(1, 2) += bbox.height / 2.0 - center.y;
+
+
+    warpAffine(inputMat, outputMat, rot, inputMat.size());
+
+    TRACE_("Center: (%.1f,%.1f)\n", center.x, center.y);
+    TRACE_("bbox: (%d,%d,%d,%d), size: %d\n", bbox.x, bbox.y, bbox.width, bbox.height, bbox.size());
+
+    outputMat.locateROI(wholeSize, pnt);
+    TRACE_("after output size: (%d,%d), pnt: %d,%d, col/row:%d,%d\n", wholeSize.width, wholeSize.height, pnt.x, pnt.y,
+        outputMat.cols, outputMat.rows);
+}
+
 void OpenCVHelper::Blur(SoftwareBitmap^ input, SoftwareBitmap^ output)
 {
     Mat inputMat, outputMat;

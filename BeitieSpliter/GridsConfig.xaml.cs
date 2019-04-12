@@ -59,7 +59,9 @@ namespace BeitieSpliter
         }
         OperationType OpType = OperationType.SingleElement;
         BeitieGrids BtGrids = null;
+        BeitieGrids LastBtGrids = null;
         BeitieImage BtImage = null;
+        MainPage ParentPage = null;
         Rect BtImageShowRect = new Rect();
         Rect BtImageAdjustRect = new Rect();
         HashSet<Point> DrawLineElements = new HashSet<Point>();
@@ -345,8 +347,9 @@ namespace BeitieSpliter
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             Debug.WriteLine("OnNavigatedTo() called");
-            BtGrids = (BeitieGrids)e.Parameter;
-
+            ParentPage = (MainPage)e.Parameter;
+            BtGrids = ParentPage.BtGrids;
+            LastBtGrids = (BeitieGrids)BtGrids.Clone();
             //BtImage = new BeitieImage(CurrentItem, BtGrids.ImageFile);
             BtImage = BtGrids.BtImageParent;
             InitControls();
@@ -629,6 +632,21 @@ namespace BeitieSpliter
                     RowNumber.SelectedIndex = GetNextColRow(RowNumber.SelectedIndex, BtGrids.Rows - 1);
                 }
             }
+        }
+
+        private async void Rotate_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (sender == BtnRotateLeft)
+            {
+                BtGrids.angle += 0.3F;
+            }
+            else if (sender == BtnRotateRight)
+            {
+                BtGrids.angle -= 0.3F;
+            }
+            BtGrids.BtImageParent.cvsBmp = await ParentPage.RotateImage(BtGrids.angle);
+
+            Refresh(true);
         }
     }
 }

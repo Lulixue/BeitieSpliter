@@ -112,5 +112,9 @@
                 <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
         </Border>
+        <Button Grid.Column="2" Grid.Row="3" Margin="2"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  />
+
+        <Button Grid.Column="0" Grid.Row="3" Margin="2"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  />
+
     </Grid>
 </Page>

@@ -23,6 +23,10 @@ namespace OpenCVBridge
         OpenCVHelper();
 
         // Image processing operators
+        void Rotate(
+            Windows::Graphics::Imaging::SoftwareBitmap^ input,
+            Windows::Graphics::Imaging::SoftwareBitmap^ output,
+            float angle);
         void Blur(
             Windows::Graphics::Imaging::SoftwareBitmap^ input,
             Windows::Graphics::Imaging::SoftwareBitmap^ output);

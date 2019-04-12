@@ -10,6 +10,7 @@
     mc:Ignorable="d"
     RequestedTheme="Dark"
     Unloaded="Page_OnUnloaded" 
+    Name="BtSpliterParentWindows"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
