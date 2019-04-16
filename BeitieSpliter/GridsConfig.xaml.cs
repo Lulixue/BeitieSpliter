@@ -66,6 +66,8 @@ namespace BeitieSpliter
         Rect BtImageAdjustRect = new Rect();
         HashSet<Point> DrawLineElements = new HashSet<Point>();
         Rect ToAdjustRect = new Rect();
+        bool AvgCol = true;
+        bool AvgRow = true;
         ChangeStruct ChangeRect = new ChangeStruct();
         ChangeStruct LastChangeRect = new ChangeStruct();
         static int MIN_ROW_COLUMN = 1;
@@ -115,12 +117,17 @@ namespace BeitieSpliter
                 bool revised = BtGrids.ElementRects[index].revised;
                 Point pntLt = new Point(dstRc.X, dstRc.Y);
                 Point pntRb = new Point(dstRc.X + dstRc.Width, dstRc.Y + dstRc.Height);
+                bool dstRevised = true;
 
                 if (OperationType.SingleColumn == OpType)
                 {
                     pntLt.X += offset.left;
                     pntRb.X += offset.right;
 
+                    if (AvgRow)
+                    {
+                        dstRevised = false;
+                    }
                     // 每列第一个元素
                     if (pnt.Y == MIN_ROW_COLUMN)
                     {
@@ -137,6 +144,10 @@ namespace BeitieSpliter
                     pntLt.Y += offset.top;
                     pntRb.Y += offset.bottom;
 
+                    if (AvgCol)
+                    {
+                        dstRevised = false;
+                    }
                     // 每行第一个元素
                     if (pnt.Y == MIN_ROW_COLUMN)
                     {
@@ -151,6 +162,10 @@ namespace BeitieSpliter
                 else if (OperationType.WholePage == OpType)
                 {
                     revised = true;
+                    if (AvgCol || AvgRow)
+                    {
+                        dstRevised = false;
+                    }
                     if (pnt.X == MIN_ROW_COLUMN)
                     {
                         pntLt.Y += offset.top;
@@ -166,7 +181,6 @@ namespace BeitieSpliter
                         pntLt.X += offset.left;
                         revised = false;
                     }
-                    // 右上解
                     if (pnt.Y == BtGrids.Columns)
                     {
                         pntRb.X += offset.right;
@@ -184,13 +198,130 @@ namespace BeitieSpliter
                 if (!revised)
                 {
                     PrintRect("Before", dstRc);
-                    BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(pntLt, pntRb), true);
+                    BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(pntLt, pntRb), dstRevised);
                     PrintRect("After", BtGrids.ElementRects[index].rc);
                 }
             }
-            
+            if (OperationType.SingleElement == OpType)
+            {
+                return;
+            }
+            // 平均分布行和列
+            if (AvgCol || AvgRow)
+            {
+                Point pntLt2, pntRb2;
+                GetRectPoints(ToAdjustRect, ref pntLt2, ref pntRb2);
+                pntLt2.X += ChangeRect.left;
+                pntLt2.Y += ChangeRect.top;
+                pntRb2.X += ChangeRect.right;
+                pntRb2.Y += ChangeRect.bottom;
 
+                double height = pntRb2.Y - pntLt2.Y;
+                double width = pntRb2.X - pntLt2.X;
+
+
+                Point PntLeftTop = new Point();
+                int minCol = MIN_ROW_COLUMN;
+                int minRow = MIN_ROW_COLUMN;
+                int maxCol = BtGrids.Columns;
+                int maxRow = BtGrids.Rows;
+                if (AvgRow && ((OperationType.SingleColumn == OpType) || (OperationType.WholePage == OpType)))
+                {
+                    double AvgHeight = height / BtGrids.Rows;
+
+                    if (OpType == OperationType.SingleColumn)
+                    {
+                        minCol = maxCol = ColumnNumber.SelectedIndex + 1;
+                    }
+
+                    // 每列以第一个元素为起点
+                    for (int col = minCol; col <= maxCol; col++)
+                    {
+                        for (int row = MIN_ROW_COLUMN; row <= BtGrids.Rows; row++)
+                        {
+                            int index = BtGrids.ToIndex(row, col);
+                            Rect dstRc = BtGrids.ElementRects[index].rc;
+                            bool revised = BtGrids.ElementRects[index].revised;
+
+                            if (row == MIN_ROW_COLUMN)
+                            {
+                                PntLeftTop.X = dstRc.X;
+                                PntLeftTop.Y = dstRc.Y;
+                            }
+                            else
+                            {
+                                PntLeftTop.Y += AvgHeight;
+                                if (row == BtGrids.Rows)
+                                {
+                                    PntLeftTop.Y = (PntLeftTop.Y > dstRc.Y) ? dstRc.Y : PntLeftTop.Y;
+                                }
+                            }
+                            // 已经调整过了就不再弄了
+                            if (!revised)
+                            {
+                                PrintRect("(Avg Column)Before[" + row + "," + col + "]", dstRc);
+                                BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop.X, PntLeftTop.Y, dstRc.Width, AvgHeight), false);
+                                PrintRect("After", BtGrids.ElementRects[index].rc);
+                                Debug.WriteLine("\r\n");
+                            }
+                        }
+                       
+                    }
+                }
+                if (AvgCol && ((OperationType.SingleRow == OpType) || (OperationType.WholePage == OpType)))
+                {
+                    double AvgWidth = width / BtGrids.Columns;
+
+                    if (OpType == OperationType.SingleRow)
+                    {
+                        minRow = maxRow = RowNumber.SelectedIndex + 1;
+                    }
+
+                    // 每行以第一个元素为起点
+                    for (int row = minRow; row <= maxRow; row++)
+                    {
+                        for (int col = MIN_ROW_COLUMN; col <= BtGrids.Columns; col++)
+                        {
+                            int index = BtGrids.ToIndex(row, col);
+                            Rect dstRc = BtGrids.ElementRects[index].rc;
+                            bool revised = BtGrids.ElementRects[index].revised;
+
+                            if (col == MIN_ROW_COLUMN)
+                            {
+                                PntLeftTop.X = dstRc.X;
+                                PntLeftTop.Y = dstRc.Y;
+                            }
+                            else
+                            {
+                                PntLeftTop.X += AvgWidth;
+                                if (col == BtGrids.Columns)
+                                {
+                                    PntLeftTop.X = (PntLeftTop.X > dstRc.X) ? dstRc.X : PntLeftTop.X;
+                                }
+                            }
+                            // 已经调整过了就不再弄了
+                            if (!revised)
+                            {
+                                PrintRect("(Avg Row) Before[" + row + "," + col + "]", dstRc);
+                                BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop.X, PntLeftTop.Y, AvgWidth, dstRc.Height), false);
+                                PrintRect("After", BtGrids.ElementRects[index].rc);
+                                Debug.WriteLine("\r\n");
+                            }
+                        }
+                    }
+                }
+
+            }
         }
+
+        private Point GetDrawLineLtCoord(int row, int col)
+        {
+            int index = BtGrids.ToIndex(row, col);
+            Rect dstRc = BtGrids.ElementRects[index].rc;
+
+            return new Point(dstRc.X, dstRc.Y);
+        }
+
         private void CalculateDrawRect()
         {
             Point pntLt = new Point();
@@ -278,6 +409,8 @@ namespace BeitieSpliter
             ToAdjustRect.Width = rcEnd.X - rcStart.X + rcEnd.Width;
             ToAdjustRect.Height = rcEnd.Y - rcStart.Y + rcEnd.Height;
 
+            Debug.WriteLine("To Adjust Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
+               ToAdjustRect.X, ToAdjustRect.Y, ToAdjustRect.Width, ToAdjustRect.Height);
             ChangeRect = new ChangeStruct();
 
         }
@@ -353,8 +486,6 @@ namespace BeitieSpliter
             LastBtGrids = (BeitieGrids)BtGrids.Clone();
             //BtImage = new BeitieImage(CurrentItem, BtGrids.ImageFile);
             BtImage = BtGrids.BtImageParent;
-            InitControls();
-            CalculateDrawRect();
         }
 
         private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -368,6 +499,8 @@ namespace BeitieSpliter
             ImageBrush imageBrush = new ImageBrush();
             imageBrush.ImageSource = bi;
             imageBrush.Opacity = 0.75;
+            InitControls();
+            CalculateDrawRect();
             UpdateAngle();
             Operation_Checked(null, null);
             //OperationGrid.MaxWidth = BtGrids.DrawWidth;
@@ -422,9 +555,12 @@ namespace BeitieSpliter
             }
            
         }
-        
-
-
+        private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color, float strokeWidth)
+        {
+            Debug.WriteLine("Draw Rectangle: ({0:0},{1:0},{2:0},{3:0}), Color: {4}, Width: {5}", rect.X, rect.Y, rect.Width, rect.Height,
+                color, strokeWidth);
+            draw.DrawRectangle(rect, color, strokeWidth);
+        }
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
@@ -435,16 +571,16 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
             
             Rect drawRect = new Rect(pntLt, pntRb);
-            draw.DrawRectangle(ToAdjustRect, Colors.Azure , BtGrids.PenWidth);
-            draw.DrawRectangle(drawRect, BtGrids.PenColor, BtGrids.PenWidth+1);
+            DrawRectangle(draw, ToAdjustRect, Colors.Green , BtGrids.PenWidth);
+            DrawRectangle(draw, drawRect, BtGrids.PenColor, BtGrids.PenWidth+1);
             
             foreach (Point elem in DrawLineElements)
             {
                 Rect rc = BtGrids.GetRectangle((int)elem.X, (int)elem.Y);
-                rc.X -= ToAdjustRect.X;
-                rc.Y -= ToAdjustRect.Y;
+                rc.X -= BtImageAdjustRect.X;
+                rc.Y -= BtImageAdjustRect.Y;
 
-                draw.DrawRectangle(rc, BtGrids.PenColor, BtGrids.PenWidth);
+                DrawRectangle(draw, rc, BtGrids.PenColor, BtGrids.PenWidth);
             }
         }
 
@@ -531,7 +667,6 @@ namespace BeitieSpliter
             }
             else if (OpWholePage?.IsChecked ?? false)
             {
-
                 OpType = OperationType.WholePage;
                 if (BtnLeftElement != null)
                 {
@@ -700,6 +835,25 @@ namespace BeitieSpliter
             }
 
             Refresh(true);
+        }
+
+        private void AverageCheck_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (sender == ChkAvgCol)
+            {
+                AvgCol = ChkAvgCol.IsChecked ?? true;
+            }
+            else if (sender == ChkAvgRow)
+            {
+                AvgRow = ChkAvgRow.IsChecked ?? true;
+            }
+            UpdateElementsRects();
+            Refresh(true);
+        }
+
+        private void BtnSave_Clicked(object sender, RoutedEventArgs e)
+        {
+            ParentPage.SaveSplitImages();
         }
     }
 }

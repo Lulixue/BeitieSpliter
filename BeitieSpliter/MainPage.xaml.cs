@@ -950,16 +950,20 @@ namespace BeitieSpliter
                 roi.Y, roi.Width, roi.Height);
             await SaveSoftwareBitmapToFile(croppedBmp, album, filename);
         }
-
-        private async void OnSaveSplitImages(object sender, RoutedEventArgs e)
+        public async void SaveSplitImages()
         {
-            if (CurrentBtImage == null)
-            {
-                ShowMessageDlg("请选择书法碑帖图片!", null);
-                return;
-            }
             string album = TieAlbum.Text;
-            SoftwareBitmap inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
+            SoftwareBitmap inputBitmap = null;
+
+            if (BtGrids.IsImageRotated())
+            {
+                inputBitmap = await GetSoftwareBitmap(BtGrids.RotateFile);
+            }
+            else
+            {
+                inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
+            }
+
             int size = BtGrids.Elements.Count;
             // 从左到右，自上而下
             int counter = 0;
@@ -971,7 +975,7 @@ namespace BeitieSpliter
                 filename = currentTime.ToString("yyyyMMdd_HHmmss");
                 album = filename;
             }
-            for (int i = BtGrids.Columns-1; i >= 0; i--)
+            for (int i = BtGrids.Columns - 1; i >= 0; i--)
             {
                 for (int j = 0; j < BtGrids.Rows; j++)
                 {
@@ -994,6 +998,15 @@ namespace BeitieSpliter
                     }
                 }
             }
+        }
+        private void OnSaveSplitImages(object sender, RoutedEventArgs e)
+        {
+            if (CurrentBtImage == null)
+            {
+                ShowMessageDlg("请选择书法碑帖图片!", null);
+                return;
+            }
+            SaveSplitImages();
         }
         private List<char> IGNORED_CHARS = new List<char>();
         

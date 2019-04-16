@@ -76,6 +76,8 @@
             <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
             <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
             <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+            <CheckBox Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
+            <CheckBox Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
         </StackPanel>
         
         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
@@ -88,7 +90,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="0" Grid.Column="3" Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="BtnOk" Content="确定" FontSize="14" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="60" Width="100"/>
+            <Button x:Name="BtnSave" Content="保存" FontSize="14" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="60" Width="100"/>
 
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
