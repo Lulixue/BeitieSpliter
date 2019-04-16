@@ -50,6 +50,18 @@ namespace BeitieSpliter
     /// </summary>
     public sealed partial class GridsConfig : Page
     {
+        enum RectChangeType
+        {
+            None,
+            TopAdd,
+            TopMinus,
+            BottomAdd,
+            BottomMinus,
+            LeftAdd,
+            LeftMinus,
+            RightAdd,
+            RightMinus,
+        }
         enum OperationType
         {
             SingleElement,
@@ -68,6 +80,8 @@ namespace BeitieSpliter
         Rect ToAdjustRect = new Rect();
         bool AvgCol = true;
         bool AvgRow = true;
+        bool FixedHeight = false;
+        bool FixedWidth = false;
         ChangeStruct ChangeRect = new ChangeStruct();
         ChangeStruct LastChangeRect = new ChangeStruct();
         static int MIN_ROW_COLUMN = 1;
@@ -101,7 +115,73 @@ namespace BeitieSpliter
             pntRb = new Point(rc.X + rc.Width, rc.Y + rc.Height);
         }
 
-        void UpdateElementsRects()
+        RectChangeType GetLastChangeType(ChangeStruct offset)
+        {
+            if (offset.left != 0)
+            {
+                if (offset.left < 0)
+                    return RectChangeType.LeftMinus;
+                else
+                    return RectChangeType.LeftAdd;
+            }
+            else if (offset.right != 0)
+            {
+                if (offset.right < 0)
+                    return RectChangeType.RightMinus;
+                else
+                    return RectChangeType.RightAdd;
+            }
+            else if (offset.bottom != 0)
+            {
+                if (offset.bottom < 0)
+                    return RectChangeType.BottomMinus;
+                else
+                    return RectChangeType.BottomAdd;
+            }
+            else if (offset.top != 0)
+            {
+                if (offset.top < 0)
+                    return RectChangeType.TopMinus;
+                else
+                    return RectChangeType.TopAdd;
+            }
+            return RectChangeType.None;
+        }
+        void FixedChangedRect(RectChangeType type, ref Point pntLt, ref Point pntRb)
+        {
+            switch (type)
+            {
+                case RectChangeType.LeftAdd:
+                    pntRb.X++;
+                    break;
+                case RectChangeType.LeftMinus:
+                    pntRb.X--;
+                    break;
+                case RectChangeType.RightAdd:
+                    pntLt.X++;
+                    break;
+                case RectChangeType.RightMinus:
+                    pntLt.X--;
+                    break;
+                case RectChangeType.TopAdd:
+                    pntRb.Y++;
+                    break;
+                case RectChangeType.TopMinus:
+                    pntRb.Y--;
+                    break;
+                case RectChangeType.BottomAdd:
+                    pntLt.Y++;
+                    break;
+                case RectChangeType.BottomMinus:
+                    pntLt.Y--;
+                    break;
+                case RectChangeType.None:
+                default:
+                    break;
+            }
+        }
+
+        bool UpdateElementsRects()
         {
             ChangeStruct offset = new ChangeStruct();
             offset.Copy(ChangeRect);
@@ -109,7 +189,18 @@ namespace BeitieSpliter
             offset.right -= LastChangeRect.right;
             offset.top -= LastChangeRect.top;
             offset.bottom -= LastChangeRect.bottom;
-
+            RectChangeType chgType = GetLastChangeType(offset);
+            
+            if (chgType <= RectChangeType.BottomMinus)
+            {
+                if (!FixedHeight)
+                    chgType = RectChangeType.None;
+            }
+            else if (!FixedWidth)
+            {
+                chgType = RectChangeType.None;
+            }
+ 
             foreach (Point pnt in DrawLineElements)
             {
                 int index = BtGrids.ToIndex((int)pnt.X, (int)pnt.Y);
@@ -189,6 +280,7 @@ namespace BeitieSpliter
                 }
                 else
                 {
+
                     pntLt.X += offset.left;
                     pntRb.X += offset.right;
                     pntLt.Y += offset.top;
@@ -197,42 +289,64 @@ namespace BeitieSpliter
                 }
                 if (!revised)
                 {
-                    PrintRect("Before", dstRc);
+                    if (FixedWidth || FixedHeight)
+                    {
+                        FixedChangedRect(chgType, ref pntLt, ref pntRb);
+                    }
+                    if (pntLt.X < 0)
+                    {
+                        Common.ShowMessageDlg("已经到了最右边了!", null);
+                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
+                        return false;
+                    }
+                    else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
+                    {
+                        Common.ShowMessageDlg("已经到了最左边了!", null);
+                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
+                        return false;
+                    }
+                    else if (pntLt.Y < 0)
+                    {
+                        Common.ShowMessageDlg("已经到了最上边了!", null);
+                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
+                        return false;
+                    }
+                    else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
+                    {
+                        Common.ShowMessageDlg("已经到了最下边了!", null);
+                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
+                        return false;
+                    }
+
+                    PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Before", dstRc);
                     BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(pntLt, pntRb), dstRevised);
                     PrintRect("After", BtGrids.ElementRects[index].rc);
                 }
             }
-            if (OperationType.SingleElement == OpType)
+            if ((OperationType.SingleElement == OpType) ||
+                (!AvgCol && !AvgRow))
             {
-                return;
+                return true;
             }
             // 平均分布行和列
-            if (AvgCol || AvgRow)
             {
-                Point pntLt2, pntRb2;
-                GetRectPoints(ToAdjustRect, ref pntLt2, ref pntRb2);
-                pntLt2.X += ChangeRect.left;
-                pntLt2.Y += ChangeRect.top;
-                pntRb2.X += ChangeRect.right;
-                pntRb2.Y += ChangeRect.bottom;
-
-                double height = pntRb2.Y - pntLt2.Y;
-                double width = pntRb2.X - pntLt2.X;
-
-
                 Point PntLeftTop = new Point();
+                Point pntRightBottom = new Point();
                 int minCol = MIN_ROW_COLUMN;
                 int minRow = MIN_ROW_COLUMN;
                 int maxCol = BtGrids.Columns;
                 int maxRow = BtGrids.Rows;
                 if (AvgRow && ((OperationType.SingleColumn == OpType) || (OperationType.WholePage == OpType)))
                 {
-                    double AvgHeight = height / BtGrids.Rows;
-
+                    
                     if (OpType == OperationType.SingleColumn)
                     {
                         minCol = maxCol = ColumnNumber.SelectedIndex + 1;
                     }
+                    double height = BtGrids.GetRectangle(maxRow, maxCol).Bottom - BtGrids.GetRectangle(minRow, minCol).Top;
+                    double AvgHeight = height / BtGrids.Rows;
+
+                    Debug.WriteLine("Height: {0:F1}, Avg Height: {1:F1}", height, AvgHeight);
 
                     // 每列以第一个元素为起点
                     for (int col = minCol; col <= maxCol; col++)
@@ -251,18 +365,21 @@ namespace BeitieSpliter
                             else
                             {
                                 PntLeftTop.Y += AvgHeight;
-                                if (row == BtGrids.Rows)
-                                {
-                                    PntLeftTop.Y = (PntLeftTop.Y > dstRc.Y) ? dstRc.Y : PntLeftTop.Y;
-                                }
+                            }
+                            pntRightBottom.X = PntLeftTop.X + dstRc.Width;
+                            pntRightBottom.Y = PntLeftTop.Y + AvgHeight;
+                            if (row == BtGrids.Rows)
+                            {
+                                pntRightBottom.Y = dstRc.Bottom;
                             }
                             // 已经调整过了就不再弄了
                             if (!revised)
                             {
+                                BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop, pntRightBottom), false);
+
                                 PrintRect("(Avg Column)Before[" + row + "," + col + "]", dstRc);
-                                BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop.X, PntLeftTop.Y, dstRc.Width, AvgHeight), false);
                                 PrintRect("After", BtGrids.ElementRects[index].rc);
-                                Debug.WriteLine("\r\n");
+                                Debug.WriteLine("\n");
                             }
                         }
                        
@@ -270,13 +387,15 @@ namespace BeitieSpliter
                 }
                 if (AvgCol && ((OperationType.SingleRow == OpType) || (OperationType.WholePage == OpType)))
                 {
-                    double AvgWidth = width / BtGrids.Columns;
-
+                    
                     if (OpType == OperationType.SingleRow)
                     {
                         minRow = maxRow = RowNumber.SelectedIndex + 1;
                     }
+                    double width = BtGrids.GetRectangle(maxRow, maxCol).Right - BtGrids.GetRectangle(minRow, minCol).Left;
+                    double AvgWidth = width / BtGrids.Columns;
 
+                    Debug.WriteLine("Width: {0:F1}, Avg Width: {1:F1}", width, AvgWidth);
                     // 每行以第一个元素为起点
                     for (int row = minRow; row <= maxRow; row++)
                     {
@@ -294,24 +413,27 @@ namespace BeitieSpliter
                             else
                             {
                                 PntLeftTop.X += AvgWidth;
-                                if (col == BtGrids.Columns)
-                                {
-                                    PntLeftTop.X = (PntLeftTop.X > dstRc.X) ? dstRc.X : PntLeftTop.X;
-                                }
+                            }
+                            pntRightBottom.X = PntLeftTop.X + AvgWidth;
+                            pntRightBottom.Y = PntLeftTop.Y + dstRc.Height;
+                            if (col == BtGrids.Columns)
+                            {
+                                pntRightBottom.X = dstRc.Right;
                             }
                             // 已经调整过了就不再弄了
                             if (!revised)
                             {
+                                BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop, pntRightBottom), false);
+                                
                                 PrintRect("(Avg Row) Before[" + row + "," + col + "]", dstRc);
-                                BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop.X, PntLeftTop.Y, AvgWidth, dstRc.Height), false);
                                 PrintRect("After", BtGrids.ElementRects[index].rc);
-                                Debug.WriteLine("\r\n");
+                                Debug.WriteLine("\n"); 
                             }
                         }
                     }
                 }
-
             }
+            return true;
         }
 
         private Point GetDrawLineLtCoord(int row, int col)
@@ -365,16 +487,8 @@ namespace BeitieSpliter
                 NextRow = maxRow;
                 NextCol = maxCol;
             }
-
-            Rect rcLt = BtGrids.GetRectangle(PreRow, PreCol);
-            Rect rcRb = BtGrids.GetRectangle(NextRow, NextCol);
-
-            pntLt.X = rcLt.Left;
-            pntLt.Y = rcLt.Top;
-            pntRb.X = rcRb.Right;
-            pntRb.Y = rcRb.Bottom;
-
-            BtImageAdjustRect = new Rect(pntLt, pntRb);
+            
+            BtImageAdjustRect = BtGrids.GetMaxRectangle(PreRow, PreCol, NextRow, NextCol);
 
             pntLt.X = 0/* - BtImage.resolutionX*/;
             pntLt.Y = 0/* - BtImage.resolutionY*/;
@@ -436,11 +550,20 @@ namespace BeitieSpliter
             {
                 return;
             }
-            if (!AdjustImage)
+            lock (BtImage)
             {
-                CalculateDrawRect();
+                if (!AdjustImage)
+                {
+                    CalculateDrawRect();
+                }
             }
-            CurrentItem.Invalidate();
+
+            Task.Run(() =>
+            {
+                //Common.Sleep(30);
+                CurrentItem.Invalidate();
+            });
+            
         }
         void TestCase()
         {
@@ -484,6 +607,7 @@ namespace BeitieSpliter
             ParentPage = (MainPage)e.Parameter;
             BtGrids = ParentPage.BtGrids;
             LastBtGrids = (BeitieGrids)BtGrids.Clone();
+            
             //BtImage = new BeitieImage(CurrentItem, BtGrids.ImageFile);
             BtImage = BtGrids.BtImageParent;
         }
@@ -557,14 +681,16 @@ namespace BeitieSpliter
         }
         private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color, float strokeWidth)
         {
-            Debug.WriteLine("Draw Rectangle: ({0:0},{1:0},{2:0},{3:0}), Color: {4}, Width: {5}", rect.X, rect.Y, rect.Width, rect.Height,
-                color, strokeWidth);
+            //Debug.WriteLine("Draw Rectangle: ({0:0},{1:0},{2:0},{3:0}), Color: {4}, Width: {5}", rect.X, rect.Y, rect.Width, rect.Height,
+            //    color, strokeWidth);
             draw.DrawRectangle(rect, color, strokeWidth);
         }
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
             GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb);
+            Color BaseColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
+            Color drawColor = BtGrids.PenColor;
             pntLt.X += ChangeRect.left;
             pntLt.Y += ChangeRect.top;
             pntRb.X += ChangeRect.right;
@@ -572,41 +698,61 @@ namespace BeitieSpliter
             
             Rect drawRect = new Rect(pntLt, pntRb);
             DrawRectangle(draw, ToAdjustRect, Colors.Green , BtGrids.PenWidth);
-            DrawRectangle(draw, drawRect, BtGrids.PenColor, BtGrids.PenWidth+1);
+            //DrawRectangle(draw, drawRect, BtGrids.PenColor, BtGrids.PenWidth+1);
             
             foreach (Point elem in DrawLineElements)
             {
                 Rect rc = BtGrids.GetRectangle((int)elem.X, (int)elem.Y);
                 rc.X -= BtImageAdjustRect.X;
                 rc.Y -= BtImageAdjustRect.Y;
-
-                DrawRectangle(draw, rc, BtGrids.PenColor, BtGrids.PenWidth);
+                if (BtGrids.GetRevised((int)elem.X, (int)elem.Y))
+                {
+                    if (DrawLineElements.Count == 1)
+                    {
+                        if (BtGrids.BackupColors.Count > 1)
+                        {
+                            drawColor = BtGrids.BackupColors.ElementAt(1);
+                        }
+                    }
+                    else
+                    {
+                        if (BtGrids.BackupColors.Count > 0)
+                        {
+                            Random ran = new Random();
+                            int n = ran.Next(1, BtGrids.BackupColors.Count);
+                            drawColor = BtGrids.BackupColors.ElementAt(n);
+                        }
+                    }
+                }
+                DrawRectangle(draw, rc, drawColor, BtGrids.PenWidth);
             }
         }
-
         private void CurrentItem_OnDraw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
-            var draw = args.DrawingSession;
-
-            draw.Clear(Colors.Gray);
-            if ((BtGrids == null) || (BtImage == null))
+            lock(BtImage.cvsBmp)
             {
-                draw.DrawText("参数错误!", new Vector2(100, 100), Colors.Black);
-                return;
-            }
-            if (BtImage.cvsBmp == null)
-            {
-                draw.Clear(Colors.Black);
-                draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue);
-                Refresh();
-                return;
-            }
-            // image 1000 * 1568
+                var draw = args.DrawingSession;
 
-            // 
-            //draw.DrawImage(BtImage.cvsBmp, (float)BtImageShowRect.X, (float)BtImageShowRect.Y);
-            draw.DrawImage(BtImage.cvsBmp, BtImageShowRect, BtImageAdjustRect);
-            DrawLines(draw);
+                draw.Clear(Colors.Gray);
+                if ((BtGrids == null) || (BtImage == null))
+                {
+                    draw.DrawText("参数错误!", new Vector2(100, 100), Colors.Black);
+                    return;
+                }
+                if (BtImage.cvsBmp == null)
+                {
+                    draw.Clear(Colors.Black);
+                    draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue);
+                    Refresh();
+                    return;
+                }
+                // image 1000 * 1568
+                // 
+                //draw.DrawImage(BtImage.cvsBmp, (float)BtImageShowRect.X, (float)BtImageShowRect.Y);
+                draw.DrawImage(BtImage.cvsBmp, BtImageShowRect, BtImageAdjustRect);
+                DrawLines(draw);
+            }
+            
         }
 
         private void ColumnNumber_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -636,6 +782,9 @@ namespace BeitieSpliter
                     BtnTopElement.IsEnabled = true;
                     BtnRightElement.IsEnabled = true;
                     BtnBottomElement.IsEnabled = true;
+
+                    ChkFixedHeight.IsChecked = true;
+                    ChkFixedWidth.IsChecked = true;
                 }
             }
             else if (OpSingleRow?.IsChecked ?? false)
@@ -650,6 +799,8 @@ namespace BeitieSpliter
                     BtnRightElement.IsEnabled = false;
                     BtnTopElement.IsEnabled = true;
                     BtnBottomElement.IsEnabled = true;
+                    ChkFixedHeight.IsChecked = false;
+                    ChkFixedWidth.IsChecked = false;
                 }
             }
             else if (OpSingleColumn?.IsChecked ?? false)
@@ -659,10 +810,12 @@ namespace BeitieSpliter
                 {
                     BtnLeftElement.Content = "左一列";
                     BtnRightElement.Content = "右一列";
-                    BtnLeftElement.IsEnabled = false;
-                    BtnBottomElement.IsEnabled = false;
-                    BtnTopElement.IsEnabled = true;
+                    BtnLeftElement.IsEnabled = true;
                     BtnRightElement.IsEnabled = true;
+                    BtnBottomElement.IsEnabled = false;
+                    BtnTopElement.IsEnabled = false;
+                    ChkFixedHeight.IsChecked = false;
+                    ChkFixedWidth.IsChecked = false;
                 }
             }
             else if (OpWholePage?.IsChecked ?? false)
@@ -674,8 +827,13 @@ namespace BeitieSpliter
                     BtnBottomElement.IsEnabled = false;
                     BtnTopElement.IsEnabled = false;
                     BtnRightElement.IsEnabled = false;
+                    ChkFixedHeight.IsChecked = false;
+                    ChkFixedWidth.IsChecked = false;
                 }
             }
+
+            FixedHeight = ChkFixedHeight?.IsChecked ?? false;
+            FixedWidth = ChkFixedWidth?.IsChecked ?? false;
             Refresh();
         }
 
@@ -715,8 +873,13 @@ namespace BeitieSpliter
             {
                 ChangeRect.top--;
             }
-            UpdateElementsRects();
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+            if (!UpdateElementsRects())
+            {
+                Debug.WriteLine("Change invalid, revert to last one");
+                ChangeRect.Copy(LastChangeRect);
+                return;
+            }
             Refresh(true);
         }
 
@@ -853,7 +1016,14 @@ namespace BeitieSpliter
 
         private void BtnSave_Clicked(object sender, RoutedEventArgs e)
         {
-            ParentPage.SaveSplitImages();
+            ParentPage.HandlerSaveSplittedImages();
+        }
+        
+
+        private void FixedCheck_Clicked(object sender, RoutedEventArgs e)
+        {
+            FixedHeight = ChkFixedHeight?.IsChecked ?? false;
+            FixedWidth = ChkFixedWidth?.IsChecked ?? false;
         }
     }
 }

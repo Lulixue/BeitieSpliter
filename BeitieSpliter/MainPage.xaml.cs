@@ -52,6 +52,33 @@ namespace BeitieSpliter
             AutoResetEvent h = new AutoResetEvent(false);
             h.WaitOne(msTime);
         }
+
+        public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
+        {
+            // Create the message dialog and set its content
+            var messageDialog = new MessageDialog(msg);
+
+            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+            if (handler != null)
+            {
+                messageDialog.Commands.Add(new UICommand(
+                    "关闭", handler));
+            }
+            else
+            {
+                messageDialog.Commands.Add(new UICommand(
+                   "关闭", null));
+            }
+
+            // Set the command that will be invoked by default
+            messageDialog.DefaultCommandIndex = 0;
+
+            // Set the command to be invoked when escape is pressed
+            messageDialog.CancelCommandIndex = 1;
+
+            // Show the message dialog
+            await messageDialog.ShowAsync();
+        }
     }
     
     public sealed class BeitieElement
@@ -95,7 +122,8 @@ namespace BeitieSpliter
     {
         public float angle = 0;
         public float PenWidth = 0;
-        public Color PenColor = Colors.White;
+        public List<Color> BackupColors = new List<Color>();
+        public Color PenColor = Colors.Red;
         public Thickness PageMargin = new Thickness();
         public BeitieImage BtImageParent = null;
         public double DrawHeight = 1.0;
@@ -111,6 +139,72 @@ namespace BeitieSpliter
 
         public bool IsImageRotated() { return angle != 0; }
 
+        public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol)
+        {
+            Point pntLt = new Point(GetRowLeft(minRow, minCol, maxCol), GetColTop(minCol, minRow, maxRow));
+            Point pntRb = new Point(GetRowRight(maxRow, minCol, maxCol), GetColBottom(maxCol, minRow, maxRow));
+
+            return new Rect(pntLt, pntRb);
+        }
+        public double GetRowRight(int row, int MinCol, int MaxCol)
+        {
+            double maxRight = 0;
+
+            for (int i = MinCol; i <= MaxCol; i++)
+            {
+                double right = GetRectangle(row, i).Right;
+                if (right > maxRight)
+                {
+                    maxRight = right;
+                }
+            }
+            return maxRight;
+        }
+
+        public double GetRowLeft(int row, int MinCol, int MaxCol)
+        {
+            double minLeft = 10000.0;
+
+            for (int i = MinCol; i <= MaxCol; i++)
+            {
+                double left = GetRectangle(row, i).Left;
+                if (left < minLeft)
+                {
+                    minLeft = left;
+                }
+            }
+            return minLeft;
+        }
+
+        public double GetColTop(int col, int MinRow, int MaxRow)
+        {
+            double minTop = 10000.0;
+
+            for (int i = MinRow; i <= MaxRow; i++)
+            {
+                double top = GetRectangle(i, col).Top;
+                if (top < minTop)
+                {
+                    minTop = top;
+                }
+            }
+            return minTop;
+        }
+        public double GetColBottom(int col, int MinRow, int MaxRow)
+        {
+            double maxTop = 0.0;
+
+            for (int i = MinRow; i <= MaxRow; i++)
+            {
+                double bottom = GetRectangle(i, col).Bottom;
+                if (bottom > maxTop)
+                {
+                    maxTop = bottom;
+                }
+            }
+            return maxTop;
+        }
+
         public int ToIndex(int row, int col)
         {
             Debug.Assert(row > 0);
@@ -119,9 +213,17 @@ namespace BeitieSpliter
 
             return index;
         }
+        public BeitieGridRect GetElement(int row, int col)
+        {
+            return ElementRects[ToIndex(row, col)];
+        }
         public Rect GetRectangle(int row, int col)
         {
             return ElementRects[ToIndex(row, col)].rc;
+        }
+        public bool GetRevised(int row, int col)
+        {
+            return ElementRects[ToIndex(row, col)].revised;
         }
         // 古籍：自上而下，从右到左
         // 现代：自左而右，从上到下
@@ -364,6 +466,7 @@ namespace BeitieSpliter
         public BeitieGrids BtGrids = new BeitieGrids();
         int ColumnNumber = -1;
         int RowNumber = -1;
+        public event EventHandler SaveSplitted;
 
         private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
         public ObservableCollection<ColorBoxItem> ColorBoxItems {
@@ -395,6 +498,7 @@ namespace BeitieSpliter
             this.InitializeComponent();
             InitControls();
             InitMaps();
+            this.SaveSplitted += new EventHandler(this.OnSaveSplitImagesDelegate);
         }
         private void ColumnIllegalHandler(IUICommand command)
         {
@@ -406,32 +510,6 @@ namespace BeitieSpliter
             RowCount.SelectedIndex = 6;
         }
 
-        private async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
-        {
-            // Create the message dialog and set its content
-            var messageDialog = new MessageDialog(msg);
-
-            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-            if (handler != null)
-            {
-                messageDialog.Commands.Add(new UICommand(
-                    "关闭", handler));
-            }
-            else
-            {
-                messageDialog.Commands.Add(new UICommand(
-                   "关闭", null));
-            }
-
-            // Set the command that will be invoked by default
-            messageDialog.DefaultCommandIndex = 0;
-
-            // Set the command to be invoked when escape is pressed
-            messageDialog.CancelCommandIndex = 1;
-
-            // Show the message dialog
-            await messageDialog.ShowAsync();
-        }
 
         public int GetColumnCount()
         {
@@ -447,7 +525,7 @@ namespace BeitieSpliter
             }
             catch
             {
-                ShowMessageDlg("列数非法: " + ColumnCount.Text, new UICommandInvokedHandler(ColumnIllegalHandler));
+                Common.ShowMessageDlg("列数非法: " + ColumnCount.Text, new UICommandInvokedHandler(ColumnIllegalHandler));
             }
             return columns;
         }
@@ -466,20 +544,70 @@ namespace BeitieSpliter
             }
             catch
             {
-                ShowMessageDlg("行数非法: " + RowCount.Text, new UICommandInvokedHandler(RowIllegalHandler));
+               Common.ShowMessageDlg("行数非法: " + RowCount.Text, new UICommandInvokedHandler(RowIllegalHandler));
             }
             return columns;
+        }
+        List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
+        List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
+        
+        void UpdateBackupColors()
+        {
+            BtGrids.BackupColors.Clear();
+            bool NeedContinue = true;
+            foreach (ColorBoxItem item in LightColorItems)
+            {
+                if (item.Value == BtGrids.PenColor)
+                {
+                    NeedContinue = false;
+                    continue;
+                }
+                BtGrids.BackupColors.Add(item.Value);
+            }
+
+            if (!NeedContinue)
+            {
+                return;
+            }
+
+            BtGrids.BackupColors.Clear();
+            foreach (ColorBoxItem item in DarkColorItems)
+            {
+                if (item.Value == BtGrids.PenColor)
+                {
+                    NeedContinue = false;
+                    continue;
+                }
+                BtGrids.BackupColors.Add(item.Value);
+            }
         }
 
         void InitControls()
         {
             // 添加颜色
-            ColorBoxItems.Add(new ColorBoxItem(Colors.White, "白色"));
-            ColorBoxItems.Add(new ColorBoxItem(Colors.Red, "红色"));
-            ColorBoxItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
-            ColorBoxItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
-            ColorBoxItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
-            ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Text == "白色");
+            LightColorItems.Add(new ColorBoxItem(Colors.White, "白色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Gray, "灰色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Orange, "橙色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Green, "绿色"));
+
+            DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Navy, "海军蓝色"));
+
+            foreach (ColorBoxItem item in LightColorItems)
+            {
+                ColorBoxItems.Add(item);
+            }
+            foreach (ColorBoxItem item in DarkColorItems)
+            {
+                ColorBoxItems.Add(item);
+            }
+            ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Text == "红色");
+            BtGrids.PenColor = ColorBoxSelectedItem.Value;
+            UpdateBackupColors();
 
             for (int i = 1; i < 20; i++)
             {
@@ -755,6 +883,7 @@ namespace BeitieSpliter
         private void PenColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             BtGrids.PenColor = ColorBoxSelectedItem.Value;
+            UpdateBackupColors();
             CurrentPage.Invalidate();
         }
 
@@ -800,7 +929,7 @@ namespace BeitieSpliter
             {
                 BtGrids.PenWidth = 0;
                 textbox.Text = "";
-                ShowMessageDlg("Invalid margin: " + textbox.Text, null);
+                Common.ShowMessageDlg("Invalid margin: " + textbox.Text, null);
             }
         }
 
@@ -817,7 +946,7 @@ namespace BeitieSpliter
                 int pos = textbox.SelectionStart - 1;
                 textbox.Text = textbox.Text.Remove(pos, 1);
                 textbox.SelectionStart = pos;
-                ShowMessageDlg("Invalid pen width: " + textbox.Text, null);
+                Common.ShowMessageDlg("Invalid pen width: " + textbox.Text, null);
             }
             CurrentPage.Invalidate();
         }
@@ -950,6 +1079,19 @@ namespace BeitieSpliter
                 roi.Y, roi.Width, roi.Height);
             await SaveSoftwareBitmapToFile(croppedBmp, album, filename);
         }
+
+        public void HandlerSaveSplittedImages()
+        {
+            this.SaveSplitted.Invoke(this, null);
+        }
+
+        public async void OnSaveSplitImagesDelegate(object sender, EventArgs e)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                SaveSplitImages();
+            });
+        }
         public async void SaveSplitImages()
         {
             string album = TieAlbum.Text;
@@ -975,9 +1117,9 @@ namespace BeitieSpliter
                 filename = currentTime.ToString("yyyyMMdd_HHmmss");
                 album = filename;
             }
-            for (int i = BtGrids.Columns - 1; i >= 0; i--)
+            for (int i = BtGrids.Columns; i >= 1; i--)
             {
-                for (int j = 0; j < BtGrids.Rows; j++)
+                for (int j = 1; j <= BtGrids.Rows; j++)
                 {
                     Rect roi = BtGrids.GetRectangle(j, i);
                     BeitieElement element = BtGrids.Elements[counter];
@@ -1003,7 +1145,7 @@ namespace BeitieSpliter
         {
             if (CurrentBtImage == null)
             {
-                ShowMessageDlg("请选择书法碑帖图片!", null);
+                Common.ShowMessageDlg("请选择书法碑帖图片!", null);
                 return;
             }
             SaveSplitImages();

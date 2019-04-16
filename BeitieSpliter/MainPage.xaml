@@ -49,8 +49,8 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
-                <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="Import Beitie File" FontSize="18" Click="OnImportBeitieFile"/>
-                <Button x:Name="ImportBtDir" Width="230" Height="50" Content="Import Beitie Directory" FontSize="18" Click="OnImportBeitieDir"/>
+                <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
+                <Button x:Name="ImportBtDir" Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center" Margin="0,0,10,0" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
@@ -59,7 +59,7 @@
             </StackPanel>
         </StackPanel>
 
-        <Button Grid.Row="0" Grid.Column="1"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="Save Split Images" FontSize="18" Click="OnSaveSplitImages"/>
+        <Button Grid.Row="0" Grid.Column="1"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
        
         
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">

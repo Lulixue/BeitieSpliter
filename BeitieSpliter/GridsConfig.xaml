@@ -11,7 +11,6 @@
     Loaded="SettingsPage_Loaded"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-
     <Page.Resources>
         <Style x:Key="LeftFriendly" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -33,10 +32,10 @@
         </Style>
     </Page.Resources>
 
-    <Grid  x:Name="SettingsGrid" Grid.Row="5" Grid.ColumnSpan="4" >
+    <Grid  x:Name="SettingsGrid" Grid.Row="5" Grid.ColumnSpan="3" >
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="0.8*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="8*"/>
             <RowDefinition Height="1*"/>
@@ -44,7 +43,6 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="18*"/>
-            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Padding="2" >
@@ -67,7 +65,6 @@
             <Button  Margin="5,0"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
             <TextBox Name="AngleTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="AngleTextBox_LostFocus" InputScope="Number" />
             <Button  Margin="5,0"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
-
         </StackPanel>
         
         <StackPanel  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -78,6 +75,8 @@
             <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
             <CheckBox Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
             <CheckBox Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
+            <CheckBox Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
+            <CheckBox Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
         </StackPanel>
         
         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
@@ -89,7 +88,7 @@
             <Button Name="BtnBottomElement" Content="下一字" Margin="2"  Background="Green" Click="ElementMove_Clicked"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="0" Grid.Column="3" Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0" Grid.Column="2" Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button x:Name="BtnSave" Content="保存" FontSize="14" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="60" Width="100"/>
 
         </StackPanel>
