@@ -35,6 +35,8 @@ using Windows.Graphics.Display;
 using OpenCVBridge;
 using Windows.ApplicationModel.Core;
 using Windows.UI.ViewManagement;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 
 /* Open CV: */
 //using EMGU.CV;
@@ -118,7 +120,7 @@ namespace BeitieSpliter
         public bool revised = false;
     }
 
-    public sealed class BeitieGrids
+    public sealed class BeitieGrids : ICloneable
     {
         public float angle = 0;
         public float PenWidth = 0;
@@ -261,8 +263,22 @@ namespace BeitieSpliter
 
         public object Clone()
         {
+            // 浅拷贝，没有拷贝内存
             return this.MemberwiseClone();
+            // 需要深拷贝
+            // Color不能被serialized
+            
+            //using (MemoryStream memStream = new MemoryStream())
+            //{
+            //    BinaryFormatter binaryFormatter = new BinaryFormatter(null,
+            //         new StreamingContext(StreamingContextStates.Clone));
+            //    binaryFormatter.Serialize(memStream, this);
+            //    memStream.Seek(0, SeekOrigin.Begin);
+            //    return binaryFormatter.Deserialize(memStream);
+            //}
+
         }
+        
     }
 
     public sealed class BeitieImage

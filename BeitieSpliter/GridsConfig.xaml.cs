@@ -23,6 +23,7 @@ using Microsoft.Graphics.Canvas.Geometry;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.ApplicationModel.Core;
+using Windows.System.Threading;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -71,7 +72,7 @@ namespace BeitieSpliter
         }
         OperationType OpType = OperationType.SingleElement;
         BeitieGrids BtGrids = null;
-        BeitieGrids LastBtGrids = null;
+        BeitieGrids LastBtGrids = new BeitieGrids();
         BeitieImage BtImage = null;
         MainPage ParentPage = null;
         Rect BtImageShowRect = new Rect();
@@ -147,33 +148,25 @@ namespace BeitieSpliter
             }
             return RectChangeType.None;
         }
-        void FixedChangedRect(RectChangeType type, ref Point pntLt, ref Point pntRb)
+        void FixedChangedRect(RectChangeType type, ref Point pntLt, ref Point pntRb, ChangeStruct offset)
         {
             switch (type)
             {
                 case RectChangeType.LeftAdd:
-                    pntRb.X++;
-                    break;
                 case RectChangeType.LeftMinus:
-                    pntRb.X--;
-                    break;
-                case RectChangeType.RightAdd:
-                    pntLt.X++;
+                    pntRb.X += offset.left;
                     break;
                 case RectChangeType.RightMinus:
-                    pntLt.X--;
+                case RectChangeType.RightAdd:
+                    pntLt.X += offset.right;
                     break;
                 case RectChangeType.TopAdd:
-                    pntRb.Y++;
-                    break;
                 case RectChangeType.TopMinus:
-                    pntRb.Y--;
+                    pntRb.Y += offset.top;
                     break;
                 case RectChangeType.BottomAdd:
-                    pntLt.Y++;
-                    break;
                 case RectChangeType.BottomMinus:
-                    pntLt.Y--;
+                    pntLt.Y += offset.bottom;
                     break;
                 case RectChangeType.None:
                 default:
@@ -291,7 +284,7 @@ namespace BeitieSpliter
                 {
                     if (FixedWidth || FixedHeight)
                     {
-                        FixedChangedRect(chgType, ref pntLt, ref pntRb);
+                        FixedChangedRect(chgType, ref pntLt, ref pntRb, offset);
                     }
                     if (pntLt.X < 0)
                     {
@@ -606,31 +599,49 @@ namespace BeitieSpliter
             Debug.WriteLine("OnNavigatedTo() called");
             ParentPage = (MainPage)e.Parameter;
             BtGrids = ParentPage.BtGrids;
-            LastBtGrids = (BeitieGrids)BtGrids.Clone();
-            
+            // 备份上一次的数据
+            LastBtGrids.Columns = BtGrids.Columns;
+            LastBtGrids.Rows = BtGrids.Rows;
+            foreach (BeitieGridRect bgr in BtGrids.ElementRects)
+            {
+                LastBtGrids.ElementRects.Add(new BeitieGridRect(bgr.rc));
+            }
+
             //BtImage = new BeitieImage(CurrentItem, BtGrids.ImageFile);
             BtImage = BtGrids.BtImageParent;
         }
 
-        private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        void AdjustAddHandler(Button btn)
+        {
+            btn.AddHandler(PointerPressedEvent, new PointerEventHandler(Adjust_PointerPressed), true);
+            btn.AddHandler(PointerReleasedEvent, new PointerEventHandler(Adjust_PointerReleased), true);
+        }
+
+        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("SettingsPage_Loaded() called");
 
-            IRandomAccessStream ir = await BtGrids.ImageFile.OpenAsync(FileAccessMode.Read);
-            BitmapImage bi = new BitmapImage();
-            await bi.SetSourceAsync(ir);
-
-            ImageBrush imageBrush = new ImageBrush();
-            imageBrush.ImageSource = bi;
-            imageBrush.Opacity = 0.75;
             InitControls();
             CalculateDrawRect();
             UpdateAngle();
-            Operation_Checked(null, null);
-            //OperationGrid.MaxWidth = BtGrids.DrawWidth;
-            //OperationGrid.MaxHeight = BtGrids.DrawHeight; 
-            //OperationGrid.Background = imageBrush;
+            Operation_Checked(null, null); 
+
+            AdjustAddHandler(BtnLeftAdd);
+            AdjustAddHandler(BtnLeftMinus);
+            AdjustAddHandler(BtnTopAdd);
+            AdjustAddHandler(BtnTopMinus);
+            AdjustAddHandler(BtnBottomAdd);
+            AdjustAddHandler(BtnBottomMinus);
+            AdjustAddHandler(BtnRightMinus);
+            AdjustAddHandler(BtnRightAdd);
+           
         }
+        private void GetCurrentRowCol(ref int row, ref int col)
+        {
+            col = ColumnNumber.SelectedIndex + 1;
+            row = RowNumber.SelectedIndex + 1;
+        }
+
         private Object SyncObj = new Object();
         private void UpdateElementRowCol(bool baseOnRowCol)
         {
@@ -646,8 +657,8 @@ namespace BeitieSpliter
                     return;
                 }
                 int ElemIndex = CurrentElements.SelectedIndex;
-                int col = ColumnNumber.SelectedIndex + 1;
-                int row = RowNumber.SelectedIndex + 1;
+                int row = 1, col = 1;
+                GetCurrentRowCol(ref row, ref col);
                 if (baseOnRowCol)
                 {
                     int ToElemIndex = BtGrids.GetIndex(row, col, true);
@@ -837,10 +848,8 @@ namespace BeitieSpliter
             Refresh();
         }
 
-
-        private void Adjust_Clicked(object sender, RoutedEventArgs e)
+        private void AdjustFunction(object sender, bool UpdateRect)
         {
-            LastChangeRect.Copy(ChangeRect);
             if (sender == BtnBottomAdd)
             {
                 ChangeRect.bottom++;
@@ -874,15 +883,18 @@ namespace BeitieSpliter
                 ChangeRect.top--;
             }
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
-            if (!UpdateElementsRects())
+            if (UpdateRect)
             {
-                Debug.WriteLine("Change invalid, revert to last one");
-                ChangeRect.Copy(LastChangeRect);
-                return;
+                if (!UpdateElementsRects())
+                {
+                    Debug.WriteLine("Change invalid, revert to last one");
+                    ChangeRect.Copy(LastChangeRect);
+                    return;
+                }
+                Refresh(true);
             }
-            Refresh(true);
         }
-
+        
         private void CurrentElements_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateElementRowCol(false);
@@ -1024,6 +1036,46 @@ namespace BeitieSpliter
         {
             FixedHeight = ChkFixedHeight?.IsChecked ?? false;
             FixedWidth = ChkFixedWidth?.IsChecked ?? false;
+        }
+
+        private async void AdjustTimerFunction(ThreadPoolTimer timer)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            {
+                Debug.WriteLine("AdjustTimerFunction() called");
+                AdjustFunction(CurrentAdjustSender, false);
+            });
+        }
+        ThreadPoolTimer AdjustTimer = null;
+        static int AdjustTimerPeriod = 100;
+        TimeSpan delay = TimeSpan.FromMilliseconds(AdjustTimerPeriod);
+        object CurrentAdjustSender = null;
+        private void Adjust_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            Debug.WriteLine("Adjust_PointerPressed() called");
+            CurrentAdjustSender = sender;
+            LastChangeRect.Copy(ChangeRect);
+            AdjustTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(AdjustTimerFunction), delay);
+        }
+
+        private void Adjust_PointerReleased(object sender, PointerRoutedEventArgs e)
+        { 
+            Debug.WriteLine("Adjust_PointerReleased() called");
+            if (AdjustTimer != null)
+            {
+                AdjustTimer.Cancel();
+            }
+            AdjustFunction(sender, true);
+        }
+
+        private void ResetElement_Clicked(object sender, RoutedEventArgs e)
+        {
+            int row = 1, col = 1;
+            GetCurrentRowCol(ref row, ref col);
+
+            //BeitieGridRect bgr = BtGrids.GetElement(row, col);
+            BtGrids.ElementRects[BtGrids.ToIndex(row, col)] = new BeitieGridRect(LastBtGrids.GetElement(row, col).rc);
+            Refresh();
         }
     }
 }
