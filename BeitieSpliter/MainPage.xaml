@@ -11,7 +11,7 @@
     RequestedTheme="Dark"
     Unloaded="Page_OnUnloaded" 
     Name="BtSpliterParentWindows"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
 
     <Page.Resources>
         <Style x:Key="LeftFriendly" TargetType="TextBlock">
@@ -35,13 +35,14 @@
     </Page.Resources>
 
 
-    <Grid x:Name="RootGrid" Grid.Row="5" Grid.ColumnSpan="2" Margin="10" BorderThickness="{ThemeResource SearchBoxThemePadding}">
+    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Margin="10" BorderThickness="{ThemeResource SearchBoxThemePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="17*"/>
             <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
@@ -60,8 +61,8 @@
         </StackPanel>
 
         <Button Grid.Row="0" Grid.Column="1"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
-       
-        
+
+
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock  Text="行数：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
@@ -76,7 +77,7 @@
                       LostFocus="PageMargin_LostFocus"
                       Width="130" FontSize="14" Style="{StaticResource LeftFriendlyBox}" />
             <TextBlock  Text="画笔颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
-            
+
             <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
                        SelectedValuePath="Value" DisplayMemberPath="Text"
                        SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"

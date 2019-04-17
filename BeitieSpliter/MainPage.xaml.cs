@@ -194,17 +194,17 @@ namespace BeitieSpliter
         }
         public double GetColBottom(int col, int MinRow, int MaxRow)
         {
-            double maxTop = 0.0;
+            double maxBottom = 0.0;
 
             for (int i = MinRow; i <= MaxRow; i++)
             {
                 double bottom = GetRectangle(i, col).Bottom;
-                if (bottom > maxTop)
+                if (bottom > maxBottom)
                 {
-                    maxTop = bottom;
+                    maxBottom = bottom;
                 }
             }
-            return maxTop;
+            return maxBottom;
         }
 
         public int ToIndex(int row, int col)
@@ -1096,22 +1096,23 @@ namespace BeitieSpliter
             await SaveSoftwareBitmapToFile(croppedBmp, album, filename);
         }
 
-        public void HandlerSaveSplittedImages()
+        public void HandlerSaveSplittedImages(object para)
         {
-            this.SaveSplitted.Invoke(this, null);
+            this.SaveSplitted.Invoke(para, null);
         }
 
         public async void OnSaveSplitImagesDelegate(object sender, EventArgs e)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                SaveSplitImages();
+                SaveSplitImages(sender);
             });
         }
-        public async void SaveSplitImages()
+        public async void SaveSplitImages(object para)
         {
             string album = TieAlbum.Text;
             SoftwareBitmap inputBitmap = null;
+            HashSet<Point> ElementIndexes = (HashSet<Point>)para;
 
             if (BtGrids.IsImageRotated())
             {
@@ -1121,41 +1122,46 @@ namespace BeitieSpliter
             {
                 inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
             }
-
-            int size = BtGrids.Elements.Count;
+            
             // 从左到右，自上而下
-            int counter = 0;
-
             if (album == "")
             {
                 System.DateTime currentTime = System.DateTime.Now;
-                string filename;
-                filename = currentTime.ToString("yyyyMMdd_HHmmss");
-                album = filename;
+                album = currentTime.ToString("yyyyMMdd_HHmmss");
             }
-            for (int i = BtGrids.Columns; i >= 1; i--)
-            {
-                for (int j = 1; j <= BtGrids.Rows; j++)
-                {
-                    Rect roi = BtGrids.GetRectangle(j, i);
-                    BeitieElement element = BtGrids.Elements[counter];
-                    string filename = string.Format("{0}-{1}.jpg", counter, element.content);
 
-                    if (element.type == BeitieElement.BeitieElementType.Kongbai)
+            if (ElementIndexes == null)
+            {
+                ElementIndexes = new HashSet<Point>();
+                for (int i = BtGrids.Columns; i >= 1; i--)
+                {
+                    for (int j = 1; j <= BtGrids.Rows; j++)
                     {
-                        continue;
-                    }
-                    try
-                    {
-                        SaveSingleCropImage(inputBitmap, roi, album, filename);
-                        counter++;
-                    }
-                    catch (Exception err)
-                    {
-                        Debug.WriteLine(err.ToString());
+                        ElementIndexes.Add(new Point(j, i));
                     }
                 }
             }
+            foreach (Point pnt in ElementIndexes)
+            {
+                Rect roi = BtGrids.GetRectangle((int)pnt.X, (int)pnt.Y);
+                int index = BtGrids.GetIndex((int)pnt.X, (int)pnt.Y, true);
+                BeitieElement element = BtGrids.Elements[index];
+                string filename = string.Format("{0}-{1}.jpg", index+1, element.content);
+
+                if (element.type == BeitieElement.BeitieElementType.Kongbai)
+                {
+                    continue;
+                }
+                try
+                {
+                    SaveSingleCropImage(inputBitmap, roi, album, filename);
+                }
+                catch (Exception err)
+                {
+                    Debug.WriteLine(err.ToString());
+                }
+            }
+           
         }
         private void OnSaveSplitImages(object sender, RoutedEventArgs e)
         {
@@ -1164,7 +1170,7 @@ namespace BeitieSpliter
                 Common.ShowMessageDlg("请选择书法碑帖图片!", null);
                 return;
             }
-            SaveSplitImages();
+            SaveSplitImages(null);
         }
         private List<char> IGNORED_CHARS = new List<char>();
         
@@ -1442,5 +1448,25 @@ namespace BeitieSpliter
             });
             bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId, ViewSizePreference.UseMore);
         }
+        bool HaveGotFocus = true;
+        protected override void OnGotFocus(RoutedEventArgs e)
+        {
+
+            Debug.WriteLine("OnGotFocus(): {0}", HaveGotFocus);
+            if (this.IsLoaded && !HaveGotFocus)
+            {
+                HaveGotFocus = true;
+                RefreshPage();
+            }
+            base.OnGotFocus(e);
+        }
+
+        protected override void OnLostFocus(RoutedEventArgs e)
+        {
+            Debug.WriteLine("OnLostFocus(): {0}", HaveGotFocus);
+            HaveGotFocus = false;
+            base.OnLostFocus(e);
+        }
+        
     }
 }
