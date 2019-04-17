@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.ApplicationModel.Core;
 using Windows.System.Threading;
+using Windows.UI.Xaml.Automation.Peers;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -289,24 +290,28 @@ namespace BeitieSpliter
                     if (pntLt.X < 0)
                     {
                         Common.ShowMessageDlg("已经到了最右边了!", null);
+                        NotifyUser("已经到了最右边了!", NotifyType.ErrorMessage);
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
                         return false;
                     }
                     else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
                     {
                         Common.ShowMessageDlg("已经到了最左边了!", null);
+                        NotifyUser("已经到了最左边了!", NotifyType.ErrorMessage);
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
                         return false;
                     }
                     else if (pntLt.Y < 0)
                     {
                         Common.ShowMessageDlg("已经到了最上边了!", null);
+                        NotifyUser("已经到了最上边了!", NotifyType.ErrorMessage);
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
                         return false;
                     }
                     else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
                     {
                         Common.ShowMessageDlg("已经到了最下边了!", null);
+                        NotifyUser("已经到了最下边了!", NotifyType.ErrorMessage);
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
                         return false;
                     }
@@ -551,6 +556,7 @@ namespace BeitieSpliter
                 }
             }
 
+            UpdateAdjustStatus();
             Task.Run(() =>
             {
                 //Common.Sleep(30);
@@ -634,6 +640,9 @@ namespace BeitieSpliter
             AdjustAddHandler(BtnBottomMinus);
             AdjustAddHandler(BtnRightMinus);
             AdjustAddHandler(BtnRightAdd);
+            NotifyUser(string.Format("当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}",
+                BtImage.resolutionX, BtImage.resolutionY, BtGrids.ElementRects.Count, BtGrids.Rows, BtGrids.Columns),
+                NotifyType.StatusMessage);
            
         }
         private void GetCurrentRowCol(ref int row, ref int col)
@@ -883,6 +892,7 @@ namespace BeitieSpliter
                 ChangeRect.top--;
             }
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+            
             if (UpdateRect)
             {
                 if (!UpdateElementsRects())
@@ -893,7 +903,21 @@ namespace BeitieSpliter
                 }
                 Refresh(true);
             }
+            else
+            {
+                UpdateAdjustStatus();
+            }
         }
+
+        void UpdateAdjustStatus()
+        {
+            string info = "";
+            info += string.Format("当前修改元素: {0}个, ", DrawLineElements.Count);
+            info += string.Format("当前矩形改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+            info += string.Format("修改角度: {0:F1}", BtGrids.angle);
+            NotifyUser(info, NotifyType.StatusMessage);
+        }
+
         
         private void CurrentElements_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1052,7 +1076,7 @@ namespace BeitieSpliter
         object CurrentAdjustSender = null;
         private void Adjust_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            Debug.WriteLine("Adjust_PointerPressed() called");
+            //Debug.WriteLine("Adjust_PointerPressed() called");
             CurrentAdjustSender = sender;
             LastChangeRect.Copy(ChangeRect);
             AdjustTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(AdjustTimerFunction), delay);
@@ -1060,7 +1084,7 @@ namespace BeitieSpliter
 
         private void Adjust_PointerReleased(object sender, PointerRoutedEventArgs e)
         { 
-            Debug.WriteLine("Adjust_PointerReleased() called");
+            //Debug.WriteLine("Adjust_PointerReleased() called");
             if (AdjustTimer != null)
             {
                 AdjustTimer.Cancel();
@@ -1072,10 +1096,71 @@ namespace BeitieSpliter
         {
             int row = 1, col = 1;
             GetCurrentRowCol(ref row, ref col);
-
-            //BeitieGridRect bgr = BtGrids.GetElement(row, col);
+            
             BtGrids.ElementRects[BtGrids.ToIndex(row, col)] = new BeitieGridRect(LastBtGrids.GetElement(row, col).rc);
             Refresh();
+        }
+        
+        public enum NotifyType
+        {
+            StatusMessage,
+            ErrorMessage
+        };
+
+
+        /// <summary>
+        /// Display a message to the user.
+        /// This method may be called from any thread.
+        /// </summary>
+        /// <param name="strMessage"></param>
+        /// <param name="type"></param>
+        public void NotifyUser(string strMessage, NotifyType type)
+        {
+            // If called from the UI thread, then update immediately.
+            // Otherwise, schedule a task on the UI thread to perform the update.
+            if (Dispatcher.HasThreadAccess)
+            {
+                UpdateStatus(strMessage, type);
+            }
+            else
+            {
+                var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => UpdateStatus(strMessage, type));
+            }
+        }
+
+        private void UpdateStatus(string strMessage, NotifyType type)
+        {
+            switch (type)
+            {
+                case NotifyType.StatusMessage:
+                    StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Green);
+                    break;
+                case NotifyType.ErrorMessage:
+                    StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Red);
+                    break;
+            }
+
+            StatusBlock.Text = strMessage;
+
+            // Collapse the StatusBlock if it has no text to conserve real estate.
+            StatusBorder.Visibility = (StatusBlock.Text != String.Empty) ? Visibility.Visible : Visibility.Collapsed;
+            if (StatusBlock.Text != String.Empty)
+            {
+                StatusBorder.Visibility = Visibility.Visible;
+                StatusPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                StatusBorder.Visibility = Visibility.Collapsed;
+                StatusPanel.Visibility = Visibility.Collapsed;
+            }
+
+            // Raise an event if necessary to enable a screen reader to announce the status update.
+            var peer = FrameworkElementAutomationPeer.FromElement(StatusBlock);
+            if (peer != null)
+            {
+                peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+            }
         }
     }
 }
