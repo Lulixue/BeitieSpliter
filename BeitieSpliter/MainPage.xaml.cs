@@ -316,6 +316,7 @@ namespace BeitieSpliter
         private BinaryReader stmReader;
         private Stream stream;
         public CanvasBitmap cvsBmp;
+        public bool PageTextConfirmed = false;
 
         public void Init()
         {
@@ -730,6 +731,16 @@ namespace BeitieSpliter
 
         }
         
+        private string GetFileTitle(StorageFile file)
+        {
+            string name = file.Name;
+            int index = name.IndexOf('.');
+            if (index == -1)
+            {
+                return name;
+            }
+            return name.Substring(0, index);
+        }
 
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
@@ -747,6 +758,8 @@ namespace BeitieSpliter
             {
                 // Application now has read/write access to the picked file
                 SetDirFilePath("图片: " + file.Path);
+                if (TieAlbum.Text == "")
+                    TieAlbum.Text = GetFileTitle(file);
                 CurrentBtImage = new BeitieImage(CurrentPage, file);
                 
                 InitDrawParameters();
@@ -1040,8 +1053,9 @@ namespace BeitieSpliter
         }
         private async Task<StorageFolder> GetSaveFolder(string dir)
         {
-            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
-            StorageFolder folder = await applicationFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
+            //StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder picFolder = KnownFolders.PicturesLibrary;
+            StorageFolder folder = await picFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
 
             return folder;
         }
@@ -1117,12 +1131,36 @@ namespace BeitieSpliter
                 SaveSplitImages(sender);
             });
         }
+
+        public async Task<bool> ShowNotifyPageTextDlg()
+        {
+            ContentDialog locationPromptDialog = new ContentDialog
+            {
+                Title = "输入释文",
+                Content = "你还没有输入释文, 是否生成图片?",
+                CloseButtonText = "继续生成",
+                PrimaryButtonText = "输入释文"
+            };
+
+            ContentDialogResult result = await locationPromptDialog.ShowAsync();
+            return (result == ContentDialogResult.Primary);
+        }
+
         public async void SaveSplitImages(object para)
         {
             string album = TieAlbum.Text;
             SoftwareBitmap inputBitmap = null;
             HashSet<Point> ElementIndexes = (HashSet<Point>)para;
             int StartNo = int.Parse(StartNoBox.Text);
+
+            if ((PageText.Text == "") && !CurrentBtImage.PageTextConfirmed)
+            {
+                if (await ShowNotifyPageTextDlg())
+                {
+                    return;
+                }
+                CurrentBtImage.PageTextConfirmed = true;
+            }
 
             NotifyUser("开始保存分割单字图片...", NotifyType.StatusMessage);
 
@@ -1255,6 +1293,7 @@ namespace BeitieSpliter
 
             NotifyUser(info, NotifyType.StatusMessage);
         }
+
         private void ParsePageText()
         {
             string txt = PageText.Text;
@@ -1266,62 +1305,75 @@ namespace BeitieSpliter
             StringBuilder sb = new StringBuilder();
 
             BtGrids.Elements.Clear();
-            for (int i = 0; i < length; i++)
+            if (length == 0)
             {
-                single = txt[i];
-                if (IGNORED_CHARS.Contains(single))
+                length = BtGrids.Rows * BtGrids.Columns;
+                for (int i = 0; i < length; i++)
                 {
-                    continue;
+                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi,
+                           "", ZiNo++));
                 }
-                else if (single == '□')
+            }
+            else
+            {
+                for (int i = 0; i < length; i++)
                 {
-                    string name = new string(single, 1);
-                    name += OthersNo++;
-                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Quezi,
-                        name, ZiNo++));
-                }
-                else if (single == '{')
-                {
-                    specialTypeDetected = true;
-                }
-                else if (single == '}')
-                {
-                    specialTypeDetected = false;
-                    string name = sb.ToString();
-                    BeitieElement.BeitieElementType type;
+                    single = txt[i];
+                    if (IGNORED_CHARS.Contains(single))
+                    {
+                        continue;
+                    }
+                    else if (single == '□')
+                    {
+                        string name = new string(single, 1);
+                        name += OthersNo++;
+                        BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Quezi,
+                            name, ZiNo++));
+                    }
+                    else if (single == '{')
+                    {
+                        specialTypeDetected = true;
+                    }
+                    else if (single == '}')
+                    {
+                        specialTypeDetected = false;
+                        string name = sb.ToString();
+                        BeitieElement.BeitieElementType type;
 
-                    if (name.Contains("印"))
-                    {
-                        name += OthersNo++;
-                        type = BeitieElement.BeitieElementType.Yinzhang;
+                        if (name.Contains("印"))
+                        {
+                            name += OthersNo++;
+                            type = BeitieElement.BeitieElementType.Yinzhang;
+                        }
+                        else if (name.Length == 0)
+                        {
+                            name += OthersNo++;
+                            type = BeitieElement.BeitieElementType.Kongbai;
+                        }
+                        else if (name.Contains("缺"))
+                        {
+                            name += OthersNo++;
+                            type = BeitieElement.BeitieElementType.Quezi;
+                        }
+                        else
+                        {
+                            name += OthersNo++;
+                            type = BeitieElement.BeitieElementType.Other;
+                        }
+                        BtGrids.Elements.Add(new BeitieElement(type, name, OnlyZiNo ? -1 : ZiNo++));
+                        sb.Clear();
                     }
-                    else if (name.Length == 0)
+                    else if (specialTypeDetected)
                     {
-                        name += OthersNo++;
-                        type = BeitieElement.BeitieElementType.Kongbai;
-                    }
-                    else if (name.Contains("缺"))
-                    {
-                        name += OthersNo++;
-                        type = BeitieElement.BeitieElementType.Quezi;
+                        sb.Append(single);
                     }
                     else
                     {
-                        name += OthersNo++;
-                        type = BeitieElement.BeitieElementType.Other;
+                        BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1), ZiNo++));
                     }
-                    BtGrids.Elements.Add(new BeitieElement(type, name, OnlyZiNo ? -1 : ZiNo++));
-                    sb.Clear();
-                }
-                else if (specialTypeDetected)
-                {
-                    sb.Append(single);
-                }
-                else
-                {
-                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1), ZiNo++));
                 }
             }
+            
             UpdateParseStatus();
         }
 
@@ -1343,7 +1395,7 @@ namespace BeitieSpliter
 
             _helper.Rotate(originalBitmap, outputBitmap, angle);
 
-            BtGrids.RotateFile = await SaveSoftwareBitmapToFile(outputBitmap, "Dmr", "Rotate.jpg");
+            BtGrids.RotateFile = await SaveSoftwareBitmapToFile(outputBitmap, "Tmp", "Rotate.jpg");
             return CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap);
         }
 
@@ -1457,7 +1509,7 @@ namespace BeitieSpliter
                 {
                     currentOperation = OpenCVOperationType.Crop;
                 }
-                await SaveSoftwareBitmapToFile(outputBitmap, "Dmr", "show.jpg");
+                await SaveSoftwareBitmapToFile(outputBitmap, "Test", "show.jpg");
                 //UpdateCanvasBmp(CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap));
                 UpdateCanvasBmp(await RotateImage(angleRotate));
                 RefreshPage(100);

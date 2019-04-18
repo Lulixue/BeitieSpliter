@@ -622,6 +622,17 @@ namespace BeitieSpliter
             btn.AddHandler(PointerReleasedEvent, new PointerEventHandler(Adjust_PointerReleased), true);
         }
 
+        void UpdateChangeStep()
+        {
+            double gridHeight = BtGrids.BtImageParent.resolutionY / BtGrids.Rows;
+            double gridWidth = BtGrids.BtImageParent.resolutionX / BtGrids.Columns;
+            double greater = (gridHeight > gridWidth) ? gridHeight : gridWidth;
+
+            ChangeStep = greater / 50;
+            ChangeStep = (ChangeStep < 1) ? 1 : ChangeStep;
+
+            ChangeStepTxtBox.Text = string.Format("{0:0}", ChangeStep);
+        }
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("SettingsPage_Loaded() called");
@@ -629,7 +640,8 @@ namespace BeitieSpliter
             InitControls();
             CalculateDrawRect();
             UpdateAngle();
-            Operation_Checked(null, null); 
+            Operation_Checked(null, null);
+            UpdateChangeStep();
 
             AdjustAddHandler(BtnLeftAdd);
             AdjustAddHandler(BtnLeftMinus);
@@ -639,8 +651,8 @@ namespace BeitieSpliter
             AdjustAddHandler(BtnBottomMinus);
             AdjustAddHandler(BtnRightMinus);
             AdjustAddHandler(BtnRightAdd);
-            NotifyUser(string.Format("当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}",
-                BtImage.resolutionX, BtImage.resolutionY, BtGrids.ElementRects.Count, BtGrids.Rows, BtGrids.Columns),
+            NotifyUser(string.Format("当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}",
+                BtImage.resolutionX, BtImage.resolutionY, BtGrids.ElementRects.Count, BtGrids.Rows, BtGrids.Columns, ChangeStep),
                 NotifyType.StatusMessage);
            
         }
@@ -861,35 +873,35 @@ namespace BeitieSpliter
         {
             if (sender == BtnBottomAdd)
             {
-                ChangeRect.bottom++;
+                ChangeRect.bottom += ChangeStep;
             }
             else if (sender == BtnBottomMinus)
             {
-                ChangeRect.bottom--;
+                ChangeRect.bottom -= ChangeStep;
             }
             else if (sender == BtnLeftAdd)
             {
-                ChangeRect.left++;
+                ChangeRect.left += ChangeStep;
             }
             else if (sender == BtnLeftMinus)
             {
-                ChangeRect.left--;
+                ChangeRect.left -= ChangeStep;
             }
             else if (sender == BtnRightAdd)
             {
-                ChangeRect.right++;
+                ChangeRect.right += ChangeStep;
             }
             else if (sender == BtnRightMinus)
             {
-                ChangeRect.right--;
+                ChangeRect.right -= ChangeStep;
             }
             else if (sender == BtnTopAdd)
             {
-                ChangeRect.top++;
+                ChangeRect.top += ChangeStep;
             }
             else if (sender == BtnTopMinus)
             {
-                ChangeRect.top--;
+                ChangeRect.top -= ChangeStep;
             }
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
             
@@ -1228,6 +1240,12 @@ namespace BeitieSpliter
             Debug.WriteLine("SettingPage OnLostFocus(): {0}", HaveGotFocus);
             HaveGotFocus = false;
             base.OnLostFocus(e);
+        }
+
+        double ChangeStep = 1.0;
+        private void ChangeStepTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ChangeStep = double.Parse(ChangeStepTxtBox.Text);
         }
     }
 }

@@ -68,6 +68,10 @@
             <Button  Margin="5,0"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
             <TextBox Name="AngleTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="AngleTextBox_LostFocus" InputScope="Number" />
             <Button  Margin="5,0"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
+            <TextBlock  Text="步进：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+
+            <TextBox Name="ChangeStepTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="ChangeStepTextBox_LostFocus" InputScope="Number" />
+
         </StackPanel>
         
         <StackPanel  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
