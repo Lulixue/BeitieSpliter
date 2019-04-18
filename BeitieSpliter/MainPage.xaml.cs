@@ -37,6 +37,7 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.ViewManagement;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using Windows.UI.Xaml.Automation.Peers;
 
 /* Open CV: */
 //using EMGU.CV;
@@ -85,10 +86,15 @@ namespace BeitieSpliter
     
     public sealed class BeitieElement
     {
-        public BeitieElement(BeitieElementType t, string cont)
+        public BeitieElement(BeitieElementType t, string cont, int n)
         {
             type = t;
             content = cont;
+            this.no = n;
+        }
+        public bool NeedAddNo()
+        {
+            return no != -1;
         }
         public enum BeitieElementType
         {
@@ -102,6 +108,7 @@ namespace BeitieSpliter
         public string content;
         public int row = -1;
         public int col = -1;
+        public int no = -1;
     }
     public class BeitieGridRect
     {
@@ -639,6 +646,11 @@ namespace BeitieSpliter
 
         private void InitDrawParameters()
         {
+            if (CurrentBtImage == null)
+            {
+                return;
+            }
+
             BtGrids.ImageFile = CurrentBtImage.file;
             BtGrids.BtImageParent = CurrentBtImage;
 
@@ -717,16 +729,7 @@ namespace BeitieSpliter
         {
 
         }
-
-        private void SavePage(StorageFile file)
-        {
-
-        }
-
-        private void DrawPage(StorageFile file)
-        {
-
-        }
+        
 
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
@@ -872,9 +875,9 @@ namespace BeitieSpliter
         {
             UpdateColumnCount();
         }
+
         void UpdateRowCount()
         {
-
             int rows = GetRowCount();
             if (rows == RowNumber)
             {
@@ -1035,13 +1038,19 @@ namespace BeitieSpliter
             Debug.WriteLine("New Bitmap: {0:0},{1:0}", CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
             InitDrawParameters();
         }
-
-        private async Task<StorageFile> SaveSoftwareBitmapToFile(SoftwareBitmap softwareBitmap, string dir, string filename)
+        private async Task<StorageFolder> GetSaveFolder(string dir)
         {
             StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
             StorageFolder folder = await applicationFolder.CreateFolderAsync(dir, CreationCollisionOption.OpenIfExists);
-            StorageFile outputFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
 
+            return folder;
+        }
+
+        private async Task<StorageFile> SaveSoftwareBitmapToFile(SoftwareBitmap softwareBitmap, string dir, string filename)
+        {
+            StorageFolder folder = await GetSaveFolder(dir);
+            StorageFile outputFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
+            
             using (IRandomAccessStream stream = await outputFile.OpenAsync(FileAccessMode.ReadWrite))
             {
                 // Create an encoder with the desired format
@@ -1113,6 +1122,9 @@ namespace BeitieSpliter
             string album = TieAlbum.Text;
             SoftwareBitmap inputBitmap = null;
             HashSet<Point> ElementIndexes = (HashSet<Point>)para;
+            int StartNo = int.Parse(StartNoBox.Text);
+
+            NotifyUser("开始保存分割单字图片...", NotifyType.StatusMessage);
 
             if (BtGrids.IsImageRotated())
             {
@@ -1146,7 +1158,6 @@ namespace BeitieSpliter
                 Rect roi = BtGrids.GetRectangle((int)pnt.X, (int)pnt.Y);
                 int index = BtGrids.GetIndex((int)pnt.X, (int)pnt.Y, true);
                 BeitieElement element = BtGrids.Elements[index];
-                string filename = string.Format("{0}-{1}.jpg", index+1, element.content);
 
                 if (element.type == BeitieElement.BeitieElementType.Kongbai)
                 {
@@ -1154,6 +1165,15 @@ namespace BeitieSpliter
                 }
                 try
                 {
+                    string filename = "";
+                    if (!element.NeedAddNo())
+                    {
+                        filename = string.Format("{0}.jpg", element.content);
+                    }
+                    else
+                    {
+                        filename = string.Format("{0}-{1}.jpg", element.no + StartNo, element.content);
+                    }
                     SaveSingleCropImage(inputBitmap, roi, album, filename);
                 }
                 catch (Exception err)
@@ -1161,7 +1181,9 @@ namespace BeitieSpliter
                     Debug.WriteLine(err.ToString());
                 }
             }
-           
+
+            StorageFolder folder = await GetSaveFolder(album);
+            NotifyUser("单字分割图片已保存到文件夹"+ folder.Path, NotifyType.StatusMessage);
         }
         private void OnSaveSplitImages(object sender, RoutedEventArgs e)
         {
@@ -1190,7 +1212,7 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add('）');
         }
 
-        private void SetStatisticsOfPageText()
+        private void UpdateParseStatus()
         {
             int totalElements = BtGrids.Elements.Count;
             int CharCount = 0;
@@ -1219,9 +1241,19 @@ namespace BeitieSpliter
                         break;
                 }
             }
-            TextParsedData.Text = string.Format("字：{0},阙字({5})：{1}, 印章({6})：{2},空白({7}): {3}, 其他({8}): {4}",
+
+            string info = "";
+            if (CurrentBtImage != null)
+            {
+                info += string.Format("图片尺寸: {0:0}*{1:0}, ", CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
+            }
+            info += string.Format("当前碑帖: {0}, 起始单字编号: {1}({2}), ", TieAlbum.Text, StartNoBox.Text,
+                NoNameSwitch.IsOn ? NoNameSwitch.OnContent : NoNameSwitch.OffContent);
+            info += string.Format("字: {0}, 阙字({5}): {1}, 印章({6}): {2}, 空白({7}): {3}, 其他({8}): {4}",
                 CharCount, LostCharCount, SealCount, SpaceCount, OtherCount,
-                "{缺}", "{印:}", "{}", "{XX}");
+                "{缺}/□", "{印:}", "{}", "{XX}");
+
+            NotifyUser(info, NotifyType.StatusMessage);
         }
         private void ParsePageText()
         {
@@ -1229,6 +1261,8 @@ namespace BeitieSpliter
             int length = txt.Length;
             char single;
             bool specialTypeDetected = false;
+            int OthersNo = 1;
+            int ZiNo = 0;
             StringBuilder sb = new StringBuilder();
 
             BtGrids.Elements.Clear();
@@ -1241,8 +1275,10 @@ namespace BeitieSpliter
                 }
                 else if (single == '□')
                 {
-                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Kongbai,
-                        new string(single, 1)));
+                    string name = new string(single, 1);
+                    name += OthersNo++;
+                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Quezi,
+                        name, ZiNo++));
                 }
                 else if (single == '{')
                 {
@@ -1253,23 +1289,28 @@ namespace BeitieSpliter
                     specialTypeDetected = false;
                     string name = sb.ToString();
                     BeitieElement.BeitieElementType type;
+
                     if (name.Contains("印"))
                     {
+                        name += OthersNo++;
                         type = BeitieElement.BeitieElementType.Yinzhang;
                     }
                     else if (name.Length == 0)
                     {
+                        name += OthersNo++;
                         type = BeitieElement.BeitieElementType.Kongbai;
                     }
                     else if (name.Contains("缺"))
                     {
+                        name += OthersNo++;
                         type = BeitieElement.BeitieElementType.Quezi;
                     }
                     else
                     {
+                        name += OthersNo++;
                         type = BeitieElement.BeitieElementType.Other;
                     }
-                    BtGrids.Elements.Add(new BeitieElement(type, name));
+                    BtGrids.Elements.Add(new BeitieElement(type, name, OnlyZiNo ? -1 : ZiNo++));
                     sb.Clear();
                 }
                 else if (specialTypeDetected)
@@ -1278,10 +1319,10 @@ namespace BeitieSpliter
                 }
                 else
                 {
-                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1)));
+                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1), ZiNo++));
                 }
             }
-            SetStatisticsOfPageText();
+            UpdateParseStatus();
         }
 
         private void PageText_LostFocus(object sender, RoutedEventArgs e)
@@ -1294,9 +1335,7 @@ namespace BeitieSpliter
             // The XAML Image control can only display images in BRGA8 format with premultiplied or no alpha
             // The frame reader as configured in this sample gives BGRA8 with straight alpha, so need to convert it
          
-
             SoftwareBitmap inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
-
 
             SoftwareBitmap originalBitmap = SoftwareBitmap.Convert(inputBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
             SoftwareBitmap outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
@@ -1467,6 +1506,79 @@ namespace BeitieSpliter
             HaveGotFocus = false;
             base.OnLostFocus(e);
         }
-        
+
+        bool OnlyZiNo = true;
+        private void NoNameSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            OnlyZiNo = !NoNameSwitch.IsOn;
+            ParsePageText();
+        }
+
+        public enum NotifyType
+        {
+            StatusMessage,
+            ErrorMessage
+        };
+
+
+        /// <summary>
+        /// Display a message to the user.
+        /// This method may be called from any thread.
+        /// </summary>
+        /// <param name="strMessage"></param>
+        /// <param name="type"></param>
+        public void NotifyUser(string strMessage, NotifyType type)
+        {
+            // If called from the UI thread, then update immediately.
+            // Otherwise, schedule a task on the UI thread to perform the update.
+            if (Dispatcher.HasThreadAccess)
+            {
+                UpdateStatus(strMessage, type);
+            }
+            else
+            {
+                var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => UpdateStatus(strMessage, type));
+            }
+        }
+
+        private void UpdateStatus(string strMessage, NotifyType type)
+        {
+            switch (type)
+            {
+                case NotifyType.StatusMessage:
+                    StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Green);
+                    break;
+                case NotifyType.ErrorMessage:
+                    StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Red);
+                    break;
+            }
+
+            StatusBlock.Text = strMessage;
+
+            // Collapse the StatusBlock if it has no text to conserve real estate.
+            StatusBorder.Visibility = (StatusBlock.Text != String.Empty) ? Visibility.Visible : Visibility.Collapsed;
+            if (StatusBlock.Text != String.Empty)
+            {
+                StatusBorder.Visibility = Visibility.Visible;
+                StatusPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                StatusBorder.Visibility = Visibility.Collapsed;
+                StatusPanel.Visibility = Visibility.Collapsed;
+            }
+
+            // Raise an event if necessary to enable a screen reader to announce the status update.
+            var peer = FrameworkElementAutomationPeer.FromElement(StatusBlock);
+            if (peer != null)
+            {
+                peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+            }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateParseStatus();
+        }
     }
 }

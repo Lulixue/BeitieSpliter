@@ -578,7 +578,6 @@ namespace BeitieSpliter
         }
         void InitControls()
         {
-            TestCase();
             int index = 0;
             foreach (BeitieElement elem in BtGrids.Elements)
             {

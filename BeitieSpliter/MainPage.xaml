@@ -11,6 +11,7 @@
     RequestedTheme="Dark"
     Unloaded="Page_OnUnloaded" 
     Name="BtSpliterParentWindows"
+    Loaded="Page_Loaded"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
 
     <Page.Resources>
@@ -40,8 +41,8 @@
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="1.5*"/>
-            <RowDefinition Height="17*"/>
             <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="17*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -101,14 +102,32 @@
                 <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
         </Border>
+
         <TextBox x:Name="TieAlbum" Grid.Row="2" Grid.Column="1" Margin="3" FontSize="14" 
                  PlaceholderText="输入帖的名称" MinWidth="50"  MaxWidth="200"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" 
-                 Text="董美人墓志"
-                 VerticalAlignment="Center"/>
-        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="3" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
+                 Text="董美人墓志"  VerticalAlignment="Center"/>
+
+        <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="2">
+            <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
+            <RelativePanel RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBox Name="StartNoBox" Text="1" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30"/>
+            </RelativePanel>
+        </StackPanel>
+        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文" Grid.Row="4" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
                      Text="美人董氏墓志铭{印}{印}，美人姓董，汴州恤宜县人也。祖佛子，齐凉州刺史，敦仁愽洽，标誉乡闾。父后进，俶傥英雄，声驰河渷。美人体质闲华，天" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />
-        <TextBlock x:Name="TextParsedData" Grid.Row="4" Grid.Column="1" Text="" FontSize="12" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap"/>
-
+        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
+            <Frame x:Name="ScenarioFrame" Margin="0,1,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
+            <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+                <Border x:Name="StatusBorder" Margin="0,0,0,0">
+                    <ScrollViewer VerticalScrollMode="Auto"  VerticalScrollBarVisibility="Auto" MaxHeight="100">
+                        <!-- Use LiveSetting to enable screen readers to announce the status update. -->
+                        <TextBlock x:Name="StatusBlock" FontWeight="Bold" AutomationProperties.LiveSetting="Assertive"
+                                  Margin="10,10,10,20" TextWrapping="Wrap"  />
+                    </ScrollViewer>
+                </Border>
+            </StackPanel>
+        </RelativePanel>
     </Grid>
+    
 </Page>
