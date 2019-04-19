@@ -25,6 +25,7 @@ using Windows.UI.Core;
 using Windows.ApplicationModel.Core;
 using Windows.System.Threading;
 using Windows.UI.Xaml.Automation.Peers;
+using Windows.UI.Input;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -728,8 +729,7 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
             
             Rect drawRect = new Rect(pntLt, pntRb);
-            DrawRectangle(draw, ToAdjustRect, Colors.Green , BtGrids.PenWidth);
-            //DrawRectangle(draw, drawRect, BtGrids.PenColor, BtGrids.PenWidth+1);
+            //DrawRectangle(draw, ToAdjustRect, Colors.Green , BtGrids.PenWidth);
             
             foreach (Point elem in DrawLineElements)
             {
@@ -1224,8 +1224,7 @@ namespace BeitieSpliter
         }
         bool HaveGotFocus = true;
         protected override void OnGotFocus(RoutedEventArgs e)
-        {
-
+        { 
             Debug.WriteLine("SettingPage OnGotFocus(): {0}", HaveGotFocus);
             if (this.IsLoaded && !HaveGotFocus)
             {
@@ -1246,6 +1245,143 @@ namespace BeitieSpliter
         private void ChangeStepTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ChangeStep = double.Parse(ChangeStepTxtBox.Text);
+        }
+        enum PointerLocation
+        {
+            OutsideImage,
+            InsideImage,
+            OnLeftBoarder,
+            OnRightBoarder,
+            OnTopBoarder,
+            OnBottomBoarder,
+            OnElementBody,
+        }
+        enum PointerStatus
+        {
+            Entered,
+            Moved,
+            Pressed,
+            Released,
+            Exited,
+            PressedToDrag,
+            ReleasedToExit,
+            MoveOnBoarder,
+            MoveToScalingBoarder,
+        }
+        PointerStatus LastPntrStatus = PointerStatus.Exited;
+        PointerStatus CurrentPntrStatus = PointerStatus.Exited;
+        PointerLocation LastLocation = PointerLocation.OutsideImage;
+        PointerLocation CurrentLocation = PointerLocation.OutsideImage;
+        PointerPoint LastPointerPnt = null;
+        PointerPoint CurrentPointerPnt = null;
+
+        void ChangePointerCursor(CoreCursorType type)
+        {
+            //NotifyUser(string.Format("Cursor: {0}", type), NotifyType.StatusMessage);
+            if (type == CoreCursorType.Custom)
+            {
+                return;
+            }
+            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(type, 1);
+        }
+        bool IsOnDrawing()
+        {
+            return CurrentPntrStatus == PointerStatus.PressedToDrag;
+        }
+        bool IsOnScaling()
+        {
+            return CurrentPntrStatus == PointerStatus.MoveToScalingBoarder;
+        }
+        
+        private void UpdatePointer(PointerPoint pp, PointerStatus status)
+        {
+            LastPntrStatus = CurrentPntrStatus;
+            LastPointerPnt = CurrentPointerPnt;
+
+            TracePointerLocation(pp, status);
+
+            //NotifyUser(string.Format("Previous Status: {0}, Next: {1}", LastPntrStatus, status), NotifyType.StatusMessage);
+
+            switch (status)
+            {
+                case PointerStatus.Entered:
+                    {
+                        Random ran = new Random();
+                        int n = ran.Next(1, (int)CoreCursorType.Person);
+                        ChangePointerCursor((CoreCursorType)n);
+                    }
+                    break;
+                case PointerStatus.Pressed:
+                    if (LastPntrStatus != PointerStatus.MoveOnBoarder)
+                    {
+                        status = PointerStatus.PressedToDrag;
+                        ChangePointerCursor(CoreCursorType.SizeAll);
+                    }
+                    else
+                    {
+                        status = PointerStatus.MoveToScalingBoarder;
+                        ChangePointerCursor(CoreCursorType.SizeWestEast);
+                    }
+                    break;
+                case PointerStatus.Released:
+                    if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
+                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
+                    {
+                        status = PointerStatus.ReleasedToExit;
+                        ChangePointerCursor(CoreCursorType.Arrow);
+                    }
+                    break;
+                case PointerStatus.Moved:
+                    if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
+                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
+                    {
+                        return;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            CurrentPntrStatus = status;
+        }
+
+        private void TracePointerLocation(PointerPoint pp, PointerStatus status)
+        {
+            string info = string.Format("DrawRect: {0:0},{1:0},{2:0},{3:0}, ", ToAdjustRect.Left, ToAdjustRect.Top,
+                ToAdjustRect.Right, ToAdjustRect.Bottom);
+            info += string.Format("PointerLocation: {0:0},{1:0}, -> {2} ", pp.Position.X, pp.Position.Y, status);
+            info += string.Format("ChangeRect: {0:0},{1:0},{2:0},{3:0}",
+                ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+
+            NotifyUser(info, NotifyType.StatusMessage);
+        }
+
+        private void PointerMovedCurrentItem(object sender, PointerRoutedEventArgs e)
+        {
+            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Moved);
+        }
+
+        private void PointerPressedCurrentItem(object sender, PointerRoutedEventArgs e)
+        {
+            Debug.WriteLine("SettingPage PointerPressed ");
+            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Pressed);
+        }
+
+        private void PointerEnteredCurrentItem(object sender, PointerRoutedEventArgs e)
+        {
+           Debug.WriteLine("SettingPage PointerEntered ");
+            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Entered);
+        }
+
+        private void PointerExitedCurrentItem(object sender, PointerRoutedEventArgs e)
+        {
+            Debug.WriteLine("SettingPage PointerExited ");
+            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Exited);
+        }
+
+        private void PointerReleasedCurrentItem(object sender, PointerRoutedEventArgs e)
+        {
+            Debug.WriteLine("SettingPage PointerReleased");
+            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Released);
         }
     }
 }

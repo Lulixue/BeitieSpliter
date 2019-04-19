@@ -126,7 +126,7 @@
                     ZoomMode="Enabled">
 
                 <canvas:CanvasControl Draw="CurrentItem_OnDraw" 
-                                      x:Name="CurrentItem" ClearColor="Gray" />
+                                      x:Name="CurrentItem" ClearColor="Gray" PointerMoved="PointerMovedCurrentItem" PointerPressed="PointerPressedCurrentItem" PointerEntered="PointerEnteredCurrentItem" PointerExited="PointerExitedCurrentItem" PointerReleased="PointerReleasedCurrentItem" />
 
             </ScrollViewer>
         </Border>

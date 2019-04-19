@@ -132,6 +132,7 @@ namespace BeitieSpliter
         public float angle = 0;
         public float PenWidth = 0;
         public List<Color> BackupColors = new List<Color>();
+        public List<Color> ContrastColors = new List<Color>();
         public Color PenColor = Colors.Red;
         public Thickness PageMargin = new Thickness();
         public BeitieImage BtImageParent = null;
@@ -384,7 +385,7 @@ namespace BeitieSpliter
             if (ff != 0xff || type != 0xd8)
             {//非JPG文件
                 stmReader.Dispose();
-                Debug.WriteLine("Error -> File({3}) Not JPG: {0:H}{1:H}", ff, type, file.Name);
+                Debug.WriteLine("Error -> File({2}) Not JPG: {0}{1}", ff, type, file.Name);
                 return rx;
             }
             long ps = 0;
