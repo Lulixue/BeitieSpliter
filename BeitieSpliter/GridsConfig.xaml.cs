@@ -39,6 +39,14 @@ namespace BeitieSpliter
         public double top = 0;
         public double bottom = 0;
 
+        public void Reset()
+        {
+            left = 0;
+            right = 0;
+            top = 0;
+            bottom = 0;
+        }
+
         public void Copy(ChangeStruct cs)
         {
             left = cs.left;
@@ -55,15 +63,15 @@ namespace BeitieSpliter
     {
         enum RectChangeType
         {
-            None,
-            TopAdd,
-            TopMinus,
-            BottomAdd,
-            BottomMinus,
-            LeftAdd,
-            LeftMinus,
-            RightAdd,
-            RightMinus,
+            None = 0,
+            TopAdd = 0x01,
+            TopMinus = 0x02,
+            BottomAdd = 0x04,
+            BottomMinus = 0x10,
+            LeftAdd = 0x20,
+            LeftMinus = 0x40,
+            RightAdd = 0x100,
+            RightMinus = 0x200,
         }
         enum OperationType
         {
@@ -87,6 +95,7 @@ namespace BeitieSpliter
         bool FixedWidth = false;
         ChangeStruct ChangeRect = new ChangeStruct();
         ChangeStruct LastChangeRect = new ChangeStruct();
+        ChangeStruct LastValidChange = new ChangeStruct();
         static int MIN_ROW_COLUMN = 1;
 
         public GridsConfig()
@@ -110,7 +119,7 @@ namespace BeitieSpliter
         void PrintRect(string title, Rect rc)
         {
             Debug.WriteLine("{0}: {1:0},{2:0},{3:0},{4:0}", title,
-                rc.X, rc.Y, rc.Width, rc.Height);
+                rc.X, rc.Y, rc.X + rc.Width, rc.Y + rc.Height);
         }
         void GetRectPoints(Rect rc, ref Point pntLt, ref Point pntRb)
         {
@@ -174,6 +183,47 @@ namespace BeitieSpliter
                 default:
                     break;
             }
+        }
+
+        bool IsChangeNoteOverflow()
+        {
+            Point pntLt, pntRb;
+            GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb); 
+
+            pntLt.X += ChangeRect.left;
+            pntLt.Y += ChangeRect.top;
+            pntRb.X += ChangeRect.right;
+            pntRb.Y += ChangeRect.bottom;
+
+            if (pntLt.X < 0)
+            {
+                Common.ShowMessageDlg("已经到了最右边了!", null);
+                NotifyUser("已经到了最右边了!", NotifyType.ErrorMessage);
+                PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
+                return false;
+            }
+            else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
+            {
+                Common.ShowMessageDlg("已经到了最左边了!", null);
+                NotifyUser("已经到了最左边了!", NotifyType.ErrorMessage);
+                PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
+                return false;
+            }
+            else if (pntLt.Y < 0)
+            {
+                Common.ShowMessageDlg("已经到了最上边了!", null);
+                NotifyUser("已经到了最上边了!", NotifyType.ErrorMessage);
+                PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
+                return false;
+            }
+            else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
+            {
+                Common.ShowMessageDlg("已经到了最下边了!", null);
+                NotifyUser("已经到了最下边了!", NotifyType.ErrorMessage);
+                PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
+                return false;
+            }
+            return true;
         }
 
         bool UpdateElementsRects()
@@ -443,6 +493,7 @@ namespace BeitieSpliter
             return new Point(dstRc.X, dstRc.Y);
         }
 
+        private double AdjustExtendSize = 0;
         private void CalculateDrawRect()
         {
             Point pntLt = new Point();
@@ -489,10 +540,10 @@ namespace BeitieSpliter
             
             BtImageAdjustRect = BtGrids.GetMaxRectangle(PreRow, PreCol, NextRow, NextCol);
 
-            pntLt.X = 0/* - BtImage.resolutionX*/;
-            pntLt.Y = 0/* - BtImage.resolutionY*/;
-            pntRb.X = BtImageAdjustRect.Width;
-            pntRb.Y = BtImageAdjustRect.Height;
+            pntLt.X = AdjustExtendSize; // 0
+            pntLt.Y = AdjustExtendSize; // 0
+            pntRb.X = BtImageAdjustRect.Width + AdjustExtendSize;
+            pntRb.Y = BtImageAdjustRect.Height + AdjustExtendSize;
 
             BtImageShowRect = new Rect(pntLt, pntRb);
             Debug.WriteLine("Operation: {0}, Previous: {1},{2}; Current: {3},{4}; Next: {5},{6}",
@@ -503,8 +554,8 @@ namespace BeitieSpliter
                 BtImage.resolutionX, BtImage.resolutionY, 0, 0,
                 BtImageShowRect.X, BtImageShowRect.Y, BtImageShowRect.Width, BtImageShowRect.Height);
             
-            CurrentItem.Height = BtImageAdjustRect.Height;
-            CurrentItem.Width = BtImageAdjustRect.Width;
+            CurrentItem.Height = (BtImageAdjustRect.Height + 2 * AdjustExtendSize);
+            CurrentItem.Width = BtImageAdjustRect.Width + 2 * AdjustExtendSize;
             
             for (int row = minRow; row <= maxRow; row++)
             {
@@ -543,7 +594,7 @@ namespace BeitieSpliter
             }
             return false;
         }
-        private void Refresh(bool AdjustImage = false)
+        private void Refresh(bool AdjustImage = false, bool updateStatus = true)
         {
             if (IsParaInvalid())
             {
@@ -556,8 +607,8 @@ namespace BeitieSpliter
                     CalculateDrawRect();
                 }
             }
-
-            UpdateAdjustStatus();
+            if (updateStatus)
+                UpdateAdjustStatus();
             Task.Run(() =>
             {
                 //Common.Sleep(30);
@@ -715,7 +766,9 @@ namespace BeitieSpliter
         {
             //Debug.WriteLine("Draw Rectangle: ({0:0},{1:0},{2:0},{3:0}), Color: {4}, Width: {5}", rect.X, rect.Y, rect.Width, rect.Height,
             //    color, strokeWidth);
-            draw.DrawRectangle(rect, color, strokeWidth);
+            
+            draw.DrawRectangle((float)(rect.Left + AdjustExtendSize), (float)(rect.Top + AdjustExtendSize), 
+                (float)rect.Width, (float)rect.Height, color, strokeWidth);
         }
         private void DrawLines(CanvasDrawingSession draw)
         {
@@ -729,7 +782,7 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
             
             Rect drawRect = new Rect(pntLt, pntRb);
-            //DrawRectangle(draw, ToAdjustRect, Colors.Green , BtGrids.PenWidth);
+            DrawRectangle(draw, drawRect, BaseColor, BtGrids.PenWidth);
             
             foreach (Point elem in DrawLineElements)
             {
@@ -765,7 +818,8 @@ namespace BeitieSpliter
             {
                 var draw = args.DrawingSession;
 
-                draw.Clear(Colors.Gray);
+                draw.Clear(Colors.Black);
+                draw.DrawRectangle(BtImageShowRect, Colors.White, 1);
                 if ((BtGrids == null) || (BtImage == null))
                 {
                     draw.DrawText("参数错误!", new Vector2(100, 100), Colors.Black);
@@ -799,6 +853,20 @@ namespace BeitieSpliter
             Refresh();
         }
 
+        private void UpdateFixedChecks()
+        {
+            FixedHeight = ChkFixedHeight?.IsChecked ?? false;
+            FixedWidth = ChkFixedWidth?.IsChecked ?? false;
+        }
+        private void UpdateFixedChecks(bool bFixedW, bool bFixedH)
+        {
+            ChkFixedHeight.IsChecked = bFixedH;
+            ChkFixedWidth.IsChecked = bFixedW;
+            
+            FixedHeight = ChkFixedHeight?.IsChecked ?? false;
+            FixedWidth = ChkFixedWidth?.IsChecked ?? false;
+        }
+
         private void Operation_Checked(object sender, RoutedEventArgs e)
         {
             if (OpSingleElement?.IsChecked ?? false)
@@ -815,8 +883,7 @@ namespace BeitieSpliter
                     BtnRightElement.IsEnabled = true;
                     BtnBottomElement.IsEnabled = true;
 
-                    ChkFixedHeight.IsChecked = true;
-                    ChkFixedWidth.IsChecked = true;
+                    UpdateFixedChecks(true, true);
                 }
             }
             else if (OpSingleRow?.IsChecked ?? false)
@@ -831,8 +898,7 @@ namespace BeitieSpliter
                     BtnRightElement.IsEnabled = false;
                     BtnTopElement.IsEnabled = true;
                     BtnBottomElement.IsEnabled = true;
-                    ChkFixedHeight.IsChecked = false;
-                    ChkFixedWidth.IsChecked = false;
+                    UpdateFixedChecks(false, false);
                 }
             }
             else if (OpSingleColumn?.IsChecked ?? false)
@@ -846,8 +912,7 @@ namespace BeitieSpliter
                     BtnRightElement.IsEnabled = true;
                     BtnBottomElement.IsEnabled = false;
                     BtnTopElement.IsEnabled = false;
-                    ChkFixedHeight.IsChecked = false;
-                    ChkFixedWidth.IsChecked = false;
+                    UpdateFixedChecks(false, false);
                 }
             }
             else if (OpWholePage?.IsChecked ?? false)
@@ -859,16 +924,13 @@ namespace BeitieSpliter
                     BtnBottomElement.IsEnabled = false;
                     BtnTopElement.IsEnabled = false;
                     BtnRightElement.IsEnabled = false;
-                    ChkFixedHeight.IsChecked = false;
-                    ChkFixedWidth.IsChecked = false;
+                    UpdateFixedChecks(false, false);
                 }
             }
 
-            FixedHeight = ChkFixedHeight?.IsChecked ?? false;
-            FixedWidth = ChkFixedWidth?.IsChecked ?? false;
             Refresh();
         }
-
+        
         private void AdjustFunction(object sender, bool UpdateRect)
         {
             if (sender == BtnBottomAdd)
@@ -904,7 +966,12 @@ namespace BeitieSpliter
                 ChangeRect.top -= ChangeStep;
             }
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
-            
+            if (!IsChangeNoteOverflow())
+            {
+                Debug.WriteLine("Change invalid, revert to last one");
+                ChangeRect.Copy(LastChangeRect);
+                return;
+            }
             if (UpdateRect)
             {
                 if (!UpdateElementsRects())
@@ -1107,8 +1174,7 @@ namespace BeitieSpliter
 
         private void FixedCheck_Clicked(object sender, RoutedEventArgs e)
         {
-            FixedHeight = ChkFixedHeight?.IsChecked ?? false;
-            FixedWidth = ChkFixedWidth?.IsChecked ?? false;
+            UpdateFixedChecks();
         }
 
         private async void AdjustTimerFunction(ThreadPoolTimer timer)
@@ -1249,11 +1315,15 @@ namespace BeitieSpliter
         enum PointerLocation
         {
             OutsideImage,
-            InsideImage,
+            InsideImageButNotElement,
             OnLeftBoarder,
             OnRightBoarder,
             OnTopBoarder,
             OnBottomBoarder,
+            OnLeftTopBoarder,
+            OnLeftBottomBoarder,
+            OnRightTopBoarder,
+            OnRightBottomBoarder,
             OnElementBody,
         }
         enum PointerStatus
@@ -1272,8 +1342,9 @@ namespace BeitieSpliter
         PointerStatus CurrentPntrStatus = PointerStatus.Exited;
         PointerLocation LastLocation = PointerLocation.OutsideImage;
         PointerLocation CurrentLocation = PointerLocation.OutsideImage;
-        PointerPoint LastPointerPnt = null;
-        PointerPoint CurrentPointerPnt = null;
+        Point LastPointerPnt = new Point();
+        Point CurrentPointerPnt = new Point();
+        double AdjustDelta = 15;
 
         void ChangePointerCursor(CoreCursorType type)
         {
@@ -1293,34 +1364,200 @@ namespace BeitieSpliter
             return CurrentPntrStatus == PointerStatus.MoveToScalingBoarder;
         }
         
-        private void UpdatePointer(PointerPoint pp, PointerStatus status)
+        bool IsOnBoarder(double delta, double baseline, double step = 3)
+        {
+            return (delta >= (baseline - step)) &&
+                (delta <= (baseline + step));
+        }
+
+        private PointerLocation GetPointerLocation(Point pp)
+        {
+            double deltaX = pp.X - ToAdjustRect.X;
+            double deltaY = pp.Y - ToAdjustRect.Y;
+
+            if ((pp.X < -AdjustDelta) ||
+                (pp.Y < -AdjustDelta))
+            {
+                return PointerLocation.OutsideImage;
+            }
+            if ((pp.X > (BtImageAdjustRect.Width + AdjustDelta)) ||
+                (pp.Y > (BtImageAdjustRect.Height + AdjustDelta)))
+            {
+                return PointerLocation.OutsideImage;
+            }
+            //Debug.WriteLine("{0:F1},{1:F1} -> Delta: {0:F1},{1:F1}", pp.X, pp.Y, deltaX, deltaY);
+            if ((deltaX > (ToAdjustRect.Width + AdjustDelta)) ||
+                (deltaX < -AdjustDelta))
+            {
+                return PointerLocation.InsideImageButNotElement;
+            }
+            if ((deltaY > (ToAdjustRect.Height + AdjustDelta)) ||
+                (deltaY < -AdjustDelta))
+            {
+                return PointerLocation.InsideImageButNotElement;
+            }
+            if (IsOnBoarder(deltaX, 0, AdjustDelta))
+            {
+                if (IsOnBoarder(deltaY, 0, AdjustDelta))
+                {
+                    return PointerLocation.OnLeftTopBoarder;
+                }
+                else if (IsOnBoarder(deltaY, ToAdjustRect.Height, AdjustDelta))
+                {
+                    return PointerLocation.OnLeftBottomBoarder;
+                }
+                else
+                {
+                    return PointerLocation.OnLeftBoarder;
+                }
+            }
+            else if (IsOnBoarder(deltaX, ToAdjustRect.Width, AdjustDelta))
+            {
+                if (IsOnBoarder(deltaY, 0, AdjustDelta))
+                {
+                    return PointerLocation.OnRightTopBoarder;
+                }
+                else if (IsOnBoarder(deltaY, ToAdjustRect.Height, AdjustDelta))
+                {
+                    return PointerLocation.OnRightBottomBoarder;
+                }
+                else
+                {
+                    return PointerLocation.OnRightBoarder;
+                }
+            }
+            else
+            {
+                if (IsOnBoarder(deltaY, 0, AdjustDelta))
+                {
+                    return PointerLocation.OnTopBoarder;
+                }
+                else if (IsOnBoarder(deltaY, ToAdjustRect.Height, AdjustDelta))
+                {
+                    return PointerLocation.OnBottomBoarder;
+                }
+                return PointerLocation.OnElementBody;
+            }
+
+        }
+
+        void CursorAdjustRect(Point pp)
+        {
+            double deltaX = pp.X - LastPointerPnt.X;
+            double deltaY = pp.Y - LastPointerPnt.Y;
+
+            ChangeRect.Reset();
+            switch (LastLocation)
+            {
+                case PointerLocation.InsideImageButNotElement:
+                    break;
+                case PointerLocation.OnTopBoarder:
+                    ChangeRect.top = deltaY;
+                    break;
+                case PointerLocation.OnBottomBoarder:
+                    ChangeRect.bottom = deltaY;
+                    break;
+                case PointerLocation.OnLeftBoarder:
+                    ChangeRect.left = deltaX;
+                    break;
+                case PointerLocation.OnRightBoarder:
+                    ChangeRect.right = deltaX;
+                    break;
+                case PointerLocation.OnLeftTopBoarder:
+                    ChangeRect.left = deltaX;
+                    ChangeRect.top = deltaY;
+                    break;
+                case PointerLocation.OnRightBottomBoarder:
+                    ChangeRect.right = deltaX;
+                    ChangeRect.bottom = deltaY;
+                    break;
+                case PointerLocation.OnLeftBottomBoarder:
+                    ChangeRect.left = deltaX;
+                    ChangeRect.bottom = deltaY;
+                    break;
+                case PointerLocation.OnRightTopBoarder:
+                    ChangeRect.right = deltaX;
+                    ChangeRect.top = deltaY;
+                    break;
+                case PointerLocation.OnElementBody:
+                    ChangeRect.right = deltaX;
+                    ChangeRect.top = deltaY;
+                    ChangeRect.left = deltaX;
+                    ChangeRect.bottom = deltaY;
+                    break;
+                case PointerLocation.OutsideImage:
+                default:
+                    return;
+            }
+            Refresh(true, false);
+        }
+
+
+        private void UpdatePointerCursor(PointerLocation pl)
+        {
+            switch (pl)
+            {
+                case PointerLocation.InsideImageButNotElement:
+                    ChangePointerCursor(CoreCursorType.Arrow);
+                    break;
+                case PointerLocation.OnTopBoarder:
+                case PointerLocation.OnBottomBoarder:
+                    ChangePointerCursor(CoreCursorType.SizeNorthSouth);
+                    break;
+                case PointerLocation.OnLeftBoarder:
+                case PointerLocation.OnRightBoarder:
+                    ChangePointerCursor(CoreCursorType.SizeWestEast);
+                    break;
+                case PointerLocation.OnLeftTopBoarder:
+                case PointerLocation.OnRightBottomBoarder:
+                    ChangePointerCursor(CoreCursorType.SizeNorthwestSoutheast);
+                    break;
+                case PointerLocation.OnLeftBottomBoarder:
+                case PointerLocation.OnRightTopBoarder:
+                    ChangePointerCursor(CoreCursorType.SizeNortheastSouthwest);
+                    break;
+                case PointerLocation.OnElementBody:
+                    ChangePointerCursor(CoreCursorType.SizeAll);
+                    break;
+                case PointerLocation.OutsideImage:
+                default:
+                    ChangePointerCursor(CoreCursorType.Arrow);
+                    break;
+            }
+        }
+        private void UpdatePointer(Point pp, PointerStatus status)
         {
             LastPntrStatus = CurrentPntrStatus;
             LastPointerPnt = CurrentPointerPnt;
+            LastLocation = CurrentLocation;
 
+            PointerLocation loc = GetPointerLocation(pp);
             TracePointerLocation(pp, status);
-
+            
             //NotifyUser(string.Format("Previous Status: {0}, Next: {1}", LastPntrStatus, status), NotifyType.StatusMessage);
 
             switch (status)
             {
                 case PointerStatus.Entered:
                     {
-                        Random ran = new Random();
-                        int n = ran.Next(1, (int)CoreCursorType.Person);
-                        ChangePointerCursor((CoreCursorType)n);
+                        //Random ran = new Random();
+                        //int n = ran.Next(1, (int)CoreCursorType.Person);
+                        //ChangePointerCursor((CoreCursorType)n);
                     }
                     break;
                 case PointerStatus.Pressed:
-                    if (LastPntrStatus != PointerStatus.MoveOnBoarder)
+                    if (loc == PointerLocation.OnElementBody)
                     {
+                        LastChangeRect.Reset();
+                        UpdateFixedChecks(false, false);
                         status = PointerStatus.PressedToDrag;
-                        ChangePointerCursor(CoreCursorType.SizeAll);
                     }
-                    else
+                    else if ((loc != PointerLocation.OutsideImage) &&
+                        (loc != PointerLocation.InsideImageButNotElement))
                     {
+                        LastChangeRect.Reset();
+                        UpdateFixedChecks(false, false);
                         status = PointerStatus.MoveToScalingBoarder;
-                        ChangePointerCursor(CoreCursorType.SizeWestEast);
                     }
                     break;
                 case PointerStatus.Released:
@@ -1328,27 +1565,44 @@ namespace BeitieSpliter
                         (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
                     {
                         status = PointerStatus.ReleasedToExit;
-                        ChangePointerCursor(CoreCursorType.Arrow);
+                        UpdateElementsRects();
+                        Refresh();
                     }
                     break;
                 case PointerStatus.Moved:
                     if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
                         (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
                     {
+                        CursorAdjustRect(pp);
                         return;
+                    }
+                    break;
+                case PointerStatus.Exited:
+                    if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
+                       (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
+                    {
+                        Refresh(false);
+                        UpdatePointerCursor(PointerLocation.OutsideImage);
                     }
                     break;
                 default:
                     break;
             }
+            if (loc != LastLocation)
+            {
+                UpdatePointerCursor(loc);
+            }
             CurrentPntrStatus = status;
+            CurrentLocation = loc;
+            CurrentPointerPnt = pp;
         }
 
-        private void TracePointerLocation(PointerPoint pp, PointerStatus status)
+        private void TracePointerLocation(Point pp, PointerStatus status)
         {
-            string info = string.Format("DrawRect: {0:0},{1:0},{2:0},{3:0}, ", ToAdjustRect.Left, ToAdjustRect.Top,
+            string info = string.Format("ToAdjustRect: {0:0},{1:0},{2:0},{3:0}, ", ToAdjustRect.Left, ToAdjustRect.Top,
                 ToAdjustRect.Right, ToAdjustRect.Bottom);
-            info += string.Format("PointerLocation: {0:0},{1:0}, -> {2} ", pp.Position.X, pp.Position.Y, status);
+            info += string.Format("PointerLocation: {0:0},{1:0}, -> {2}: {3} ", pp.X, pp.Y, status,
+                GetPointerLocation(pp));
             info += string.Format("ChangeRect: {0:0},{1:0},{2:0},{3:0}",
                 ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
 
@@ -1357,31 +1611,56 @@ namespace BeitieSpliter
 
         private void PointerMovedCurrentItem(object sender, PointerRoutedEventArgs e)
         {
-            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Moved);
+            PointerPoint ptrpnt = e.GetCurrentPoint((UIElement)sender);
+            Point pp = new Point(ptrpnt.Position.X, ptrpnt.Position.Y);
+            pp.X -= AdjustExtendSize;
+            pp.Y -= AdjustExtendSize;
+
+            UpdatePointer(pp, PointerStatus.Moved);
         }
 
         private void PointerPressedCurrentItem(object sender, PointerRoutedEventArgs e)
         {
             Debug.WriteLine("SettingPage PointerPressed ");
-            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Pressed);
+            PointerPoint ptrpnt = e.GetCurrentPoint((UIElement)sender);
+            Point pp = new Point(ptrpnt.Position.X, ptrpnt.Position.Y);
+            pp.X -= AdjustExtendSize;
+            pp.Y -= AdjustExtendSize;
+
+            UpdatePointer(pp, PointerStatus.Pressed);
         }
 
         private void PointerEnteredCurrentItem(object sender, PointerRoutedEventArgs e)
         {
            Debug.WriteLine("SettingPage PointerEntered ");
-            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Entered);
+            PointerPoint ptrpnt = e.GetCurrentPoint((UIElement)sender);
+            Point pp = new Point(ptrpnt.Position.X, ptrpnt.Position.Y);
+            pp.X -= AdjustExtendSize;
+            pp.Y -= AdjustExtendSize;
+
+            UpdatePointer(pp, PointerStatus.Entered);
         }
 
         private void PointerExitedCurrentItem(object sender, PointerRoutedEventArgs e)
         {
             Debug.WriteLine("SettingPage PointerExited ");
-            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Exited);
+            PointerPoint ptrpnt = e.GetCurrentPoint((UIElement)sender);
+            Point pp = new Point(ptrpnt.Position.X, ptrpnt.Position.Y);
+            pp.X -= AdjustExtendSize;
+            pp.Y -= AdjustExtendSize;
+
+            UpdatePointer(pp, PointerStatus.Exited);
         }
 
         private void PointerReleasedCurrentItem(object sender, PointerRoutedEventArgs e)
         {
             Debug.WriteLine("SettingPage PointerReleased");
-            UpdatePointer(e.GetCurrentPoint((UIElement)sender), PointerStatus.Released);
+            PointerPoint ptrpnt = e.GetCurrentPoint((UIElement)sender);
+            Point pp = new Point(ptrpnt.Position.X, ptrpnt.Position.Y);
+            pp.X -= AdjustExtendSize;
+            pp.Y -= AdjustExtendSize;
+
+            UpdatePointer(pp, PointerStatus.Released);
         }
     }
 }

@@ -151,70 +151,69 @@ namespace BeitieSpliter
 
         public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol)
         {
-            Point pntLt = new Point(GetRowLeft(minRow, minCol, maxCol), GetColTop(minCol, minRow, maxRow));
-            Point pntRb = new Point(GetRowRight(maxRow, minCol, maxCol), GetColBottom(maxCol, minRow, maxRow));
+            Point pntLt = new Point();
+            Point pntRb = new Point();
+
+            GetMinLeftTop(minRow, maxRow, minCol, maxCol, ref pntLt);
+            GetMaxRightBottom(minRow, maxRow, minCol, maxCol, ref pntRb);
 
             return new Rect(pntLt, pntRb);
         }
-        public double GetRowRight(int row, int MinCol, int MaxCol)
+   
+
+        public void GetMinLeftTop(int MinRow, int MaxRow, int MinCol, int MaxCol, ref Point pntLt)
         {
-            double maxRight = 0;
-
-            for (int i = MinCol; i <= MaxCol; i++)
-            {
-                double right = GetRectangle(row, i).Right;
-                if (right > maxRight)
-                {
-                    maxRight = right;
-                }
-            }
-            return maxRight;
-        }
-
-        public double GetRowLeft(int row, int MinCol, int MaxCol)
-        {
-            double minLeft = 10000.0;
-
-            for (int i = MinCol; i <= MaxCol; i++)
-            {
-                double left = GetRectangle(row, i).Left;
-                if (left < minLeft)
-                {
-                    minLeft = left;
-                }
-            }
-            return minLeft;
-        }
-
-        public double GetColTop(int col, int MinRow, int MaxRow)
-        {
-            double minTop = 10000.0;
-
+            double minLeft = 100000.0;
+            double minTop = 100000.0;
+            
             for (int i = MinRow; i <= MaxRow; i++)
             {
-                double top = GetRectangle(i, col).Top;
-                if (top < minTop)
+                for (int j = MinCol; j <= MaxCol; j++)
                 {
-                    minTop = top;
+                    Rect rc = GetRectangle(i, j);
+                    double left = rc.Left;
+                    double top = rc.Top;
+
+                    if (left < minLeft)
+                    {
+                        minLeft = left;
+                    }
+                    if (top < minTop)
+                    {
+                        minTop = top;
+                    }
                 }
             }
-            return minTop;
+            pntLt.X = minLeft;
+            pntLt.Y = minTop;
         }
-        public double GetColBottom(int col, int MinRow, int MaxRow)
+        public void GetMaxRightBottom(int MinRow, int MaxRow, int MinCol, int MaxCol, ref Point pntRb)
         {
             double maxBottom = 0.0;
+            double maxRight = 0;
 
             for (int i = MinRow; i <= MaxRow; i++)
             {
-                double bottom = GetRectangle(i, col).Bottom;
-                if (bottom > maxBottom)
+                for (int j = MinCol; j <= MaxCol; j++)
                 {
-                    maxBottom = bottom;
+                    Rect rc = GetRectangle(i, j);
+                    double bottom = rc.Bottom;
+                    double right = rc.Right;
+
+                    if (bottom > maxBottom)
+                    {
+                        maxBottom = bottom;
+                    }
+                    if (right > maxRight)
+                    {
+                        maxRight = right;
+                    }
                 }
             }
-            return maxBottom;
+            pntRb.X = maxRight;
+            pntRb.Y = maxBottom;
         }
-
+      
         public int ToIndex(int row, int col)
         {
             Debug.Assert(row > 0);
@@ -296,180 +295,54 @@ namespace BeitieSpliter
             AutoResetEvent h = new AutoResetEvent(false);
             h.WaitOne(msTime);
         }
-        public BeitieImage(CanvasControl cvs, StorageFile f)
+        public BeitieImage(MainPage parent, CanvasControl cvs, StorageFile f)
         {
+            ParentPage = parent;
             creator = cvs;
             file = f;
             Init();
-            if (resolutionX < 100)
-            {
-                resolutionX = (float)size.Width;
-                resolutionY = (float)size.Height;
-            }
         }
+        public MainPage ParentPage;
         public CanvasControl creator;
         public StorageFile file;
-        public float resolutionX;
-        public float resolutionY;
-        public Size size;
+        public float resolutionX = 0;
+        public float resolutionY = 0;
+        public double DipX = 0;
+        public double DipY = 0;
         public string contents;
         public IRandomAccessStream iras;
-        private BinaryReader stmReader;
-        private Stream stream;
         public CanvasBitmap cvsBmp;
+        public bool FileSupported = true;
         public bool PageTextConfirmed = false;
-
+        public bool InitFinished = false;
+        
         public void Init()
         {
-            var t = Task.Run(() =>
-                {
-                    GetJpgSize(file.Path, out size, out resolutionX, out resolutionY);
-                }
-            );
-            t.Wait();
-             
-            //await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-            //() =>
-            //{
-
-            //});
-            //getJpgSize(file.Path, out size, out resolutionX, out resolutionY);
+            GetJpgSize();
         }
 
-
-        public async void GetFileText()
+        public async void GetJpgSize()
         {
-            //contents = await FileIO.ReadTextAsync(file);
-
-
-            stream = await file.OpenStreamForReadAsync();
-            stmReader = new BinaryReader(stream, Encoding.ASCII);
-
-            iras = await file.OpenAsync(FileAccessMode.Read);
-            cvsBmp = await CanvasBitmap.LoadAsync(creator, iras);
-
-
-            //var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-            //ulong size = stream.Size;
-            //using (var inputStream = stream.GetInputStreamAt(0))
-            //{
-            //    // We'll add more code here in the next step.
-            //    using (var dataReader = new Windows.Storage.Streams.DataReader(inputStream))
-            //    {
-            //        uint numBytesLoaded = await dataReader.LoadAsync((uint)size);
-            //        string text = dataReader.ReadString(numBytesLoaded);
-
-            //    }
-            //}
-
-        }
-        
-
-        public int GetJpgSize(string FileName, out Size JpgSize, out float Wpx, out float Hpx)
-        {
-            JpgSize = new Size(0, 0);
-            Wpx = 0; Hpx = 0;
-            int rx = 0;
-
-            GetFileText();
-            while (stmReader == null)
+            try
             {
-                Sleep(50);
+                iras = await file.OpenAsync(FileAccessMode.Read);
+                cvsBmp = await CanvasBitmap.LoadAsync(creator, iras);
+                var sbmp = await MainPage.GetSoftwareBitmap(file);
+                Common.Sleep(50);
+                resolutionX = (float)cvsBmp.SizeInPixels.Width;//sbmp.PixelWidth;
+                resolutionY = (float)cvsBmp.SizeInPixels.Height;//sbmp.PixelHeight;
+                DipX = sbmp.DpiX;
+                DipY = sbmp.DpiY;
+                FileSupported = true;
+                InitFinished = true;
+                ParentPage.InitAfterImageLoaded();
             }
-            
-            stream.Seek(0, SeekOrigin.Begin);
-
-            int ff = stmReader.ReadByte();
-            int type = stmReader.ReadByte();
-
-            if (ff != 0xff || type != 0xd8)
-            {//非JPG文件
-                stmReader.Dispose();
-                Debug.WriteLine("Error -> File({2}) Not JPG: {0}{1}", ff, type, file.Name);
-                return rx;
-            }
-            long ps = 0;
-            do
+            catch (Exception e)
             {
-                do
-                {
-                    ff = stmReader.ReadByte();
-                    if (ff < 0) //文件结束
-                    {
-                        stmReader.Dispose();
-                        Debug.WriteLine("End of File, position: {0}", stream.Position);
-                        return rx;
-                    }
-                } while (ff != 0xff);
-
-                do
-                {
-                    type = stmReader.ReadByte();
-                } while (type == 0xff);
-
-                //MessageBox.Show(ff.ToString() + "," + type.ToString(), stmReader.Position.ToString());
-                ps = stream.Position;
-                switch (type)
-                {
-                    case 0x00:
-                    case 0x01:
-                    case 0xD0:
-                    case 0xD1:
-                    case 0xD2:
-                    case 0xD3:
-                    case 0xD4:
-                    case 0xD5:
-                    case 0xD6:
-                    case 0xD7:
-                        break;
-                    case 0xc0: //SOF0段
-                        ps = stmReader.ReadByte() * 256;
-                        ps = stream.Position + ps + stmReader.ReadByte() - 2; //加段长度
-
-                        stmReader.ReadByte(); //丢弃精度数据
-                        //高度
-                        JpgSize.Height = stmReader.ReadByte() * 256;
-                        JpgSize.Height = JpgSize.Height + stmReader.ReadByte();
-                        //宽度
-                        JpgSize.Width = stmReader.ReadByte() * 256;
-                        JpgSize.Width = JpgSize.Width + stmReader.ReadByte();
-                        //后面信息忽略
-                        if (rx != 1 && rx < 3) rx = rx + 1;
-                        break;
-                    case 0xe0: //APP0段
-                        ps = stmReader.ReadByte() * 256;
-                        ps = stream.Position + ps + stmReader.ReadByte() - 2; //加段长度
-
-                        stream.Seek(5, SeekOrigin.Current); //丢弃APP0标记(5bytes)
-                        stream.Seek(2, SeekOrigin.Current); //丢弃主版本号(1bytes)及次版本号(1bytes)
-                        int units = stmReader.ReadByte(); //X和Y的密度单位,units=0：无单位,units=1：点数/英寸,units=2：点数/厘米
-
-                        //水平方向(像素/英寸)分辨率
-                        Wpx = stmReader.ReadByte() * 256;
-                        Wpx = Wpx + stmReader.ReadByte();
-                        if (units == 2) Wpx = (float)(Wpx * 2.54); //厘米变为英寸
-                        //垂直方向(像素/英寸)分辨率
-                        Hpx = stmReader.ReadByte() * 256;
-                        Hpx = Hpx + stmReader.ReadByte();
-                        if (units == 2) Hpx = (float)(Hpx * 2.54); //厘米变为英寸
-                        //后面信息忽略
-                        if (rx != 2 && rx < 3) rx = rx + 2;
-                        break;
-
-                    default: //别的段都跳过////////////////
-                        ps = stmReader.ReadByte() * 256;
-                        ps = stream.Position + ps + stmReader.ReadByte() - 2; //加段长度
-                        break;
-                }
-                if (ps + 1 >= stream.Length) //文件结束
-                {
-                    stmReader.Dispose();
-                    return rx;
-                }
-                stream.Position = ps; //移动指针
-            } while (type != 0xda); // 扫描行开始
-            stmReader.Dispose();
-            return rx;
+                Debug.WriteLine(e.ToString());
+                FileSupported = false;
+                InitFinished = true;
+            }
         }
     }
     public class ColorBoxItem
@@ -646,11 +519,12 @@ namespace BeitieSpliter
             CurrentPage.Width = ImageScrollViewer.Width;
         }
 
-        private void InitDrawParameters()
+        public bool InitDrawParameters()
         {
-            if (CurrentBtImage == null)
+            if ((CurrentBtImage == null) ||
+                (CurrentBtImage.resolutionX == 0))
             {
-                return;
+                return false;
             }
 
             BtGrids.ImageFile = CurrentBtImage.file;
@@ -693,6 +567,7 @@ namespace BeitieSpliter
                 "PageMargin:({4},{5},{6},{7})", ColumnNumber, RowNumber, CurrentBtImage.resolutionX,
                 CurrentBtImage.resolutionY, BtGrids.PageMargin.Left, BtGrids.PageMargin.Top, 
                 BtGrids.PageMargin.Right, BtGrids.PageMargin.Bottom);
+            return true;
         }
 
         private void RefreshPage()
@@ -742,6 +617,13 @@ namespace BeitieSpliter
             }
             return name.Substring(0, index);
         }
+        public void InitAfterImageLoaded()
+        {
+            InitDrawParameters();
+            ParsePageText();
+            BtnMore.IsEnabled = true;
+            RefreshPage(1);
+        }
 
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
@@ -758,15 +640,17 @@ namespace BeitieSpliter
             if (file != null)
             {
                 // Application now has read/write access to the picked file
+                CurrentBtImage = new BeitieImage(this, CurrentPage, file);
+                if (!CurrentBtImage.FileSupported)
+                {
+                    Common.ShowMessageDlg("文件格式不支持!", null);
+                    CurrentBtImage = null;
+                    return;
+                }
                 SetDirFilePath("图片: " + file.Path);
                 if (TieAlbum.Text == "")
                     TieAlbum.Text = GetFileTitle(file);
-                CurrentBtImage = new BeitieImage(CurrentPage, file);
-                
-                InitDrawParameters();
-                ParsePageText();
-                BtnMore.IsEnabled = true;
-                RefreshPage(1);
+
             }
             else
             {
@@ -1008,7 +892,7 @@ namespace BeitieSpliter
             }
         }
 
-        async Task<SoftwareBitmap> GetSoftwareBitmap(StorageFile inputFile)
+        public static async Task<SoftwareBitmap> GetSoftwareBitmap(StorageFile inputFile)
         {
             SoftwareBitmap softwareBitmap;
             using (IRandomAccessStream stream = await inputFile.OpenAsync(FileAccessMode.Read))

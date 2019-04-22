@@ -125,7 +125,7 @@
             <ScrollViewer x:Name="ItemScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible"
                     ZoomMode="Enabled">
 
-                <canvas:CanvasControl Draw="CurrentItem_OnDraw" 
+                <canvas:CanvasControl Draw="CurrentItem_OnDraw"
                                       x:Name="CurrentItem" ClearColor="Gray" PointerMoved="PointerMovedCurrentItem" PointerPressed="PointerPressedCurrentItem" PointerEntered="PointerEnteredCurrentItem" PointerExited="PointerExitedCurrentItem" PointerReleased="PointerReleasedCurrentItem" />
 
             </ScrollViewer>
