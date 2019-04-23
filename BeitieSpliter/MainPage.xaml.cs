@@ -1455,13 +1455,15 @@ namespace BeitieSpliter
             {
                 Frame frame = new Frame();
                 frame.Navigate(typeof(GridsConfig), this);
+
                 Window.Current.Content = frame;
                 // You have to activate the window in order to show it later.
                 Window.Current.Activate();
 
                 newViewId = ApplicationView.GetForCurrentView().Id;
             });
-            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId, ViewSizePreference.UseMore);
+            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId/*, ViewSizePreference.UseMore*/);
+
         }
         bool HaveGotFocus = true;
         protected override void OnGotFocus(RoutedEventArgs e)
@@ -1555,8 +1557,10 @@ namespace BeitieSpliter
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateParseStatus();
-        }
+            var view = ApplicationView.GetForCurrentView();
 
-  
+            view.Title = "碑帖分割工具";
+
+        } 
     }
 }

@@ -34,9 +34,9 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </Page.Resources>
-
-
-    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Margin="10,10,10,0" BorderThickness="{ThemeResource SearchBoxThemePadding}">
+    
+    
+    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Padding="10,10,10,0" BorderBrush="DarkGray" BorderThickness="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>

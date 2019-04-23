@@ -26,6 +26,7 @@ using Windows.ApplicationModel.Core;
 using Windows.System.Threading;
 using Windows.UI.Xaml.Automation.Peers;
 using Windows.UI.Input;
+using Windows.UI.ViewManagement;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -706,7 +707,12 @@ namespace BeitieSpliter
             NotifyUser(string.Format("当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}",
                 BtImage.resolutionX, BtImage.resolutionY, BtGrids.ElementRects.Count, BtGrids.Rows, BtGrids.Columns, ChangeStep),
                 NotifyType.StatusMessage);
-           
+
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
+            
+            var view = ApplicationView.GetForCurrentView();
+
+            view.Title = "碑帖分割工具";
         }
         private void GetCurrentRowCol(ref int row, ref int col)
         {
