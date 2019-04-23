@@ -775,6 +775,7 @@ namespace BeitieSpliter
             Point pntLt, pntRb;
             GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb);
             Color BaseColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
+            float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
             pntLt.X += ChangeRect.left;
             pntLt.Y += ChangeRect.top;
@@ -782,8 +783,26 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
             
             Rect drawRect = new Rect(pntLt, pntRb);
-            DrawRectangle(draw, drawRect, BaseColor, BtGrids.PenWidth);
             
+            //switch (CurrentLocation)
+            //{
+            //    case PointerLocation.InsideImageButNotElement:
+            //    case PointerLocation.OutsideImage:
+            //        break;
+            //    default:
+            //        penWidth = BtGrids.PenWidth + 3;
+            //        if (BtGrids.GridType == BeitieGrids.ColorType.Dark)
+            //        {
+            //            BaseColor = Colors.Red;
+            //        }
+            //        else
+            //        {
+            //            BaseColor = Colors.SeaShell;
+            //        }
+            //        break;
+            //}
+            DrawRectangle(draw, drawRect, BaseColor, penWidth);
+
             foreach (Point elem in DrawLineElements)
             {
                 Rect rc = BtGrids.GetRectangle((int)elem.X, (int)elem.Y);
@@ -794,10 +813,10 @@ namespace BeitieSpliter
                 {
                     if (DrawLineElements.Count == 1)
                     {
-                        if (BtGrids.BackupColors.Count > 1)
-                        {
-                            drawColor = BtGrids.BackupColors.ElementAt(1);
-                        }
+                        //if (BtGrids.BackupColors.Count > 1)
+                        //{
+                        //    drawColor = BtGrids.BackupColors.ElementAt(1);
+                        //}
                     }
                     else
                     {
@@ -809,7 +828,7 @@ namespace BeitieSpliter
                         }
                     }
                 }
-                DrawRectangle(draw, rc, drawColor, BtGrids.PenWidth);
+                DrawRectangle(draw, rc, drawColor, penWidth);
             }
         }
         private void CurrentItem_OnDraw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
@@ -1582,8 +1601,8 @@ namespace BeitieSpliter
                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
                     {
                         Refresh(false);
-                        UpdatePointerCursor(PointerLocation.OutsideImage);
                     }
+                    loc = PointerLocation.OutsideImage;
                     break;
                 default:
                     break;
@@ -1662,5 +1681,6 @@ namespace BeitieSpliter
 
             UpdatePointer(pp, PointerStatus.Released);
         }
+
     }
 }

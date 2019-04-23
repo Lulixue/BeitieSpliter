@@ -129,10 +129,16 @@ namespace BeitieSpliter
 
     public sealed class BeitieGrids : ICloneable
     {
+        public enum ColorType
+        {
+            Light,
+            Dark,
+        }
+
+        public ColorType GridType = ColorType.Dark;
         public float angle = 0;
         public float PenWidth = 0;
         public List<Color> BackupColors = new List<Color>();
-        public List<Color> ContrastColors = new List<Color>();
         public Color PenColor = Colors.Red;
         public Thickness PageMargin = new Thickness();
         public BeitieImage BtImageParent = null;
@@ -148,6 +154,7 @@ namespace BeitieSpliter
         public List<BeitieElement> Elements = new List<BeitieElement>();
 
         public bool IsImageRotated() { return angle != 0; }
+        public double ExtraSize = 5;
 
         public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol)
         {
@@ -156,6 +163,31 @@ namespace BeitieSpliter
 
             GetMinLeftTop(minRow, maxRow, minCol, maxCol, ref pntLt);
             GetMaxRightBottom(minRow, maxRow, minCol, maxCol, ref pntRb);
+
+            pntLt.X -= ExtraSize;
+            pntLt.Y -= ExtraSize;
+            pntRb.X += ExtraSize;
+            pntRb.Y += ExtraSize;
+
+            if (pntLt.X < 0)
+            {
+                pntLt.X = 0;
+            }
+                
+            if (pntLt.Y < 0)
+            {
+                pntLt.Y = 0;
+            }
+            
+            if (pntRb.X > BtImageParent.resolutionX)
+            {
+                pntRb.X = BtImageParent.resolutionX;
+            }
+
+            if (pntRb.Y > BtImageParent.resolutionY)
+            {
+                pntRb.Y = BtImageParent.resolutionY;
+            }
 
             return new Rect(pntLt, pntRb);
         }
@@ -465,6 +497,7 @@ namespace BeitieSpliter
 
             if (!NeedContinue)
             {
+                BtGrids.GridType = BeitieGrids.ColorType.Light;
                 return;
             }
 
@@ -476,6 +509,7 @@ namespace BeitieSpliter
                     NeedContinue = false;
                     continue;
                 }
+                BtGrids.GridType = BeitieGrids.ColorType.Dark;
                 BtGrids.BackupColors.Add(item.Value);
             }
         }
@@ -489,6 +523,7 @@ namespace BeitieSpliter
             LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
             LightColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
             LightColorItems.Add(new ColorBoxItem(Colors.Green, "绿色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Gold, "金色"));
 
             DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
@@ -503,7 +538,7 @@ namespace BeitieSpliter
             {
                 ColorBoxItems.Add(item);
             }
-            ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Text == "红色");
+            ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Text == "黄色");
             BtGrids.PenColor = ColorBoxSelectedItem.Value;
             UpdateBackupColors();
 
@@ -512,8 +547,13 @@ namespace BeitieSpliter
                 RowCount.Items.Add(i);
                 ColumnCount.Items.Add(i);
             }
+            for (int i = 1; i < 10; i++)
+            {
+                PenWidthCombo.Items.Add(i);
+            }
             RowCount.SelectedIndex = 8;
             ColumnCount.SelectedIndex = 5;
+            PenWidthCombo.SelectedIndex = 1;
 
             CurrentPage.Height = ImageScrollViewer.Height;
             CurrentPage.Width = ImageScrollViewer.Width;
@@ -531,7 +571,6 @@ namespace BeitieSpliter
             BtGrids.BtImageParent = CurrentBtImage;
 
             BtGrids.PenColor = ColorBoxSelectedItem.Value;
-            BtGrids.PenWidth = float.Parse(PenWidthBox.Text);
 
             ColumnNumber = GetColumnCount();
             RowNumber = GetRowCount();
@@ -803,16 +842,7 @@ namespace BeitieSpliter
             UpdateBackupColors();
             CurrentPage.Invalidate();
         }
-
-        private void PenWidthBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
-
-        private void PageMargin_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
+        
         private void InitPageMargin()
         {
             string pattern = "([\\d\\.]+),?";
@@ -849,24 +879,33 @@ namespace BeitieSpliter
                 Common.ShowMessageDlg("Invalid margin: " + textbox.Text, null);
             }
         }
-
-        private void PenWidthBox_LostFocus(object sender, RoutedEventArgs e)
+        private void PenWidth_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var textbox = (TextBox)sender;
-            if (Regex.IsMatch(textbox.Text, "^[\\d]+\\.?[\\d]?$") && textbox.Text != "")
+            BtGrids.PenWidth = (PenWidthCombo?.SelectedIndex + 1) ?? 2;
+            CurrentPage.Invalidate();
+        }
+
+        private void PenWidth_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var combo = (ComboBox)sender;
+
+            if (combo?.Text == "")
             {
-                BtGrids.PenWidth = float.Parse(PenWidthBox.Text);
+                return;
+            }
+
+            if (Regex.IsMatch(combo.Text, "^[\\d]+\\.?[\\d]?$") && combo.Text != "")
+            {
+                BtGrids.PenWidth = float.Parse(PenWidthCombo.Text);
             }
             else
             {
-                BtGrids.PenWidth = 0;
-                int pos = textbox.SelectionStart - 1;
-                textbox.Text = textbox.Text.Remove(pos, 1);
-                textbox.SelectionStart = pos;
-                Common.ShowMessageDlg("Invalid pen width: " + textbox.Text, null);
+                BtGrids.PenWidth = 2;
+                Common.ShowMessageDlg("Invalid pen width: " + combo.Text, null);
             }
             CurrentPage.Invalidate();
         }
+
 
         async void SaveWholePage(string name)
         {
@@ -1024,7 +1063,7 @@ namespace BeitieSpliter
                 Title = "输入释文",
                 Content = "你还没有输入释文, 是否生成图片?",
                 CloseButtonText = "继续生成",
-                PrimaryButtonText = "输入释文"
+                PrimaryButtonText = "输入释文",
             };
 
             ContentDialogResult result = await locationPromptDialog.ShowAsync();
@@ -1517,5 +1556,7 @@ namespace BeitieSpliter
         {
             UpdateParseStatus();
         }
+
+  
     }
 }

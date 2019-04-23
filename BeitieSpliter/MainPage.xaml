@@ -74,7 +74,7 @@
                        LostFocus="ColumnCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70" />
             <TextBlock  Text="裁边：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1" TextChanged="PageMargin_TextChanged" 
+            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1" 
                       LostFocus="PageMargin_LostFocus"
                       Width="130" FontSize="14" Style="{StaticResource LeftFriendlyBox}" />
             <TextBlock  Text="画笔颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
@@ -85,9 +85,9 @@
                        SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
                         Width="70" />
             <TextBlock  Text="画笔宽度：" Margin="20,0,5,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PenWidthBox" 
-                      LostFocus="PenWidthBox_LostFocus"
-                      TextChanged="PenWidthBox_TextChanged" Text="1" Width="70" Style="{StaticResource LeftFriendlyBox}" InputScope="Number"  />
+            <ComboBox  x:Name="PenWidthCombo" Margin="0,3,0,0"  SelectionChanged="PenWidth_SelectionChanged"  
+                       LostFocus="PenWidth_LostFocus"
+                       IsDropDownOpen="True" IsEditable="True" Width="70"/>
             <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
         </StackPanel>
 
