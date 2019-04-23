@@ -5,7 +5,7 @@
   <Properties>
     <DisplayName>BeitieSpliter</DisplayName>
     <PublisherDisplayName>v-ligxia</PublisherDisplayName>
-    <Logo>Assets\BeitieSpliterStoreLogo.png</Logo>
+    <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
@@ -16,6 +16,11 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="BeitieSpliter.App">
       <uap:VisualElements DisplayName="碑帖分割工具" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\BeitieSpliter44X44Logo.png" Description="对碑帖图片进行单字分割" BackgroundColor="transparent">
+        <uap:DefaultTile ShortName="碑帖分割工具">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="lightGray" />
       </uap:VisualElements>
     </Application>
