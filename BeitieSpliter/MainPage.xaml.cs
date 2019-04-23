@@ -151,7 +151,7 @@ namespace BeitieSpliter
 
         public ColorType GridType = ColorType.Dark;
         public float angle = 0;
-        public float PenWidth = 0;
+        public float PenWidth = 1;
         public List<Color> BackupColors = new List<Color>();
         public Color PenColor = Colors.Red;
         public Thickness PageMargin = new Thickness();
@@ -580,7 +580,6 @@ namespace BeitieSpliter
             {
                 return false;
             }
-
             BtGrids.ImageFile = CurrentBtImage.file;
             BtGrids.BtImageParent = CurrentBtImage;
 
@@ -732,6 +731,7 @@ namespace BeitieSpliter
         }
         public void InitAfterImageLoaded()
         {
+            BtGrids = new BeitieGrids();
             InitDrawParameters();
             ParsePageText();
             BtnMore.IsEnabled = true;
