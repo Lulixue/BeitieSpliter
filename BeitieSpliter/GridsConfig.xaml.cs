@@ -710,9 +710,6 @@ namespace BeitieSpliter
 
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
             
-            var view = ApplicationView.GetForCurrentView();
-
-            view.Title = "碑帖分割工具";
         }
         private void GetCurrentRowCol(ref int row, ref int col)
         {
@@ -1017,6 +1014,7 @@ namespace BeitieSpliter
         {
             string info = "";
             info += string.Format("当前修改元素: {0}个, ", DrawLineElements.Count);
+            info += string.Format("当前矩形尺寸： {0:0}*{1:0}, ", ToAdjustRect.Width, ToAdjustRect.Height);
             info += string.Format("当前矩形改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
             info += string.Format("修改角度: {0:F1}", BtGrids.angle);
             NotifyUser(info, NotifyType.StatusMessage);
@@ -1557,7 +1555,7 @@ namespace BeitieSpliter
             LastLocation = CurrentLocation;
 
             PointerLocation loc = GetPointerLocation(pp);
-            TracePointerLocation(pp, status);
+            //TracePointerLocation(pp, status);
             
             //NotifyUser(string.Format("Previous Status: {0}, Next: {1}", LastPntrStatus, status), NotifyType.StatusMessage);
 
@@ -1657,7 +1655,7 @@ namespace BeitieSpliter
 
         private void PointerEnteredCurrentItem(object sender, PointerRoutedEventArgs e)
         {
-           Debug.WriteLine("SettingPage PointerEntered ");
+            Debug.WriteLine("SettingPage PointerEntered ");
             PointerPoint ptrpnt = e.GetCurrentPoint((UIElement)sender);
             Point pp = new Point(ptrpnt.Position.X, ptrpnt.Position.Y);
             pp.X -= AdjustExtendSize;

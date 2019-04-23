@@ -127,6 +127,20 @@ namespace BeitieSpliter
         public bool revised = false;
     }
 
+    public class BeitieAlbumItem
+    {
+        public BeitieAlbumItem(StorageFile f, int n)
+        {
+            file = f;
+            no = n;
+            NumberedCount = n;
+        }
+
+        public StorageFile file = null;
+        public int no = 0;
+        public int NumberedCount = 0;
+    }
+
     public sealed class BeitieGrids : ICloneable
     {
         public enum ColorType
@@ -632,18 +646,78 @@ namespace BeitieSpliter
         {
             if (path != null)
             {
-                FileDirPath.Visibility = Visibility.Visible;
                 FileDirPath.Text = path;
-            }
-            else
-            {
-                FileDirPath.Visibility = Visibility.Collapsed;
+                FileDirPath.Select(path.Length, 0);
+                FileDirPath.SelectAll();
             }
         }
 
-        private void OnImportBeitieDir(object sender, RoutedEventArgs e)
+        StorageFolder BtFolder = null;
+        Dictionary<int, BeitieAlbumItem> DictBtFiles = new Dictionary<int, BeitieAlbumItem>();
+        private void StartFolderFiles()
         {
+            if (FolderFileCombo.Items == null)
+            {
+                return;
+            }
+            if (FolderFileCombo.Items.Count <= 1)
+            {
+                BtnNextImg.IsEnabled = false;
+                BtnPreviousImg.IsEnabled = false;
+            }
+            else
+            {
+                BtnNextImg.IsEnabled = true;
+                BtnPreviousImg.IsEnabled = true;
+            }
+            FolderFileCombo.SelectedIndex = 0;
+        }
+        private async void OnImportBeitieDir(object sender, RoutedEventArgs e)
+        {
+            var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
 
+            folderPicker.FileTypeFilter.Add(".jpg");
+            folderPicker.FileTypeFilter.Add(".jpeg");
+            folderPicker.FileTypeFilter.Add(".png");
+
+            BtFolder = await folderPicker.PickSingleFolderAsync();
+            if (BtFolder != null)
+            {
+                // Application now has read/write access to all contents in the picked folder
+                // (including other sub-folder contents)
+                Windows.Storage.AccessCache.StorageApplicationPermissions.
+                FutureAccessList.AddOrReplace("PickedFolderToken", BtFolder);
+
+                IReadOnlyList<StorageFile> BtFolderFileList = await BtFolder.GetFilesAsync();
+
+                if (BtFolderFileList.Count < 1)
+                {
+                    Common.ShowMessageDlg("所选文件夹下找不到碑帖图片！", null);
+                    return;
+                }
+
+                ImageSlidePanel.Visibility = Visibility;
+                FolderFileCombo.Items.Clear();
+                DictBtFiles.Clear();
+                int i = 0;
+                int baseNo = 1;
+                foreach (StorageFile file in BtFolderFileList)
+                {
+                    FolderFileCombo.Items.Add(string.Format("[{0}/{1}]{2}", i+1, BtFolderFileList.Count, file.Name));
+                    DictBtFiles.Add(i++, new BeitieAlbumItem(file, baseNo));
+                    baseNo += (ColumnNumber * RowNumber);
+                }
+                StartFolderFiles();
+                SetDirFilePath("文件夹: " + BtFolder.Path);
+
+                if (TieAlbum.Text == "")
+                    TieAlbum.Text = BtFolder.Name;
+            }
+            else
+            {
+                SetDirFilePath(null);
+            }
         }
         
         private string GetFileTitle(StorageFile file)
@@ -663,7 +737,52 @@ namespace BeitieSpliter
             BtnMore.IsEnabled = true;
             RefreshPage(1);
         }
+        private void OnImageSlide(object sender, RoutedEventArgs e)
+        {
+            if (sender == BtnPreviousImg)
+            {
+                if (FolderFileCombo.SelectedIndex >= 1)
+                {
+                    FolderFileCombo.SelectedIndex--;
+                }
+            }
+            else if (sender == BtnNextImg)
+            {
+                if (FolderFileCombo.SelectedIndex < (DictBtFiles.Count - 1))
+                {
+                    FolderFileCombo.SelectedIndex++;
+                }
+            }
+        }
 
+        private void FolderFileCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DictBtFiles.Count < 1)
+            {
+                return;
+            }
+            foreach (KeyValuePair<int, BeitieAlbumItem> kv in DictBtFiles)
+            {
+                if (kv.Key == FolderFileCombo.SelectedIndex)
+                {
+                    OpenFile(kv.Value.file, kv.Value.no);
+                    break;
+                }
+            }
+        }
+
+        private void OpenFile(StorageFile file, int no)
+        {
+            Debug.WriteLine(String.Format("Open FIle: {0}, No: {1}", file.Name, no));
+            CurrentBtImage = new BeitieImage(this, CurrentPage, file);
+            if (!CurrentBtImage.FileSupported)
+            {
+                Common.ShowMessageDlg("文件格式不支持!", null);
+                CurrentBtImage = null;
+                return;
+            }
+            StartNoBox.Text = string.Format("{0}", no);
+        }
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
             FileOpenPicker openPicker = new FileOpenPicker
@@ -678,18 +797,20 @@ namespace BeitieSpliter
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
+                ImageSlidePanel.Visibility = Visibility;
                 // Application now has read/write access to the picked file
-                CurrentBtImage = new BeitieImage(this, CurrentPage, file);
-                if (!CurrentBtImage.FileSupported)
-                {
-                    Common.ShowMessageDlg("文件格式不支持!", null);
-                    CurrentBtImage = null;
-                    return;
-                }
+                BtFolder = null;
+
+                DictBtFiles.Clear();
+                FolderFileCombo.Items.Clear();
+                FolderFileCombo.Items.Add("[1/1]" + file.Name);
+                DictBtFiles.Add(0, new BeitieAlbumItem(file, 1));
+
+                StartFolderFiles();
+                
                 SetDirFilePath("图片: " + file.Path);
                 if (TieAlbum.Text == "")
                     TieAlbum.Text = GetFileTitle(file);
-
             }
             else
             {
@@ -801,6 +922,7 @@ namespace BeitieSpliter
             {
                 InitDrawParameters();
             }
+            ParsePageText();
             RefreshPage();
         }
         private void ColumnCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -825,6 +947,7 @@ namespace BeitieSpliter
             {
                 InitDrawParameters();
             }
+            ParsePageText();
             CurrentPage.Invalidate();
         }
         private void RowCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1218,6 +1341,23 @@ namespace BeitieSpliter
             NotifyUser(info, NotifyType.StatusMessage);
         }
 
+        void UpdateBeitieAlbumItemNo(int curMaxZiNo)
+        {
+            KeyValuePair<int, BeitieAlbumItem> prev;
+            foreach (KeyValuePair<int, BeitieAlbumItem> kv in DictBtFiles)
+            {
+                if (kv.Key == FolderFileCombo.SelectedIndex)
+                {
+                    kv.Value.NumberedCount = curMaxZiNo;
+                }
+                if (prev.Value != null)
+                {
+                    kv.Value.no = prev.Value.NumberedCount + prev.Value.no;
+                }
+                prev = kv;
+            }
+        }
+
         private void ParsePageText()
         {
             string txt = PageText.Text;
@@ -1297,7 +1437,7 @@ namespace BeitieSpliter
                     }
                 }
             }
-            
+            UpdateBeitieAlbumItemNo(ZiNo);
             UpdateParseStatus();
         }
 
@@ -1557,10 +1697,11 @@ namespace BeitieSpliter
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateParseStatus();
-            var view = ApplicationView.GetForCurrentView();
+            
+            UpdateColumnCount();
+            UpdateRowCount();
+        }
+        
 
-            view.Title = "碑帖分割工具";
-
-        } 
     }
 }

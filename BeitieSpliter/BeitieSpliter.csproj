@@ -135,6 +135,10 @@
     <None Include="BeitieSpliter_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\BeitieSpliter44X44Logo.scale-200.png" />
+    <Content Include="Assets\BeitieSpliter44X44Logo.targetsize-24.png" />
+    <Content Include="Assets\BeitieSpliterStoreLogo.scale-100.png" />
+    <Content Include="Assets\BeitieSpliterStoreLogo.scale-150.png" />
     <Content Include="Properties\Default.rd.xml">
       <SubType>Designer</SubType>
     </Content>

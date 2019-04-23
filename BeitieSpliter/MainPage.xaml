@@ -54,11 +54,16 @@
                 <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
                 <Button x:Name="ImportBtDir" Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
             </StackPanel>
-
-            <StackPanel VerticalAlignment="Center" Margin="0,0,10,0" Orientation="Horizontal" HorizontalAlignment="Stretch"  >
+            <StackPanel Name="ImageSlidePanel" Visibility="Collapsed" Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Margin="0,2,5,2" x:Name="BtnPreviousImg" Click="OnImageSlide"  Content="&lt;" HorizontalAlignment="Right" VerticalAlignment="Stretch" />
+               
+                <Button Margin="0,2,10,2" x:Name="BtnNextImg" Click="OnImageSlide" Content=">"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
+                <ComboBox  x:Name="FolderFileCombo" Margin="0,3,10,0"  SelectionChanged="FolderFileCombo_SelectionChanged"  
+                       IsDropDownOpen="True" IsEditable="False" Width="150"/>
                 <TextBox x:Name="FileDirPath" VerticalContentAlignment="Center"  IsSpellCheckEnabled="False"
-                         MaxWidth="500" FontSize="18" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+                         MaxWidth="500"  VerticalAlignment="Stretch" Style="{StaticResource LeftFriendlyBox}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
             </StackPanel>
+            
         </StackPanel>
 
         <Button Grid.Row="0" Grid.Column="1"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
@@ -89,8 +94,11 @@
                        LostFocus="PenWidth_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
             <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
+            
         </StackPanel>
-
+        
+        
+        
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
             <ScrollViewer x:Name="ImageScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible"
                     ZoomMode="Enabled">
