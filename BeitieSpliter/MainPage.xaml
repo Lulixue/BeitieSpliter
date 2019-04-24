@@ -43,7 +43,7 @@
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="17*"/>
-            <RowDefinition Height="1.2*"/>
+            <RowDefinition Height="1.5*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
@@ -70,7 +70,11 @@
 
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock  Text="行数：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock Name="ZiCountTitle" Text="总字数：" Visibility="Collapsed" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <TextBox  x:Name="ZiCountBox" Text="10" Visibility="Collapsed" InputScope="TelephoneNumber"
+                      LostFocus="ZiCount_LostFocus"
+                      Width="70" FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
+            <TextBlock  Name="RowCountTitle" Text="行数：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
                        LostFocus="RowCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
@@ -78,23 +82,23 @@
             <ComboBox  x:Name="ColumnCount"  Margin="0,3,0,0" SelectionChanged="ColumnCount_SelectionChanged"  
                        LostFocus="ColumnCount_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70" />
-            <TextBlock  Text="裁边：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock Name="MarginTitle" Text="裁边：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1" 
                       LostFocus="PageMargin_LostFocus"
-                      Width="130" FontSize="14" Style="{StaticResource LeftFriendlyBox}" />
-            <TextBlock  Text="画笔颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
+                      Width="130" FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
+            <TextBlock  Text="网格颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
 
             <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
-                       SelectedValuePath="Value" DisplayMemberPath="Text"
+                       SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,3,0,0" 
                        SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
                        SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
                         Width="70" />
-            <TextBlock  Text="画笔宽度：" Margin="20,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock  Text="网格宽度：" Margin="20,0,5,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="PenWidthCombo" Margin="0,3,0,0"  SelectionChanged="PenWidth_SelectionChanged"  
                        LostFocus="PenWidth_LostFocus"
                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
+            <CheckBox Name="XingcaoModeCheck" Click="XincaoModeCheck_Clicked" Content="行草模式" Margin="15,0,0,0" FontSize="16" MinWidth="100"/>
             <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
-            
         </StackPanel>
         
         
@@ -118,7 +122,7 @@
         <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="3">
             <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
             <RelativePanel RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <TextBox Name="StartNoBox" Text="1" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30"/>
+                <TextBox Name="StartNoBox" Text="1" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number"/>
             </RelativePanel>
         </StackPanel>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 

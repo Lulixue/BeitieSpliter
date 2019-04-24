@@ -89,6 +89,7 @@ namespace BeitieSpliter
         Rect BtImageShowRect = new Rect();
         Rect BtImageAdjustRect = new Rect();
         HashSet<Point> DrawLineElements = new HashSet<Point>();
+        Point CurrentXcElementPnt = new Point();
         Rect ToAdjustRect = new Rect();
         bool AvgCol = true;
         bool AvgRow = true;
@@ -224,6 +225,17 @@ namespace BeitieSpliter
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
+            return true;
+        }
+        bool UpdateXingcaoElementsRects()
+        {
+            ChangeStruct offset = new ChangeStruct();
+            offset.Copy(ChangeRect);
+            offset.left -= LastChangeRect.left;
+            offset.right -= LastChangeRect.right;
+            offset.top -= LastChangeRect.top;
+            offset.bottom -= LastChangeRect.bottom;
+        
             return true;
         }
 
@@ -495,8 +507,109 @@ namespace BeitieSpliter
         }
 
         private double AdjustExtendSize = 0;
+
+        private void CalculateXingcaoDrawRect()
+        {
+            Point pntLt = new Point();
+            Point pntRb = new Point();
+            int SelectedCol = ColumnNumber.SelectedIndex + 1;
+            int SelectedElementNo = CurrentElements.SelectedIndex + 1;
+            int PreCol = GetPreviousColRow(SelectedCol, MIN_ROW_COLUMN);
+            int NextCol = GetNextColRow(SelectedCol, BtGrids.Columns);
+            int minCol = MIN_ROW_COLUMN;
+            int maxCol = BtGrids.Columns;
+            int minRow = MIN_ROW_COLUMN;
+            int maxRow = BtGrids.Rows;
+
+            if (OperationType.SingleColumn == OpType)
+            {
+                minCol = maxCol = SelectedCol;
+            }
+            else
+            {
+                // whole page
+                PreCol = minCol;
+                NextCol = maxCol;
+            }
+            BtImageAdjustRect = BtGrids.GetMaxRectangle(minRow, PreCol, maxRow, NextCol);
+
+            if (!ChkShowGrid?.IsChecked ?? true)
+            {
+                for (int row = minRow; row <= maxRow; row++)
+                {
+                    for (int col = minCol; col <= maxCol; col++)
+                    {
+                        DrawLineElements.Add(new Point(row, col));
+                    }
+                }
+            }
+            
+            CurrentItem.Height = (BtImageAdjustRect.Height + 2 * AdjustExtendSize);
+            CurrentItem.Width = BtImageAdjustRect.Width + 2 * AdjustExtendSize;
+
+            pntLt.X = AdjustExtendSize; // 0
+            pntLt.Y = AdjustExtendSize; // 0
+            pntRb.X = BtImageAdjustRect.Width + AdjustExtendSize;
+            pntRb.Y = BtImageAdjustRect.Height + AdjustExtendSize;
+
+
+            BtImageShowRect = new Rect(pntLt, pntRb);
+
+            if (AdjustGridsSwitch?.IsOn ?? false)
+            {
+                Rect rcStart = BtGrids.GetRectangle(minRow, minCol);
+                Rect rcEnd = BtGrids.GetRectangle(maxRow, maxCol);
+
+                ToAdjustRect.X = rcStart.X - BtImageAdjustRect.X;
+                ToAdjustRect.Y = rcStart.Y - BtImageAdjustRect.Y;
+                ToAdjustRect.Width = rcEnd.X - rcStart.X + rcEnd.Width;
+                ToAdjustRect.Height = rcEnd.Y - rcStart.Y + rcEnd.Height;
+            }
+            else
+            {
+                CurrentXcElementPnt.X = SelectedCol;
+                CurrentXcElementPnt.Y = CurrentElements.SelectedIndex + 1;
+                PntrTargetType = PointerTargetType.ElementRect;
+                if (!BtGrids.XingcaoElements.ContainsKey(CurrentXcElementPnt))
+                {
+                    PntrTargetType = PointerTargetType.XingcaoInitDraw;
+                }
+                else
+                {
+                    var result = BtGrids.XingcaoElements.Where(p => p.Key.Y == CurrentXcElementPnt.Y);
+                    foreach (KeyValuePair<Point, BeitieGridRect> pair in result)
+                    {
+                        ToAdjustRect = pair.Value.rc;
+                        if (pair.Key.X != CurrentXcElementPnt.X)
+                        {
+                            BtGrids.XingcaoElements.Remove(pair.Key);
+                            BtGrids.XingcaoElements.Add(new Point(CurrentXcElementPnt.X, CurrentXcElementPnt.Y),
+                                new BeitieGridRect(ToAdjustRect));
+                        }
+                        break;
+                    }
+                }
+            }
+
+            ChangeRect = new ChangeStruct();
+        
+            Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
+               BtImageAdjustRect.X, BtImageAdjustRect.Y, BtImageAdjustRect.Width, BtImageAdjustRect.Height);
+            Debug.WriteLine("Image Size: ({0}*{1}), Show Rect:({4:0},{5:0},{6:0},{7:0})",
+                BtImage.resolutionX, BtImage.resolutionY, 0, 0,
+                BtImageShowRect.X, BtImageShowRect.Y, BtImageShowRect.Width, BtImageShowRect.Height);
+            Debug.WriteLine("To Adjust Rect: ({1:0},{2:0},{3:0},{4:0}), Target Type: {5}", 0,
+               ToAdjustRect.X, ToAdjustRect.Y, ToAdjustRect.Width, ToAdjustRect.Height, PntrTargetType);
+
+        }
         private void CalculateDrawRect()
         {
+            if (BtGrids.XingcaoMode)
+            {
+                CalculateXingcaoDrawRect();
+                return;
+            }
+
             Point pntLt = new Point();
             Point pntRb = new Point();
             int SelectedCol = ColumnNumber.SelectedIndex + 1;
@@ -547,13 +660,7 @@ namespace BeitieSpliter
             pntRb.Y = BtImageAdjustRect.Height + AdjustExtendSize;
 
             BtImageShowRect = new Rect(pntLt, pntRb);
-            Debug.WriteLine("Operation: {0}, Previous: {1},{2}; Current: {3},{4}; Next: {5},{6}",
-                OpType, PreRow, PreCol, SelectedRow, SelectedCol, NextRow, NextCol);
-            Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})",0,
-                BtImageAdjustRect.X, BtImageAdjustRect.Y, BtImageAdjustRect.Width, BtImageAdjustRect.Height);
-            Debug.WriteLine("Image Size: ({0}*{1}), Show Rect:({4:0},{5:0},{6:0},{7:0})",
-                BtImage.resolutionX, BtImage.resolutionY, 0, 0,
-                BtImageShowRect.X, BtImageShowRect.Y, BtImageShowRect.Width, BtImageShowRect.Height);
+           
             
             CurrentItem.Height = (BtImageAdjustRect.Height + 2 * AdjustExtendSize);
             CurrentItem.Width = BtImageAdjustRect.Width + 2 * AdjustExtendSize;
@@ -573,11 +680,18 @@ namespace BeitieSpliter
             ToAdjustRect.Y = rcStart.Y - BtImageAdjustRect.Y;
             ToAdjustRect.Width = rcEnd.X - rcStart.X + rcEnd.Width;
             ToAdjustRect.Height = rcEnd.Y - rcStart.Y + rcEnd.Height;
-
-            Debug.WriteLine("To Adjust Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
-               ToAdjustRect.X, ToAdjustRect.Y, ToAdjustRect.Width, ToAdjustRect.Height);
             ChangeRect = new ChangeStruct();
 
+
+            Debug.WriteLine("Operation: {0}, Previous: {1},{2}; Current: {3},{4}; Next: {5},{6}",
+               OpType, PreRow, PreCol, SelectedRow, SelectedCol, NextRow, NextCol);
+            Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
+                BtImageAdjustRect.X, BtImageAdjustRect.Y, BtImageAdjustRect.Width, BtImageAdjustRect.Height);
+            Debug.WriteLine("Image Size: ({0}*{1}), Show Rect:({4:0},{5:0},{6:0},{7:0})",
+                BtImage.resolutionX, BtImage.resolutionY, 0, 0,
+                BtImageShowRect.X, BtImageShowRect.Y, BtImageShowRect.Width, BtImageShowRect.Height);
+            Debug.WriteLine("To Adjust Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
+               ToAdjustRect.X, ToAdjustRect.Y, ToAdjustRect.Width, ToAdjustRect.Height);
         }
         private bool IsParaInvalid()
         {
@@ -709,6 +823,23 @@ namespace BeitieSpliter
                 NotifyType.StatusMessage);
 
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
+
+            if (BtGrids.XingcaoMode)
+            {
+                HangNoTitle.Visibility = Visibility.Collapsed;
+                RowNumber.Visibility = Visibility.Collapsed;
+                OpSingleRow.Visibility = Visibility.Collapsed;
+                ChkFixedHeight.Visibility = Visibility.Collapsed;
+                ChkFixedWidth.Visibility = Visibility.Collapsed;
+                ChkAvgCol.Visibility = Visibility.Collapsed;
+                ChkAvgRow.Visibility = Visibility.Collapsed;
+                OpSingleElement.Visibility = Visibility.Collapsed;
+                OpObjectTitle.Text = "选取蓝本：";
+
+                AdjustGridsSwitch.Visibility = Visibility.Visible;
+                ChkShowGrid.Visibility = Visibility.Visible;
+
+            }
             
         }
         private void GetCurrentRowCol(ref int row, ref int col)
@@ -720,6 +851,10 @@ namespace BeitieSpliter
         private Object SyncObj = new Object();
         private void UpdateElementRowCol(bool baseOnRowCol)
         {
+            if (BtGrids.XingcaoMode)
+            {
+                return;
+            }
             lock(SyncObj)
             {
                 Debug.WriteLine("UpdateElementRowCol: {0}", baseOnRowCol);
@@ -888,6 +1023,13 @@ namespace BeitieSpliter
             FixedHeight = ChkFixedHeight?.IsChecked ?? false;
             FixedWidth = ChkFixedWidth?.IsChecked ?? false;
         }
+        private void SetButton(object uielem, bool enabled)
+        {
+            Button ue = (Button)uielem;
+            ue.IsEnabled = enabled;
+
+            ue.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         private void Operation_Checked(object sender, RoutedEventArgs e)
         {
@@ -896,16 +1038,24 @@ namespace BeitieSpliter
                 OpType = OperationType.SingleElement;
                 if (BtnLeftElement != null)
                 {
-                    BtnLeftElement.Content = "左一字";
-                    BtnRightElement.Content = "右一字";
                     BtnTopElement.Content = "上一字";
                     BtnBottomElement.Content = "下一字";
-                    BtnLeftElement.IsEnabled = true;
-                    BtnTopElement.IsEnabled = true;
-                    BtnRightElement.IsEnabled = true;
-                    BtnBottomElement.IsEnabled = true;
+                    SetButton(BtnTopElement, true);
+                    SetButton(BtnBottomElement, true);
 
-                    UpdateFixedChecks(true, true);
+                    if (!BtGrids.XingcaoMode)
+                    {
+                        SetButton(BtnLeftElement, true);
+                        SetButton(BtnRightElement, true);
+                        BtnLeftElement.Content = "左一字";
+                        BtnRightElement.Content = "右一字";
+                        UpdateFixedChecks(true, true);
+                    }
+                    else
+                    {
+                        SetButton(BtnLeftElement, false);
+                        SetButton(BtnRightElement, false);
+                    }
                 }
             }
             else if (OpSingleRow?.IsChecked ?? false)
@@ -916,10 +1066,10 @@ namespace BeitieSpliter
                 {
                     BtnTopElement.Content = "上一行";
                     BtnBottomElement.Content = "下一行";
-                    BtnLeftElement.IsEnabled = false;
-                    BtnRightElement.IsEnabled = false;
-                    BtnTopElement.IsEnabled = true;
-                    BtnBottomElement.IsEnabled = true;
+                    SetButton(BtnLeftElement, false);
+                    SetButton(BtnRightElement, false);
+                    SetButton(BtnTopElement, true);
+                    SetButton(BtnBottomElement, true);
                     UpdateFixedChecks(false, false);
                 }
             }
@@ -930,10 +1080,10 @@ namespace BeitieSpliter
                 {
                     BtnLeftElement.Content = "左一列";
                     BtnRightElement.Content = "右一列";
-                    BtnLeftElement.IsEnabled = true;
-                    BtnRightElement.IsEnabled = true;
-                    BtnBottomElement.IsEnabled = false;
-                    BtnTopElement.IsEnabled = false;
+                    SetButton(BtnLeftElement, true);
+                    SetButton(BtnRightElement, true);
+                    SetButton(BtnBottomElement, false);
+                    SetButton(BtnTopElement, false);
                     UpdateFixedChecks(false, false);
                 }
             }
@@ -942,10 +1092,10 @@ namespace BeitieSpliter
                 OpType = OperationType.WholePage;
                 if (BtnLeftElement != null)
                 {
-                    BtnLeftElement.IsEnabled = false;
-                    BtnBottomElement.IsEnabled = false;
-                    BtnTopElement.IsEnabled = false;
-                    BtnRightElement.IsEnabled = false;
+                    SetButton(BtnLeftElement, false);
+                    SetButton(BtnBottomElement, false);
+                    SetButton(BtnTopElement, false);
+                    SetButton(BtnRightElement, false);
                     UpdateFixedChecks(false, false);
                 }
             }
@@ -1335,6 +1485,13 @@ namespace BeitieSpliter
         {
             ChangeStep = double.Parse(ChangeStepTxtBox.Text);
         }
+        enum PointerTargetType
+        {
+            ElementRect,
+            XingcaoInitDraw,
+        }
+        PointerTargetType PntrTargetType = PointerTargetType.ElementRect;
+
         enum PointerLocation
         {
             OutsideImage,
@@ -1556,7 +1713,6 @@ namespace BeitieSpliter
 
             PointerLocation loc = GetPointerLocation(pp);
             //TracePointerLocation(pp, status);
-            
             //NotifyUser(string.Format("Previous Status: {0}, Next: {1}", LastPntrStatus, status), NotifyType.StatusMessage);
 
             switch (status)
@@ -1686,5 +1842,23 @@ namespace BeitieSpliter
             UpdatePointer(pp, PointerStatus.Released);
         }
 
+        private void GridCheck_Clicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AdjustGrids_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (AdjustGridsSwitch.IsOn)
+            {
+                ChkAvgCol.Visibility = Visibility.Visible;
+                OpObjectTitle.Text = "操作对象：";
+            }
+            else
+            {
+                ChkAvgCol.Visibility = Visibility.Collapsed;
+                OpObjectTitle.Text = "选取蓝本：";
+            }
+        }
     }
 }

@@ -114,12 +114,18 @@ namespace BeitieSpliter
     {
         public BeitieGridRect(Rect rect)
         {
-            rc = rect;
+            rc.X = rect.X;
+            rc.Y = rect.Y;
+            rc.Width = rect.Width;
+            rc.Height = rect.Height;
             revised = false;
         }
         public BeitieGridRect(Rect rect, bool rev)
         {
-            rc = rect;
+            rc.X = rect.X;
+            rc.Y = rect.Y;
+            rc.Width = rect.Width;
+            rc.Height = rect.Height;
             revised = rev;
         }
 
@@ -148,7 +154,10 @@ namespace BeitieSpliter
             Light,
             Dark,
         }
-
+        public double GridHeight = 0.0;
+        public double GridWidth = 0;
+        public bool XingcaoMode = false;
+        public int ElementCount = 0;
         public ColorType GridType = ColorType.Dark;
         public float angle = 0;
         public float PenWidth = 1;
@@ -164,9 +173,9 @@ namespace BeitieSpliter
         public StorageFile ImageFile = null;
         public StorageFile RotateFile = null;
         public List<BeitieGridRect> ElementRects = new List<BeitieGridRect>();
-
         public List<BeitieElement> Elements = new List<BeitieElement>();
-
+        // Point -> X: ColumnNo, Y: Index
+        public Dictionary<Point, BeitieGridRect> XingcaoElements = new Dictionary<Point, BeitieGridRect>();
         public bool IsImageRotated() { return angle != 0; }
         public double ExtraSize = 5;
 
@@ -206,6 +215,18 @@ namespace BeitieSpliter
             return new Rect(pntLt, pntRb);
         }
    
+        public void InitXingcaoRects()
+        {
+            Point pntLt = new Point();
+            ElementRects.Clear();
+            for (int i = 0; i < Columns; i++)
+            {
+                pntLt.X = i * GridWidth + OriginPoint.X;
+                pntLt.Y = OriginPoint.Y;
+                ElementRects.Add(new BeitieGridRect(new Rect(pntLt.X, pntLt.Y,
+                    GridWidth, DrawHeight)));
+            }
+        }
 
         public void GetMinLeftTop(int MinRow, int MaxRow, int MinCol, int MaxCol, ref Point pntLt)
         {
@@ -331,7 +352,7 @@ namespace BeitieSpliter
             //}
 
         }
-        
+
     }
 
     public sealed class BeitieImage
@@ -411,6 +432,7 @@ namespace BeitieSpliter
         int ColumnNumber = -1;
         int RowNumber = -1;
         public event EventHandler SaveSplitted;
+        bool XingcaoMode = false;
 
         private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
         public ObservableCollection<ColorBoxItem> ColorBoxItems {
@@ -580,6 +602,7 @@ namespace BeitieSpliter
             {
                 return false;
             }
+            BtGrids.XingcaoMode = XingcaoMode;
             BtGrids.ImageFile = CurrentBtImage.file;
             BtGrids.BtImageParent = CurrentBtImage;
 
@@ -589,36 +612,53 @@ namespace BeitieSpliter
             RowNumber = GetRowCount();
             InitPageMargin();
 
-
             CurrentPage.Height = CurrentBtImage.resolutionY;
             CurrentPage.Width = CurrentBtImage.resolutionX;
 
             BtGrids.Columns = ColumnNumber;
-            BtGrids.Rows = RowNumber;
+            if (XingcaoMode)
+            {
+                BtGrids.Rows = 1;
+                BtGrids.ElementCount = int.Parse(ZiCountBox.Text);
+            }
+            else
+            {
+                BtGrids.Rows = RowNumber;
+                BtGrids.ElementCount = RowNumber * ColumnNumber;
+            }
             BtGrids.DrawHeight = CurrentPage.Height - BtGrids.PageMargin.Top - BtGrids.PageMargin.Bottom;
             BtGrids.DrawWidth = CurrentPage.Width - BtGrids.PageMargin.Left - BtGrids.PageMargin.Right;
 
             BtGrids.OriginPoint = new Point(BtGrids.PageMargin.Left, BtGrids.PageMargin.Top);
-            
-            float GridHeight = (float)(BtGrids.DrawHeight / RowNumber);
-            float GridWidth = (float)(BtGrids.DrawWidth / ColumnNumber);
-            
+
+            BtGrids.GridHeight = (float)(BtGrids.DrawHeight / RowNumber);
+            BtGrids.GridWidth = (float)(BtGrids.DrawWidth / ColumnNumber);
+
             BtGrids.ElementRects.Clear();
-            Point leftTop = new Point();
-            for (int i = 0; i < RowNumber; i++)
+            if (XingcaoMode)
             {
-                leftTop = BtGrids.OriginPoint;
-                leftTop.Y += i * GridHeight;
-                for (int j = 0; j < ColumnNumber; j++)
+                BtGrids.InitXingcaoRects();
+            }
+            else
+            {
+                Point leftTop = new Point();
+                for (int i = 0; i < RowNumber; i++)
                 {
-                    BtGrids.ElementRects.Add(new BeitieGridRect(new Rect(leftTop.X, leftTop.Y, GridWidth, GridHeight)));
-                    leftTop.X += GridWidth;
+                    leftTop = BtGrids.OriginPoint;
+                    leftTop.Y += i * BtGrids.GridHeight;
+                    for (int j = 0; j < ColumnNumber; j++)
+                    {
+                        BtGrids.ElementRects.Add(new BeitieGridRect(new Rect(leftTop.X, leftTop.Y, 
+                            BtGrids.GridWidth, BtGrids.GridHeight)));
+                        leftTop.X += BtGrids.GridWidth;
+                    }
                 }
             }
-            Debug.WriteLine("Image Parameter:\n col/row: ({0},{1}), resolution: ({2:0},{3:0})\n " +
+            
+            Debug.WriteLine("Image Parameter:\n col/row: ({0},{1}), element: {8}, resolution: ({2:0},{3:0})\n " +
                 "PageMargin:({4},{5},{6},{7})", ColumnNumber, RowNumber, CurrentBtImage.resolutionX,
                 CurrentBtImage.resolutionY, BtGrids.PageMargin.Left, BtGrids.PageMargin.Top, 
-                BtGrids.PageMargin.Right, BtGrids.PageMargin.Bottom);
+                BtGrids.PageMargin.Right, BtGrids.PageMargin.Bottom, BtGrids.ElementCount);
             return true;
         }
 
@@ -663,11 +703,17 @@ namespace BeitieSpliter
             {
                 BtnNextImg.IsEnabled = false;
                 BtnPreviousImg.IsEnabled = false;
+                BtnNextImg.Visibility = Visibility.Collapsed;
+                BtnPreviousImg.Visibility = Visibility.Collapsed;
+                FolderFileCombo.Visibility = Visibility.Collapsed;
             }
             else
             {
                 BtnNextImg.IsEnabled = true;
                 BtnPreviousImg.IsEnabled = true;
+                BtnNextImg.Visibility = Visibility.Visible;
+                BtnPreviousImg.Visibility = Visibility.Visible;
+                FolderFileCombo.Visibility = Visibility.Visible;
             }
             FolderFileCombo.SelectedIndex = 0;
         }
@@ -831,17 +877,10 @@ namespace BeitieSpliter
 
         private void PageDrawLines(CanvasDrawingSession draw)
         {
-            int GridNumber = ColumnNumber * RowNumber;
-            int index = 0;
-            for (int i = 0; i < RowNumber; i++)
+            for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
-                for (int j = 0; j < ColumnNumber; j++)
-                {
-                    index = i * ColumnNumber + j;
-                    draw.DrawRectangle(BtGrids.ElementRects[index].rc, BtGrids.PenColor, BtGrids.PenWidth);
-                }
+                draw.DrawRectangle(BtGrids.ElementRects[i].rc, BtGrids.PenColor, BtGrids.PenWidth);
             }
-
         }
 
         private bool IsColumnRowValid()
@@ -997,7 +1036,6 @@ namespace BeitieSpliter
             }
             else
             {
-                BtGrids.PenWidth = 0;
                 textbox.Text = "";
                 Common.ShowMessageDlg("Invalid margin: " + textbox.Text, null);
             }
@@ -1269,6 +1307,7 @@ namespace BeitieSpliter
 
             StorageFolder folder = await GetSaveFolder(album);
             NotifyUser("单字分割图片已保存到文件夹"+ folder.Path, NotifyType.StatusMessage);
+            Common.ShowMessageDlg("单字分割图片已保存到文件夹" + folder.Path, null);
         }
         private void OnSaveSplitImages(object sender, RoutedEventArgs e)
         {
@@ -1371,7 +1410,7 @@ namespace BeitieSpliter
             BtGrids.Elements.Clear();
             if (length == 0)
             {
-                length = BtGrids.Rows * BtGrids.Columns;
+                length = BtGrids.ElementCount;
                 for (int i = 0; i < length; i++)
                 {
                     BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi,
@@ -1701,7 +1740,40 @@ namespace BeitieSpliter
             UpdateColumnCount();
             UpdateRowCount();
         }
-        
 
+        private void XincaoModeCheck_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (XingcaoModeCheck == null)
+            {
+                return;
+            }
+            if (!XingcaoModeCheck?.IsChecked ?? false)
+            {
+                XingcaoMode = false;
+
+                RowCount.Visibility = Visibility.Visible;
+                RowCountTitle.Visibility = Visibility.Visible;
+                ZiCountBox.Visibility = Visibility.Collapsed;
+                ZiCountTitle.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                XingcaoMode = true;
+                RowCount.Visibility = Visibility.Collapsed;
+                RowCountTitle.Visibility = Visibility.Collapsed;
+                ZiCountBox.Visibility = Visibility.Visible;
+                ZiCountTitle.Visibility = Visibility.Visible;
+            }
+
+            InitDrawParameters();
+            RefreshPage();
+        }
+
+        private void ZiCount_LostFocus(object sender, RoutedEventArgs e)
+        {
+            InitDrawParameters();
+            RefreshPage();
+
+        }
     }
 }

@@ -36,7 +36,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="0.8*"/>
-            <RowDefinition Height="1.2*"/>
+            <RowDefinition Height="1.4*"/>
             <RowDefinition Height="8*"/>
             <RowDefinition Height="1.2*"/>
             <RowDefinition Height="1*"/>
@@ -47,7 +47,7 @@
             <ColumnDefinition Width="1.1*"/>
         </Grid.ColumnDefinitions>
         <StackPanel  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Padding="2" >
-            <TextBlock  Text="行号：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock Name="HangNoTitle" Text="行号：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowNumber" Margin="0,0,0,0"  SelectionChanged="RowNumber_SelectionChanged"  
                        VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True"  Width="70"/>
@@ -57,7 +57,7 @@
                         VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True" Width="70" />
 
-            <TextBlock  Text="所有元素：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock  Text="元素：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="CurrentElements"  Margin="0,0,0,0" SelectionChanged="CurrentElements_SelectionChanged"  
                         VerticalAlignment="Center" SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True" Width="90" />
@@ -75,15 +75,17 @@
         </StackPanel>
         
         <StackPanel  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock  Text="操作对象：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <RadioButton x:Name="OpWholePage" Content="整页" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" IsChecked="True"/>
-            <RadioButton x:Name="OpSingleElement" Content="单字" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
-            <RadioButton x:Name="OpSingleColumn" Content="整列" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
-            <RadioButton x:Name="OpSingleRow" Content="整行" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+            <TextBlock  Name="OpObjectTitle" Text="操作对象：" Margin="2,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <RadioButton x:Name="OpWholePage" Content="整页"  MinWidth="80" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" IsChecked="True"/>
+            <RadioButton x:Name="OpSingleElement" Content="单字" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+            <RadioButton x:Name="OpSingleColumn" Content="整列" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+            <RadioButton x:Name="OpSingleRow" Content="整行" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+            <ToggleSwitch Name="AdjustGridsSwitch" Visibility="Collapsed" OffContent="设置文字" OnContent="调整网格" Toggled="AdjustGrids_Toggled" />
             <CheckBox Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
             <CheckBox Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
             <CheckBox Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
             <CheckBox Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
+            <CheckBox Name="ChkShowGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
         </StackPanel>
         
         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >
