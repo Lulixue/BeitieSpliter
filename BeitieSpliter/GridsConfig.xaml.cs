@@ -846,6 +846,7 @@ namespace BeitieSpliter
 
             ChangeStep = greater / 50;
             ChangeStep = (ChangeStep < 1) ? 1 : ChangeStep;
+            ChangeStep = 1;     // 有了鼠标调节，按钮调节只是辅助性微调
 
             ChangeStepTxtBox.Text = string.Format("{0:0}", ChangeStep);
         }
@@ -1238,55 +1239,57 @@ namespace BeitieSpliter
         {
             if (sender == BtnLeftElement)
             {
-                ColumnNumber.SelectedIndex = GetPreviousColRow(ColumnNumber.SelectedIndex, 0);
+                int selectedIndex = ColumnNumber.SelectedIndex;
+                if (selectedIndex == 0)
+                {
+                    selectedIndex = ColumnNumber.Items.Count - 1;
+                }
+                else
+                {
+                    selectedIndex = GetPreviousColRow(ColumnNumber.SelectedIndex, 0);
+                }
+                ColumnNumber.SelectedIndex = selectedIndex;
             }
             else if (sender == BtnRightElement)
             {
-                ColumnNumber.SelectedIndex = GetNextColRow(ColumnNumber.SelectedIndex, BtGrids.Columns - 1);
+
+                int selectedIndex = ColumnNumber.SelectedIndex;
+                if (selectedIndex == (ColumnNumber.Items.Count - 1))
+                {
+                    selectedIndex = 0;
+                }
+                else
+                {
+                    selectedIndex = GetNextColRow(ColumnNumber.SelectedIndex, BtGrids.Columns - 1);
+                }
+                ColumnNumber.SelectedIndex = selectedIndex;
             }
             else if (sender == BtnTopElement)
             {
-                if (BtGrids.XingcaoMode)
+                int selectedIndex = CurrentElements.SelectedIndex;
+                if (selectedIndex == 0)
                 {
-                    CurrentElements.SelectedIndex = GetPreviousColRow(CurrentElements.SelectedIndex, 0);
-                    return;
-                }
-                if (RowNumber.SelectedIndex == 0)
-                {
-                    if (ColumnNumber.SelectedIndex == (BtGrids.Columns - 1))
-                    {
-                        return;
-                    }
-                    ColumnNumber.SelectedIndex = GetNextColRow(ColumnNumber.SelectedIndex, BtGrids.Columns - 1);
-                    ColumnNumber.SelectedIndex = GetPreviousColRow(ColumnNumber.SelectedIndex, 0);
-                    RowNumber.SelectedIndex = BtGrids.Rows - 1;
+                    selectedIndex = CurrentElements.Items.Count - 1;
                 }
                 else
                 {
-                    RowNumber.SelectedIndex = GetPreviousColRow(RowNumber.SelectedIndex, 0);
+                    selectedIndex = GetPreviousColRow(CurrentElements.SelectedIndex, 0);
                 }
+                CurrentElements.SelectedIndex = selectedIndex;
             }
             else if (sender == BtnBottomElement)
             {
-                if (BtGrids.XingcaoMode)
-                {
-                    CurrentElements.SelectedIndex = GetNextColRow(CurrentElements.SelectedIndex, CurrentElements.Items.Count - 1);
-                    return;
-                }
 
-                if (RowNumber.SelectedIndex == (BtGrids.Rows-1))
+                int selectedIndex = CurrentElements.SelectedIndex;
+                if (selectedIndex == (CurrentElements.Items.Count - 1))
                 {
-                    if (ColumnNumber.SelectedIndex == 0)
-                    {
-                        return;
-                    }
-                    ColumnNumber.SelectedIndex = GetPreviousColRow(ColumnNumber.SelectedIndex, 0);
-                    RowNumber.SelectedIndex = 0;
+                    selectedIndex = 0;
                 }
                 else
                 {
-                    RowNumber.SelectedIndex = GetNextColRow(RowNumber.SelectedIndex, BtGrids.Rows - 1);
+                    selectedIndex = GetNextColRow(CurrentElements.SelectedIndex, (CurrentElements.Items.Count - 1));
                 }
+                CurrentElements.SelectedIndex = selectedIndex;
             }
         }
         private /*async*/ void UpdateAngle(bool fromTxtBox = false)
