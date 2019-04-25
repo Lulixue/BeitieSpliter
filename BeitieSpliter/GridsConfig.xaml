@@ -85,7 +85,7 @@
             <CheckBox Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
             <CheckBox Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
             <CheckBox Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
-            <CheckBox Name="ChkShowGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
+            <CheckBox Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
         </StackPanel>
         
         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >

@@ -235,12 +235,83 @@ namespace BeitieSpliter
             offset.right -= LastChangeRect.right;
             offset.top -= LastChangeRect.top;
             offset.bottom -= LastChangeRect.bottom;
-        
+
+            Rect dstRc = ToAdjustRect;
+            Point pntLt = new Point(dstRc.X, dstRc.Y);
+            Point pntRb = new Point(dstRc.X + dstRc.Width, dstRc.Y + dstRc.Height);
+
+            pntLt.X += offset.left;
+            pntRb.X += offset.right;
+            pntLt.Y += offset.top;
+            pntRb.Y += offset.bottom;
+
+            if (!CheckOutOfImage(pntLt, pntRb))
+            {
+                PrintRect("Invalid", new Rect(pntLt, pntRb));
+                return false;
+            }
+            ToAdjustRect = new Rect(pntLt, pntRb);
+
+            int colNumber = ColumnNumber.SelectedIndex + 1;
+            int elemIndex = CurrentElements.SelectedIndex + 1;
+
+
+            if (!BtGrids.XingcaoElements.ContainsKey(elemIndex))
+            {
+                BeitieGridRect bgr = new BeitieGridRect(ToAdjustRect)
+                {
+                    col = colNumber
+                };
+                BtGrids.XingcaoElements.Add(elemIndex, bgr);
+            }
+            else
+            {
+
+                BtGrids.XingcaoElements[elemIndex].col = (int)CurrentXcElementPnt.X;
+                BtGrids.XingcaoElements[elemIndex].rc = new Rect(pntLt, pntRb);
+               
+            }
+
+            return true;
+        }
+
+        bool CheckOutOfImage(Point pntLt, Point pntRb)
+        {
+            if (pntLt.X < 0)
+            {
+                Common.ShowMessageDlg("已经到了最右边了!", null);
+                NotifyUser("已经到了最右边了!", NotifyType.ErrorMessage);
+                return false;
+            }
+            else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
+            {
+                Common.ShowMessageDlg("已经到了最左边了!", null);
+                NotifyUser("已经到了最左边了!", NotifyType.ErrorMessage);
+                return false;
+            }
+            else if (pntLt.Y < 0)
+            {
+                Common.ShowMessageDlg("已经到了最上边了!", null);
+                NotifyUser("已经到了最上边了!", NotifyType.ErrorMessage);
+                return false;
+            }
+            else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
+            {
+                Common.ShowMessageDlg("已经到了最下边了!", null);
+                NotifyUser("已经到了最下边了!", NotifyType.ErrorMessage);
+                return false;
+            }
             return true;
         }
 
         bool UpdateElementsRects()
         {
+            if ((BtGrids.XingcaoMode) && (!AdjustGridsSwitch.IsOn))
+            {
+                return UpdateXingcaoElementsRects();
+            }
+
+
             ChangeStruct offset = new ChangeStruct();
             offset.Copy(ChangeRect);
             offset.left -= LastChangeRect.left;
@@ -351,34 +422,12 @@ namespace BeitieSpliter
                     {
                         FixedChangedRect(chgType, ref pntLt, ref pntRb, offset);
                     }
-                    if (pntLt.X < 0)
-                    {
-                        Common.ShowMessageDlg("已经到了最右边了!", null);
-                        NotifyUser("已经到了最右边了!", NotifyType.ErrorMessage);
+                    if (!CheckOutOfImage(pntLt, pntRb))
+                    { 
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
                         return false;
                     }
-                    else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
-                    {
-                        Common.ShowMessageDlg("已经到了最左边了!", null);
-                        NotifyUser("已经到了最左边了!", NotifyType.ErrorMessage);
-                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
-                        return false;
-                    }
-                    else if (pntLt.Y < 0)
-                    {
-                        Common.ShowMessageDlg("已经到了最上边了!", null);
-                        NotifyUser("已经到了最上边了!", NotifyType.ErrorMessage);
-                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
-                        return false;
-                    }
-                    else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
-                    {
-                        Common.ShowMessageDlg("已经到了最下边了!", null);
-                        NotifyUser("已经到了最下边了!", NotifyType.ErrorMessage);
-                        PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
-                        return false;
-                    }
+
 
                     PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Before", dstRc);
                     BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(pntLt, pntRb), dstRevised);
@@ -533,7 +582,8 @@ namespace BeitieSpliter
             }
             BtImageAdjustRect = BtGrids.GetMaxRectangle(minRow, PreCol, maxRow, NextCol);
 
-            if (!ChkShowGrid?.IsChecked ?? true)
+            DrawLineElements.Clear();
+            if (!ChkHideGrid?.IsChecked ?? true)
             {
                 for (int row = minRow; row <= maxRow; row++)
                 {
@@ -554,7 +604,7 @@ namespace BeitieSpliter
 
 
             BtImageShowRect = new Rect(pntLt, pntRb);
-
+            ToAdjustRect = new Rect();
             if (AdjustGridsSwitch?.IsOn ?? false)
             {
                 Rect rcStart = BtGrids.GetRectangle(minRow, minCol);
@@ -566,25 +616,24 @@ namespace BeitieSpliter
                 ToAdjustRect.Height = rcEnd.Y - rcStart.Y + rcEnd.Height;
             }
             else
-            {
-                CurrentXcElementPnt.X = SelectedCol;
-                CurrentXcElementPnt.Y = CurrentElements.SelectedIndex + 1;
+            { 
+                int colNumber = ColumnNumber.SelectedIndex + 1;
+                int elemIndex = CurrentElements.SelectedIndex + 1;
+
                 PntrTargetType = PointerTargetType.ElementRect;
-                if (!BtGrids.XingcaoElements.ContainsKey(CurrentXcElementPnt))
+                if (!BtGrids.XingcaoElements.ContainsKey(elemIndex))
                 {
                     PntrTargetType = PointerTargetType.XingcaoInitDraw;
                 }
                 else
                 {
-                    var result = BtGrids.XingcaoElements.Where(p => p.Key.Y == CurrentXcElementPnt.Y);
-                    foreach (KeyValuePair<Point, BeitieGridRect> pair in result)
+                    var result = BtGrids.XingcaoElements.Where(p => p.Key == elemIndex);
+                    foreach (KeyValuePair<int, BeitieGridRect> pair in result)
                     {
                         ToAdjustRect = pair.Value.rc;
-                        if (pair.Key.X != CurrentXcElementPnt.X)
+                        if (pair.Value.col != colNumber)
                         {
-                            BtGrids.XingcaoElements.Remove(pair.Key);
-                            BtGrids.XingcaoElements.Add(new Point(CurrentXcElementPnt.X, CurrentXcElementPnt.Y),
-                                new BeitieGridRect(ToAdjustRect));
+                            BtGrids.XingcaoElements[pair.Key].col = colNumber;
                         }
                         break;
                     }
@@ -837,7 +886,7 @@ namespace BeitieSpliter
                 OpObjectTitle.Text = "选取蓝本：";
 
                 AdjustGridsSwitch.Visibility = Visibility.Visible;
-                ChkShowGrid.Visibility = Visibility.Visible;
+                ChkHideGrid.Visibility = Visibility.Visible;
 
             }
             
@@ -1025,10 +1074,10 @@ namespace BeitieSpliter
         }
         private void SetButton(object uielem, bool enabled)
         {
-            Button ue = (Button)uielem;
-            ue.IsEnabled = enabled;
+            Button btn = (Button)uielem;
+            btn.IsEnabled = enabled;
 
-            ue.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+            btn.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void Operation_Checked(object sender, RoutedEventArgs e)
@@ -1092,10 +1141,18 @@ namespace BeitieSpliter
                 OpType = OperationType.WholePage;
                 if (BtnLeftElement != null)
                 {
-                    SetButton(BtnLeftElement, false);
-                    SetButton(BtnBottomElement, false);
-                    SetButton(BtnTopElement, false);
                     SetButton(BtnRightElement, false);
+                        SetButton(BtnLeftElement, false);
+                    if (BtGrids.XingcaoMode)
+                    {
+                        SetButton(BtnTopElement, true);
+                        SetButton(BtnBottomElement, true);
+                    }
+                    else
+                    {
+                        SetButton(BtnTopElement, false);
+                        SetButton(BtnBottomElement, false);
+                    }
                     UpdateFixedChecks(false, false);
                 }
             }
@@ -1189,6 +1246,11 @@ namespace BeitieSpliter
             }
             else if (sender == BtnTopElement)
             {
+                if (BtGrids.XingcaoMode)
+                {
+                    CurrentElements.SelectedIndex = GetPreviousColRow(CurrentElements.SelectedIndex, 0);
+                    return;
+                }
                 if (RowNumber.SelectedIndex == 0)
                 {
                     if (ColumnNumber.SelectedIndex == (BtGrids.Columns - 1))
@@ -1206,6 +1268,12 @@ namespace BeitieSpliter
             }
             else if (sender == BtnBottomElement)
             {
+                if (BtGrids.XingcaoMode)
+                {
+                    CurrentElements.SelectedIndex = GetNextColRow(CurrentElements.SelectedIndex, CurrentElements.Items.Count - 1);
+                    return;
+                }
+
                 if (RowNumber.SelectedIndex == (BtGrids.Rows-1))
                 {
                     if (ColumnNumber.SelectedIndex == 0)
@@ -1505,6 +1573,7 @@ namespace BeitieSpliter
             OnRightTopBoarder,
             OnRightBottomBoarder,
             OnElementBody,
+            InsideImage,
         }
         enum PointerStatus
         {
@@ -1517,6 +1586,7 @@ namespace BeitieSpliter
             ReleasedToExit,
             MoveOnBoarder,
             MoveToScalingBoarder,
+            MoveToCapture,
         }
         PointerStatus LastPntrStatus = PointerStatus.Exited;
         PointerStatus CurrentPntrStatus = PointerStatus.Exited;
@@ -1565,6 +1635,12 @@ namespace BeitieSpliter
             {
                 return PointerLocation.OutsideImage;
             }
+            if (PntrTargetType == PointerTargetType.XingcaoInitDraw)
+            {
+                return PointerLocation.InsideImage;
+            }
+
+
             //Debug.WriteLine("{0:F1},{1:F1} -> Delta: {0:F1},{1:F1}", pp.X, pp.Y, deltaX, deltaY);
             if ((deltaX > (ToAdjustRect.Width + AdjustDelta)) ||
                 (deltaX < -AdjustDelta))
@@ -1665,6 +1741,9 @@ namespace BeitieSpliter
                     ChangeRect.left = deltaX;
                     ChangeRect.bottom = deltaY;
                     break;
+                case PointerLocation.InsideImage:
+                    ToAdjustRect = new Rect(LastPointerPnt, pp);
+                    break;
                 case PointerLocation.OutsideImage:
                 default:
                     return;
@@ -1677,6 +1756,7 @@ namespace BeitieSpliter
         {
             switch (pl)
             {
+                case PointerLocation.InsideImage:
                 case PointerLocation.InsideImageButNotElement:
                     ChangePointerCursor(CoreCursorType.Arrow);
                     break;
@@ -1705,6 +1785,7 @@ namespace BeitieSpliter
                     break;
             }
         }
+
         private void UpdatePointer(Point pp, PointerStatus status)
         {
             LastPntrStatus = CurrentPntrStatus;
@@ -1712,7 +1793,7 @@ namespace BeitieSpliter
             LastLocation = CurrentLocation;
 
             PointerLocation loc = GetPointerLocation(pp);
-            //TracePointerLocation(pp, status);
+            TracePointerLocation(pp, status);
             //NotifyUser(string.Format("Previous Status: {0}, Next: {1}", LastPntrStatus, status), NotifyType.StatusMessage);
 
             switch (status)
@@ -1731,6 +1812,11 @@ namespace BeitieSpliter
                         UpdateFixedChecks(false, false);
                         status = PointerStatus.PressedToDrag;
                     }
+                    else if (loc == PointerLocation.OnElementBody)
+                    {
+                        LastChangeRect.Reset();
+                        status = PointerStatus.MoveToCapture;
+                    }
                     else if ((loc != PointerLocation.OutsideImage) &&
                         (loc != PointerLocation.InsideImageButNotElement))
                     {
@@ -1741,7 +1827,8 @@ namespace BeitieSpliter
                     break;
                 case PointerStatus.Released:
                     if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
-                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
+                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder) ||
+                        (LastPntrStatus == PointerStatus.MoveToCapture))
                     {
                         status = PointerStatus.ReleasedToExit;
                         UpdateElementsRects();
@@ -1750,7 +1837,8 @@ namespace BeitieSpliter
                     break;
                 case PointerStatus.Moved:
                     if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
-                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
+                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder) ||
+                        (LastPntrStatus == PointerStatus.MoveToCapture))
                     {
                         CursorAdjustRect(pp);
                         return;
@@ -1758,7 +1846,8 @@ namespace BeitieSpliter
                     break;
                 case PointerStatus.Exited:
                     if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
-                       (LastPntrStatus == PointerStatus.MoveToScalingBoarder))
+                        (LastPntrStatus == PointerStatus.MoveToScalingBoarder) ||
+                        (LastPntrStatus == PointerStatus.MoveToCapture))
                     {
                         Refresh(false);
                     }
@@ -1844,7 +1933,7 @@ namespace BeitieSpliter
 
         private void GridCheck_Clicked(object sender, RoutedEventArgs e)
         {
-
+            Refresh();
         }
 
         private void AdjustGrids_Toggled(object sender, RoutedEventArgs e)
@@ -1859,6 +1948,7 @@ namespace BeitieSpliter
                 ChkAvgCol.Visibility = Visibility.Collapsed;
                 OpObjectTitle.Text = "选取蓝本：";
             }
+            Refresh();
         }
     }
 }

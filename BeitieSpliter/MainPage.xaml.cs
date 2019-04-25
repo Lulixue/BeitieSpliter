@@ -128,7 +128,7 @@ namespace BeitieSpliter
             rc.Height = rect.Height;
             revised = rev;
         }
-
+        public int col = 1;
         public Rect rc = new Rect();
         public bool revised = false;
     }
@@ -154,6 +154,7 @@ namespace BeitieSpliter
             Light,
             Dark,
         }
+        public static int MIN_ROW_COL = 1;
         public double GridHeight = 0.0;
         public double GridWidth = 0;
         public bool XingcaoMode = false;
@@ -175,7 +176,7 @@ namespace BeitieSpliter
         public List<BeitieGridRect> ElementRects = new List<BeitieGridRect>();
         public List<BeitieElement> Elements = new List<BeitieElement>();
         // Point -> X: ColumnNo, Y: Index
-        public Dictionary<Point, BeitieGridRect> XingcaoElements = new Dictionary<Point, BeitieGridRect>();
+        public Dictionary<int, BeitieGridRect> XingcaoElements = new Dictionary<int, BeitieGridRect>();
         public bool IsImageRotated() { return angle != 0; }
         public double ExtraSize = 5;
 
@@ -210,6 +211,23 @@ namespace BeitieSpliter
             if (pntRb.Y > BtImageParent.resolutionY)
             {
                 pntRb.Y = BtImageParent.resolutionY;
+            }
+            // 显示全图
+            if (minRow == MIN_ROW_COL)
+            {
+                pntLt.Y = 0;
+            }
+            if (maxRow == Rows)
+            {
+                pntRb.Y = BtImageParent.resolutionY;
+            }
+            if (minCol == MIN_ROW_COL)
+            {
+                pntLt.X = 0;
+            }
+            if (maxCol == Columns)
+            {
+                pntRb.X = BtImageParent.resolutionX;
             }
 
             return new Rect(pntLt, pntRb);
