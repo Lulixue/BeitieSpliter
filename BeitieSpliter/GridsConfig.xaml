@@ -80,12 +80,12 @@
             <RadioButton x:Name="OpSingleElement" Content="单字" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
             <RadioButton x:Name="OpSingleColumn" Content="整列" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
             <RadioButton x:Name="OpSingleRow" Content="整行" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
-            <ToggleSwitch Name="AdjustGridsSwitch" Visibility="Collapsed" OffContent="设置文字" OnContent="调整网格" Toggled="AdjustGrids_Toggled" />
+            <ToggleSwitch Name="AdjustGridsSwitch" Visibility="Collapsed" Width="120"  OffContent="设置文字" OnContent="调整网格" Toggled="AdjustGrids_Toggled" />
             <CheckBox Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
             <CheckBox Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
             <CheckBox Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
             <CheckBox Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
-            <CheckBox Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
+            <CheckBox Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="{x:Bind HideGridChecked, Mode=TwoWay}" Click="GridCheck_Clicked" />
         </StackPanel>
         
         <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" >

@@ -92,6 +92,7 @@ namespace BeitieSpliter
             SingleColumn,
             WholePage,
         }
+        bool? HideGridChecked = false;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
         BeitieGrids LastBtGrids = new BeitieGrids();
@@ -354,6 +355,12 @@ namespace BeitieSpliter
             }
             return true;
         }
+        bool IntEqual(double d1, double d2)
+        {
+            double delta = d1 - d2;
+            return Math.Abs(delta) < 1.0;
+        }
+
 
         bool UpdateElementsRects()
         {
@@ -361,7 +368,7 @@ namespace BeitieSpliter
             {
                 return UpdateXingcaoElementsRects();
             }
-
+            Dictionary<int, BeitieGridRect> backupElements = new Dictionary<int, BeitieGridRect>();
 
             ChangeStruct offset = new ChangeStruct();
             offset.Copy(ChangeRect);
@@ -370,6 +377,34 @@ namespace BeitieSpliter
             offset.top -= LastChangeRect.top;
             offset.bottom -= LastChangeRect.bottom;
             RectChangeType chgType = GetLastChangeType(offset);
+
+            // 在调节整列或整行时忽略边框的反向的位移
+            if (OperationType.SingleRow == OpType)
+            {
+                // 整个横向部分已经撑满了
+                if (IntEqual(ToAdjustRect.Width, BtGrids.DrawWidth))
+                {
+                    if (offset.left == offset.right)
+                    {
+                        offset.left  = 0;
+                        Debug.WriteLine("Stablization Horizon: {0:0}->{1:0}", offset.right, offset.left);
+                        offset.right = offset.left;
+                    }
+                }
+            }
+            else if (OperationType.SingleColumn == OpType)
+            {
+                // 整个纵向部分已经撑满了
+                if (IntEqual(ToAdjustRect.Height, BtGrids.DrawHeight))
+                {
+                    if (offset.top == offset.bottom)
+                    {
+                        offset.top = 0;
+                        Debug.WriteLine("Stablization Horizon: {0:0}->{1:0}", offset.bottom, offset.top);
+                        offset.bottom = offset.top;
+                    }
+                }
+            }
 
             Debug.WriteLine("Offset: {0},{1},{2},{3}", offset.left, offset.top, offset.right, offset.bottom);
             if (chgType <= RectChangeType.BottomMinus)
@@ -413,6 +448,8 @@ namespace BeitieSpliter
                 }
                 else if (OperationType.SingleRow == OpType)
                 {
+
+
                     pntLt.Y += offset.top;
                     pntRb.Y += offset.bottom;
 
@@ -477,11 +514,24 @@ namespace BeitieSpliter
                     if (!CheckOutOfImage(pntLt, pntRb))
                     { 
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
+                        // 恢复修改的元素
+                        foreach (KeyValuePair<int, BeitieGridRect> pair in backupElements)
+                        {
+                            BtGrids.ElementRects[pair.Key] =
+                                new BeitieGridRect(pair.Value.rc)
+                                {
+                                    revised = pair.Value.revised
+                                };
+                        }
                         return false;
                     }
 
 
                     PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Before", dstRc);
+                    backupElements.Add(index, new BeitieGridRect(BtGrids.ElementRects[index].rc)
+                    {
+                        revised = BtGrids.ElementRects[index].revised
+                    });
                     BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(pntLt, pntRb), dstRevised);
                     PrintRect("After", BtGrids.ElementRects[index].rc);
                 }
@@ -686,6 +736,7 @@ namespace BeitieSpliter
             pntRb.Y = BtImageAdjustRect.Height + AdjustExtendSize;
 
 
+            PntrTargetType = PointerTargetType.ElementRect;
             BtImageShowRect = new Rect(pntLt, pntRb);
             ToAdjustRect = new Rect();
             if (AdjustGridsSwitch?.IsOn ?? false)
@@ -714,7 +765,6 @@ namespace BeitieSpliter
                     Debug.WriteLine("Index first: {0}, selected: {1}", firstIndex, elemIndex);
                 }
 
-                PntrTargetType = PointerTargetType.ElementRect;
                 if (!BtGrids.XingcaoElements.ContainsKey(elemIndex))
                 {
                     PntrTargetType = PointerTargetType.XingcaoInitDraw;
@@ -1075,6 +1125,50 @@ namespace BeitieSpliter
             draw.DrawRectangle((float)(rect.Left + AdjustExtendSize), (float)(rect.Top + AdjustExtendSize), 
                 (float)rect.Width, (float)rect.Height, color, strokeWidth);
         }
+        
+        private void DrawElementText(CanvasDrawingSession draw, Rect rc, int index)
+        {
+            BeitieElement be = BtGrids.Elements[index];
+            string name = string.Format("元素[{0}]:{1}", index+1, be.content);
+            
+            double height = rc.Height * 0.2;
+            height = (height < 20) ? 20 : height;
+
+            Rect txtRc = new Rect()
+            {
+                X = rc.Left
+            };
+
+            if (rc.Bottom < (0.9 * BtImageAdjustRect.Height))
+            {
+                txtRc.Y = rc.Bottom + 1;
+            }
+            else
+            {
+                txtRc.Y = rc.Top - 21;
+            }
+            txtRc.Height = height;
+            txtRc.Width = rc.Width;
+            
+            // 在下方/上方显示当前元素名称
+            CanvasTextFormat fmt = new CanvasTextFormat()
+            {
+                FontSize = (int)height/2,
+                HorizontalAlignment = CanvasHorizontalAlignment.Center,
+                VerticalAlignment = CanvasVerticalAlignment.Center
+            };
+            
+            if (fmt.FontSize < 10)
+            {
+                fmt.FontSize = 10;
+            }
+            Debug.WriteLine("Height: {0:0}, FontSize: {1}", txtRc.Height, fmt.FontSize);
+
+
+            DrawRectangle(draw, rc, Colors.Red, BtGrids.PenWidth + 2);
+            draw.FillRectangle(txtRc, Colors.Red);
+            draw.DrawText(name, txtRc, Colors.White, fmt);
+        }
 
         private void DrawLines(CanvasDrawingSession draw)
         {
@@ -1089,24 +1183,7 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
             
             Rect drawRect = new Rect(pntLt, pntRb);
-            
-            //switch (CurrentLocation)
-            //{
-            //    case PointerLocation.InsideImageButNotElement:
-            //    case PointerLocation.OutsideImage:
-            //        break;
-            //    default:
-            //        penWidth = BtGrids.PenWidth + 3;
-            //        if (BtGrids.GridType == BeitieGrids.ColorType.Dark)
-            //        {
-            //            BaseColor = Colors.Red;
-            //        }
-            //        else
-            //        {
-            //            BaseColor = Colors.SeaShell;
-            //        }
-            //        break;
-            //}
+           
             DrawRectangle(draw, drawRect, BaseColor, penWidth);
 
             lock (DrawLineElements)
@@ -1137,6 +1214,18 @@ namespace BeitieSpliter
                         }
                     }
                     DrawRectangle(draw, rc, drawColor, penWidth);
+                }
+                if (!BtGrids.XingcaoMode &&
+                    (OperationType.SingleElement == OpType))
+                {
+                    int selrow = RowNumber.SelectedIndex + 1;
+                    int selcol = ColumnNumber.SelectedIndex + 1;
+                    int index = BtGrids.GetIndex(selrow, selcol, BtGrids.BookOldType);
+                    Rect rc = BtGrids.GetRectangle(selrow, selcol);
+                    rc.X -= BtImageAdjustRect.X;
+                    rc.Y -= BtImageAdjustRect.Y;
+
+                    DrawElementText(draw, rc, index);
                 }
             }
             
@@ -1171,32 +1260,7 @@ namespace BeitieSpliter
                             rc.X -= BtImageAdjustRect.X;
                             rc.Y -= BtImageAdjustRect.Y;
 
-                            DrawRectangle(draw, rc, Colors.Red, penWidth + 2);
-
-                            BeitieElement be = BtGrids.Elements[pair.Key-1];
-                            string name = string.Format("元素[{0}]:{1}", pair.Key, be.content);
-                            Rect txtRc = new Rect()
-                            {
-                                X = rc.Left
-                            };
-                        
-                            if (rc.Bottom < (0.9 * BtImageAdjustRect.Height))
-                            {
-                                txtRc.Y = rc.Bottom + 1;
-                            }
-                            else
-                            {
-                                txtRc.Y = rc.Top - 21;
-                            }
-                            txtRc.Height = 20;
-                            txtRc.Width = rc.Width;
-                            // 在下方/上方显示当前元素名称
-                            CanvasTextFormat fmt = new CanvasTextFormat();
-                            fmt.FontSize = 10;
-                            fmt.HorizontalAlignment = CanvasHorizontalAlignment.Center;
-                            fmt.VerticalAlignment = CanvasVerticalAlignment.Center;
-                            draw.FillRectangle(txtRc, Colors.Red);
-                            draw.DrawText(name, txtRc, Colors.White, fmt);
+                            DrawElementText(draw, rc, pair.Key-1);
                         }
                     }
                     
@@ -1209,7 +1273,7 @@ namespace BeitieSpliter
             lock(BtImage.cvsBmp)
             {
                 var draw = args.DrawingSession;
-
+                
                 draw.Clear(Colors.Black);
                 draw.DrawRectangle(BtImageShowRect, Colors.White, 1);
                 if ((BtGrids == null) || (BtImage == null))
@@ -1224,9 +1288,6 @@ namespace BeitieSpliter
                     Refresh();
                     return;
                 }
-                // image 1000 * 1568
-                // 
-                //draw.DrawImage(BtImage.cvsBmp, (float)BtImageShowRect.X, (float)BtImageShowRect.Y);
                 draw.DrawImage(BtImage.cvsBmp, BtImageShowRect, BtImageAdjustRect);
                 DrawLines(draw);
             }
@@ -1403,12 +1464,45 @@ namespace BeitieSpliter
             }
         }
 
+        int GetXingCaoElementCount()
+        {
+            if (OperationType.SingleElement == OpType)
+            {
+                return 1;
+            }
+            else if (OperationType.WholePage == OpType)
+            {
+                return BtGrids.XingcaoElements.Count;
+            }
+            else if (OperationType.SingleColumn == OpType)
+            {
+                int counter = 0;
+                int selcol = ColumnNumber.SelectedIndex + 1;
+                foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
+                {
+                    if (pair.Value.col == selcol)
+                    {
+                        counter++;
+                    }
+                }
+                return counter;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         void UpdateAdjustStatus()
         {
             string info = "";
-            info += string.Format("当前修改元素: {0}个, ", DrawLineElements.Count);
+            info += string.Format("当前修改元素: {0}个, ", BtGrids.XingcaoMode ?
+                GetXingCaoElementCount() : DrawLineElements.Count );
             info += string.Format("当前矩形尺寸： {0:0}*{1:0}, ", ToAdjustRect.Width, ToAdjustRect.Height);
-            info += string.Format("当前矩形改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+            if (!BtGrids.XingcaoMode)
+            {
+                info += string.Format("当前矩形改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+            }
             info += string.Format("修改角度: {0:F1}", BtGrids.angle);
             NotifyUser(info, NotifyType.StatusMessage);
         }
@@ -1902,11 +1996,21 @@ namespace BeitieSpliter
         }
 
         static readonly double IN_OFFSET_PROP = 0.15;
+        static readonly double IN_OFFSET_MAX = 20;
         private PointerLocation GetPointerLocation(Point pp)
         {
             double outMaxOffset = BtGrids.XingcaoMode ? 1 : AdjustDelta;
             double inMaxOffsetX = ToAdjustRect.Width * IN_OFFSET_PROP;
             double inMaxOffsetY = ToAdjustRect.Height * IN_OFFSET_PROP;
+
+            if (inMaxOffsetX > IN_OFFSET_MAX)
+            {
+                inMaxOffsetX = IN_OFFSET_MAX;
+            }
+            if (inMaxOffsetY > IN_OFFSET_MAX)
+            {
+                inMaxOffsetY = IN_OFFSET_MAX;
+            }
 
             if (!IsPntInRect(pp, new Rect(0, 0, BtImageAdjustRect.Width, BtImageAdjustRect.Height), outMaxOffset))
             {
@@ -2141,7 +2245,8 @@ namespace BeitieSpliter
                     }
                     else if (BtGrids.XingcaoMode)
                     {
-                        if (OpType != OperationType.SingleElement)
+                        if ((OpType != OperationType.SingleElement) &&
+                            (!AdjustGridsSwitch.IsOn))
                         {
                             GetCursorOnXcElement(pp);
                         }
@@ -2244,6 +2349,7 @@ namespace BeitieSpliter
             if (AdjustGridsSwitch.IsOn)
             {
                 ChkAvgCol.Visibility = Visibility.Visible;
+                ChkHideGrid.IsChecked = false;
                 OpObjectTitle.Text = "操作对象：";
             }
             else

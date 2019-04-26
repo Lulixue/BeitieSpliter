@@ -1395,6 +1395,12 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add(';');
             IGNORED_CHARS.Add('(');
             IGNORED_CHARS.Add(')');
+            IGNORED_CHARS.Add('>');
+            IGNORED_CHARS.Add('<');
+            IGNORED_CHARS.Add('[');
+            IGNORED_CHARS.Add(']');
+            IGNORED_CHARS.Add('\'');
+            IGNORED_CHARS.Add('"');
 
             IGNORED_CHARS.Add('，');
             IGNORED_CHARS.Add('。');
@@ -1402,6 +1408,13 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add('、');
             IGNORED_CHARS.Add('（');
             IGNORED_CHARS.Add('）');
+            IGNORED_CHARS.Add('“');
+            IGNORED_CHARS.Add('”');
+            IGNORED_CHARS.Add('《');
+            IGNORED_CHARS.Add('》');
+            IGNORED_CHARS.Add('〈');
+            IGNORED_CHARS.Add('〉');
+
         }
 
         private void UpdateParseStatus()
