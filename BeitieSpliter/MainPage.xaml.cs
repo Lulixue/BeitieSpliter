@@ -159,6 +159,7 @@ namespace BeitieSpliter
         public double GridWidth = 0;
         public bool XingcaoMode = false;
         public int ElementCount = 0;
+        public bool BookOldType = true;
         public ColorType GridType = ColorType.Dark;
         public float angle = 0;
         public float PenWidth = 1;
@@ -244,6 +245,31 @@ namespace BeitieSpliter
                 ElementRects.Add(new BeitieGridRect(new Rect(pntLt.X, pntLt.Y,
                     GridWidth, DrawHeight)));
             }
+        }
+
+        public bool GetElementRoi(int index, ref Rect rc)
+        {
+            if (!XingcaoMode)
+            {
+                if (index > ElementRects.Count)
+                {
+                    return false;
+                }
+                int row = 0, col = 0;
+                IndexToRowCol(index-1, ref row, ref col, BookOldType);
+                rc = GetRectangle(row, col);
+            }
+            else
+            {
+                BeitieGridRect bgr = null;
+                XingcaoElements.TryGetValue(index, out bgr);
+                if (bgr == null)
+                {
+                    return false;
+                }
+                rc = bgr.rc;
+            }
+            return true;
         }
 
         public void GetMinLeftTop(int MinRow, int MaxRow, int MinCol, int MaxCol, ref Point pntLt)
@@ -843,6 +869,8 @@ namespace BeitieSpliter
             {
                 Common.ShowMessageDlg("文件格式不支持!", null);
                 CurrentBtImage = null;
+                BtGrids = null;
+                FolderFileCombo.Items.RemoveAt(no);
                 return;
             }
             StartNoBox.Text = string.Format("{0}", no);
@@ -975,7 +1003,8 @@ namespace BeitieSpliter
                 return;
             }
             ColumnNumber = columns;
-            if (IsColumnRowValid())
+            if (BtGrids.XingcaoMode ||
+                IsColumnRowValid())
             {
                 InitDrawParameters();
             }
@@ -1253,7 +1282,7 @@ namespace BeitieSpliter
         {
             string album = TieAlbum.Text;
             SoftwareBitmap inputBitmap = null;
-            HashSet<Point> ElementIndexes = (HashSet<Point>)para;
+            HashSet<int> ElementIndexes = (HashSet<int>)para;
             int StartNo = int.Parse(StartNoBox.Text);
 
             if ((PageText.Text == "") && !CurrentBtImage.PageTextConfirmed)
@@ -1285,36 +1314,57 @@ namespace BeitieSpliter
 
             if (ElementIndexes == null)
             {
-                ElementIndexes = new HashSet<Point>();
-                for (int i = BtGrids.Columns; i >= 1; i--)
+                ElementIndexes = new HashSet<int>();
+                if (BtGrids.XingcaoMode)
                 {
-                    for (int j = 1; j <= BtGrids.Rows; j++)
+                    foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                     {
-                        ElementIndexes.Add(new Point(j, i));
+                        ElementIndexes.Add(pair.Key);
                     }
                 }
+                else
+                {
+                    for (int i = 1; i <= BtGrids.ElementCount; i++)
+                    {
+                        ElementIndexes.Add(i);
+                    }
+                }
+               
             }
-            foreach (Point pnt in ElementIndexes)
+            if (ElementIndexes.Count == 0)
             {
-                Rect roi = BtGrids.GetRectangle((int)pnt.X, (int)pnt.Y);
-                int index = BtGrids.GetIndex((int)pnt.X, (int)pnt.Y, true);
-                BeitieElement element = BtGrids.Elements[index];
-
+                NotifyUser("未选择元素进行保存!", NotifyType.ErrorMessage);
+                Common.ShowMessageDlg("未选择元素进行保存!", null);
+                return;
+            }
+            
+            foreach (int index in ElementIndexes)
+            {
+                Rect roi = new Rect();
+                BeitieElement element = BtGrids.Elements[index-1];
+                string filename = "";
+                if (!element.NeedAddNo())
+                {
+                    filename = string.Format("{0}.jpg", element.content);
+                }
+                else
+                {
+                    filename = string.Format("{0}-{1}.jpg", element.no + StartNo, element.content);
+                }
+                
                 if (element.type == BeitieElement.BeitieElementType.Kongbai)
                 {
                     continue;
                 }
+
+                if (!BtGrids.GetElementRoi(index, ref roi))
+                {
+                    Common.ShowMessageDlg("保存图片" + filename + "出现错误!", null);
+                    continue;
+                }
+
                 try
                 {
-                    string filename = "";
-                    if (!element.NeedAddNo())
-                    {
-                        filename = string.Format("{0}.jpg", element.content);
-                    }
-                    else
-                    {
-                        filename = string.Format("{0}-{1}.jpg", element.no + StartNo, element.content);
-                    }
                     SaveSingleCropImage(inputBitmap, roi, album, filename);
                 }
                 catch (Exception err)
@@ -1492,6 +1542,11 @@ namespace BeitieSpliter
                     {
                         BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1), ZiNo++));
                     }
+                }
+                if (BtGrids.XingcaoMode)
+                {
+                    BtGrids.ElementCount = BtGrids.Elements.Count;
+                    ZiCountBox.Text = string.Format("{0}", BtGrids.ElementCount);
                 }
             }
             UpdateBeitieAlbumItemNo(ZiNo);
@@ -1784,6 +1839,7 @@ namespace BeitieSpliter
             }
 
             InitDrawParameters();
+            ParsePageText();
             RefreshPage();
         }
 
