@@ -28,6 +28,7 @@ using Windows.UI.Xaml.Automation.Peers;
 using Windows.UI.Input;
 using Windows.UI.ViewManagement;
 using Microsoft.Graphics.Canvas.Text;
+using Windows.System;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -238,7 +239,6 @@ namespace BeitieSpliter
             }
             return true;
         }
-        
         void XingcaoMoveToNextElement()
         {
             lock (BtGrids.XingcaoElements)
@@ -259,7 +259,10 @@ namespace BeitieSpliter
                 {
                     maxIndex++;
                 }
-                CurrentElements.SelectedIndex = maxIndex - 1;
+                if (CurrentElements.SelectedIndex != maxIndex - 1)
+                {
+                    CurrentElements.SelectedIndex = maxIndex - 1;
+                }
             }
         }
 
@@ -315,6 +318,7 @@ namespace BeitieSpliter
                     col = colNumber
                 };
                 BtGrids.XingcaoElements.Add(elemIndex, bgr);
+                FirstShowBanner = false;
             }
             else
             {
@@ -1057,7 +1061,7 @@ namespace BeitieSpliter
                 ChkHideGrid.Visibility = Visibility.Visible;
 
             }
-            
+            Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
         }
         private void GetCurrentRowCol(ref int row, ref int col)
         {
@@ -1125,11 +1129,48 @@ namespace BeitieSpliter
             draw.DrawRectangle((float)(rect.Left + AdjustExtendSize), (float)(rect.Top + AdjustExtendSize), 
                 (float)rect.Width, (float)rect.Height, color, strokeWidth);
         }
+
+        private void DrawBanner(CanvasDrawingSession draw)
+        {
+            Rect rc = new Rect()
+            {
+                X = 0,
+                Y = GetItemScrollHeight()
+            };
+            rc.Height = (BtImageShowRect.Height - rc.Y) * 0.1;
+            rc.Width = BtImageShowRect.Width;
+
+            if (rc.Height > 30)
+            {
+                rc.Height = 30;
+            }
+            rcBanner = rc;
+            // 在下方/上方显示当前元素名称
+            CanvasTextFormat fmt = new CanvasTextFormat()
+            {
+                FontSize = (int)rc.Height / 2,
+                HorizontalAlignment = CanvasHorizontalAlignment.Center,
+                VerticalAlignment = CanvasVerticalAlignment.Center
+            };
+
+            if (fmt.FontSize < 10)
+            {
+                fmt.FontSize = 10;
+            }
+            Debug.WriteLine("Height: {0:0}, FontSize: {1}", rc.Height, fmt.FontSize);
+
+            int index = CurrentElements.SelectedIndex;
+            BeitieElement be = BtGrids.Elements[index];
+            string notfInfo = string.Format("请用鼠标截取元素{0}({1})所在的区域", index + 1, be.content);
+
+            draw.FillRectangle(rc, Colors.Green);
+            draw.DrawText(notfInfo, rc, Colors.White, fmt);
+        }
         
         private void DrawElementText(CanvasDrawingSession draw, Rect rc, int index)
         {
             BeitieElement be = BtGrids.Elements[index];
-            string name = string.Format("元素[{0}]:{1}", index+1, be.content);
+            string name = string.Format("元素{0}({1})", index+1, be.content);
             
             double height = rc.Height * 0.2;
             height = (height < 20) ? 20 : height;
@@ -1169,7 +1210,16 @@ namespace BeitieSpliter
             draw.FillRectangle(txtRc, Colors.Red);
             draw.DrawText(name, txtRc, Colors.White, fmt);
         }
+        private double GetItemScrollHeight()
+        {
+            var transform = CurrentItem.TransformToVisual(ItemScrollViewer);
+            var point = transform.TransformPoint(new Point(0, -10));
 
+            return point.Y;
+        }
+
+        bool FirstShowBanner = true;
+        Rect rcBanner = new Rect();
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
@@ -1263,7 +1313,10 @@ namespace BeitieSpliter
                             DrawElementText(draw, rc, pair.Key-1);
                         }
                     }
-                    
+                    else if (FirstShowBanner)
+                    {
+                        DrawBanner(draw);
+                    }
 
                 }
             }
@@ -1924,6 +1977,7 @@ namespace BeitieSpliter
             MoveOnBoarder,
             MoveToScalingBoarder,
             MoveToCapture,
+            KeyEvent,
         }
         PointerStatus LastPntrStatus = PointerStatus.Exited;
         PointerStatus CurrentPntrStatus = PointerStatus.Exited;
@@ -2250,6 +2304,11 @@ namespace BeitieSpliter
                         {
                             GetCursorOnXcElement(pp);
                         }
+                        if (FirstShowBanner && IsPntInRect(pp, rcBanner, 1))
+                        {
+                            FirstShowBanner = false;
+                            //Refresh(CtrlMessageType.AdjustChange);
+                        }
                     }
                     break;
                 case PointerStatus.Exited:
@@ -2358,6 +2417,63 @@ namespace BeitieSpliter
                 OpObjectTitle.Text = "选取蓝本：";
             }
             Refresh();
+        }
+
+        private void UpdatePointer(VirtualKey key)
+        {
+            switch (LastLocation)
+            {
+                case PointerLocation.OutsideImage:
+                case PointerLocation.InsideImageButNotElement:
+                case PointerLocation.InsideImage:
+                    return;
+            }
+            Point pnt = new Point()
+            {
+                X = LastPointerPnt.X,
+                Y = LastPointerPnt.Y
+            };
+            if (key == VirtualKey.Up)
+            {
+                pnt.Y -= ChangeStep;
+            }
+            else if (key == VirtualKey.Down)
+            {
+                pnt.Y += ChangeStep;
+            }
+            else if (key == VirtualKey.Left)
+            {
+                pnt.X -= ChangeStep;
+            }
+            else if (key == VirtualKey.Right)
+            {
+                pnt.X += ChangeStep;
+            }
+            CursorAdjustRect(pnt);
+        }
+        private void Dispatcher_AcceleratorKeyActivated(CoreDispatcher sender, AcceleratorKeyEventArgs args)
+        {
+            if (args.EventType.ToString().Contains("Down"))
+            {
+                Debug.WriteLine("KeyDown: {0}", args.VirtualKey);
+                var ctrl = Window.Current.CoreWindow.GetKeyState(VirtualKey.Control);
+                if (ctrl.HasFlag(CoreVirtualKeyStates.Down))
+                {
+                    switch (args.VirtualKey)
+                    {
+                        case VirtualKey.Up:
+                        case VirtualKey.Down:
+                        case VirtualKey.Left:
+                        case VirtualKey.Right:
+                            UpdatePointer(args.VirtualKey);
+                            break;
+                    }
+                }
+            }
+        }
+        private void KeyUp_ItemSv(object sender, KeyRoutedEventArgs e)
+        {
+            Debug.WriteLine("KeyUP: {0}", e.Key);
         }
     }
 }
