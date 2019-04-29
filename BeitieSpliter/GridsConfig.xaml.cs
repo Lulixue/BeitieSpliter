@@ -666,7 +666,7 @@ namespace BeitieSpliter
         private int GetFirstXcElementInRect(int rol)
         {
             Rect rc = BtGrids.GetMaxRectangle(MIN_ROW_COLUMN, rol, MIN_ROW_COLUMN, rol);
-            double minDeltaY = 10000;
+            double minDelta = 10000;
             int retIndex = 1;
             foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
             {
@@ -676,15 +676,17 @@ namespace BeitieSpliter
                     X = itemRc.X + itemRc.Width / 2,
                     Y = itemRc.Y + itemRc.Height / 2,
                 };
-
+                
                 if (IsPntInRect(pntC, rc, 0))
                 {
                     double deltaY = Math.Abs(rc.Y - itemRc.Y);
+                    double deltaX = Math.Abs(rc.X - itemRc.X);
+                    double delta = deltaX + deltaY;
                     
-                    if (deltaY < minDeltaY)
+                    if (delta < minDelta)
                     {
                         retIndex = pair.Key;
-                        minDeltaY = deltaY;
+                        minDelta = delta;
                     }
                 }
             }
@@ -758,7 +760,7 @@ namespace BeitieSpliter
                 int colNumber = ColumnNumber.SelectedIndex + 1;
                 int elemIndex = CurrentElements.SelectedIndex + 1;
 
-                if ((CtrlMessageType.ColumnChange == type) &&
+                if ((CtrlMessageType.ColumnChange == type)||
                     (CtrlMessageType.OperationChange == type))
                 {
                     int firstIndex = GetFirstXcElementInRect(colNumber);
@@ -767,6 +769,7 @@ namespace BeitieSpliter
                         CurrentElements.SelectedIndex = firstIndex - 1;
                     }
                     Debug.WriteLine("Index first: {0}, selected: {1}", firstIndex, elemIndex);
+                    elemIndex = firstIndex;
                 }
 
                 if (!BtGrids.XingcaoElements.ContainsKey(elemIndex))
@@ -799,7 +802,7 @@ namespace BeitieSpliter
         
             Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
                BtImageAdjustRect.X, BtImageAdjustRect.Y, BtImageAdjustRect.Width, BtImageAdjustRect.Height);
-            Debug.WriteLine("Image Size: ({0}*{1}), Show Rect:({4:0},{5:0},{6:0},{7:0})",
+            Debug.WriteLine("Image Size: ({0}*{1}), ShowRect Size:({4:0},{5:0},{6:0},{7:0})",
                 BtImage.resolutionX, BtImage.resolutionY, 0, 0,
                 BtImageShowRect.X, BtImageShowRect.Y, BtImageShowRect.Width, BtImageShowRect.Height);
             Debug.WriteLine("To Adjust Rect: ({1:0},{2:0},{3:0},{4:0}), Target Type: {5}", 0,
@@ -892,7 +895,7 @@ namespace BeitieSpliter
                OpType, PreRow, PreCol, SelectedRow, SelectedCol, NextRow, NextCol);
             Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
                 BtImageAdjustRect.X, BtImageAdjustRect.Y, BtImageAdjustRect.Width, BtImageAdjustRect.Height);
-            Debug.WriteLine("Image Size: ({0}*{1}), Show Rect:({4:0},{5:0},{6:0},{7:0})",
+            Debug.WriteLine("Image Size: ({0}*{1}), ShowRect Size:({4:0},{5:0},{6:0},{7:0})",
                 BtImage.resolutionX, BtImage.resolutionY, 0, 0,
                 BtImageShowRect.X, BtImageShowRect.Y, BtImageShowRect.Width, BtImageShowRect.Height);
             Debug.WriteLine("To Adjust Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
@@ -1062,6 +1065,7 @@ namespace BeitieSpliter
 
             }
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
+
         }
         private void GetCurrentRowCol(ref int row, ref int col)
         {
@@ -1977,7 +1981,6 @@ namespace BeitieSpliter
             MoveOnBoarder,
             MoveToScalingBoarder,
             MoveToCapture,
-            KeyEvent,
         }
         PointerStatus LastPntrStatus = PointerStatus.Exited;
         PointerStatus CurrentPntrStatus = PointerStatus.Exited;
@@ -2219,9 +2222,11 @@ namespace BeitieSpliter
         {
             lock (BtGrids.XingcaoElements)
             {
+                pp.X += BtImageAdjustRect.X;
+                pp.Y += BtImageAdjustRect.Y;
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
-                    if (IsPntInRect(pp, pair.Value.rc, 1))
+                    if (IsPntInRect(pp, pair.Value.rc, -3))
                     {
                         if (CurrentElements.SelectedIndex != (pair.Key - 1))
                             CurrentElements.SelectedIndex = pair.Key - 1;
@@ -2419,7 +2424,7 @@ namespace BeitieSpliter
             Refresh();
         }
 
-        private void UpdatePointer(VirtualKey key)
+        private void UpdatePointer(VirtualKey key, CoreAcceleratorKeyEventType type)
         {
             switch (LastLocation)
             {
@@ -2428,52 +2433,47 @@ namespace BeitieSpliter
                 case PointerLocation.InsideImage:
                     return;
             }
-            Point pnt = new Point()
+            if (type == CoreAcceleratorKeyEventType.KeyDown)
             {
-                X = LastPointerPnt.X,
-                Y = LastPointerPnt.Y
-            };
-            if (key == VirtualKey.Up)
-            {
-                pnt.Y -= ChangeStep;
+                if (key == VirtualKey.Up)
+                {
+                    CurrentPointerPnt.Y -= ChangeStep;
+                }
+                else if (key == VirtualKey.Down)
+                {
+                    CurrentPointerPnt.Y += ChangeStep;
+                }
+                else if (key == VirtualKey.Left)
+                {
+                    CurrentPointerPnt.X -= ChangeStep;
+                }
+                else if (key == VirtualKey.Right)
+                {
+                    CurrentPointerPnt.X += ChangeStep;
+                }
+                CursorAdjustRect(CurrentPointerPnt);
             }
-            else if (key == VirtualKey.Down)
+            else if (type == CoreAcceleratorKeyEventType.KeyUp)
             {
-                pnt.Y += ChangeStep;
+                LastPointerPnt = CurrentPointerPnt;
+                LastChangeRect.Reset();
+                UpdateElementsRects();
+                Refresh();
             }
-            else if (key == VirtualKey.Left)
-            {
-                pnt.X -= ChangeStep;
-            }
-            else if (key == VirtualKey.Right)
-            {
-                pnt.X += ChangeStep;
-            }
-            CursorAdjustRect(pnt);
         }
         private void Dispatcher_AcceleratorKeyActivated(CoreDispatcher sender, AcceleratorKeyEventArgs args)
         {
-            if (args.EventType.ToString().Contains("Down"))
+            Debug.WriteLine("KeyEvent: {0} {1}", args.VirtualKey, args.EventType);
+            // 键盘和按钮都是辅助调节，没必要做那么复杂，比如两个键同时按下的检测
+            switch (args.VirtualKey)
             {
-                Debug.WriteLine("KeyDown: {0}", args.VirtualKey);
-                var ctrl = Window.Current.CoreWindow.GetKeyState(VirtualKey.Control);
-                if (ctrl.HasFlag(CoreVirtualKeyStates.Down))
-                {
-                    switch (args.VirtualKey)
-                    {
-                        case VirtualKey.Up:
-                        case VirtualKey.Down:
-                        case VirtualKey.Left:
-                        case VirtualKey.Right:
-                            UpdatePointer(args.VirtualKey);
-                            break;
-                    }
-                }
+                case VirtualKey.Up:
+                case VirtualKey.Down:
+                case VirtualKey.Left:
+                case VirtualKey.Right:
+                    UpdatePointer(args.VirtualKey, args.EventType);
+                    break;
             }
-        }
-        private void KeyUp_ItemSv(object sender, KeyRoutedEventArgs e)
-        {
-            Debug.WriteLine("KeyUP: {0}", e.Key);
         }
     }
 }

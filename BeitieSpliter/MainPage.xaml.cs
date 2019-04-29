@@ -761,14 +761,26 @@ namespace BeitieSpliter
             }
             FolderFileCombo.SelectedIndex = 0;
         }
+
+        bool FileIsInFilterTypes(StorageFile file)
+        {
+            string name = file.Name.ToLower();
+            foreach (string type in FILETYPE_FILTERS)
+            {
+                if (name.Contains(type))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private async void OnImportBeitieDir(object sender, RoutedEventArgs e)
         {
             var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            folderPicker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
             folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
-
-            folderPicker.FileTypeFilter.Add(".jpg");
-            folderPicker.FileTypeFilter.Add(".jpeg");
-            folderPicker.FileTypeFilter.Add(".png");
+            folderPicker.FileTypeFilter.Add("*");
 
             BtFolder = await folderPicker.PickSingleFolderAsync();
             if (BtFolder != null)
@@ -793,6 +805,11 @@ namespace BeitieSpliter
                 int baseNo = 1;
                 foreach (StorageFile file in BtFolderFileList)
                 {
+                    if (!FileIsInFilterTypes(file))
+                    {
+                        continue;
+                    }
+                    
                     FolderFileCombo.Items.Add(string.Format("[{0}/{1}]{2}", i+1, BtFolderFileList.Count, file.Name));
                     DictBtFiles.Add(i++, new BeitieAlbumItem(file, baseNo));
                     baseNo += (ColumnNumber * RowNumber);
@@ -883,9 +900,10 @@ namespace BeitieSpliter
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary
             };
 
-            openPicker.FileTypeFilter.Add(".jpg");
-            openPicker.FileTypeFilter.Add(".jpeg");
-            openPicker.FileTypeFilter.Add(".png");
+            foreach (string type in FILETYPE_FILTERS)
+            {
+                openPicker.FileTypeFilter.Add(type);
+            }
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
@@ -1138,6 +1156,8 @@ namespace BeitieSpliter
                 await encoder.FlushAsync();
             }
         }
+        
+
 
         public static async Task<SoftwareBitmap> GetSoftwareBitmap(StorageFile inputFile)
         {
@@ -1145,7 +1165,7 @@ namespace BeitieSpliter
             using (IRandomAccessStream stream = await inputFile.OpenAsync(FileAccessMode.Read))
             {
                 // Create the decoder from the stream
-                BitmapDecoder decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.JpegDecoderId, stream);
+                BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
 
                 // Get the SoftwareBitmap representation of the file
                 softwareBitmap = await decoder.GetSoftwareBitmapAsync();
@@ -1387,7 +1407,7 @@ namespace BeitieSpliter
             SaveSplitImages(null);
         }
         private List<char> IGNORED_CHARS = new List<char>();
-        
+        private List<string> FILETYPE_FILTERS = new List<string>();
         private void InitMaps()
         {
             IGNORED_CHARS.Add(',');
@@ -1414,6 +1434,12 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add('》');
             IGNORED_CHARS.Add('〈');
             IGNORED_CHARS.Add('〉');
+
+            FILETYPE_FILTERS.Add(".jpg");
+            FILETYPE_FILTERS.Add(".jpeg");
+            FILETYPE_FILTERS.Add(".png");
+            FILETYPE_FILTERS.Add(".bmp");
+            FILETYPE_FILTERS.Add(".gif");
 
         }
 
@@ -1860,7 +1886,6 @@ namespace BeitieSpliter
         {
             InitDrawParameters();
             RefreshPage();
-
         }
     }
 }

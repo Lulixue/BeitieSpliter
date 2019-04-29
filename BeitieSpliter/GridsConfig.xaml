@@ -9,7 +9,6 @@
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     RequestedTheme="Dark"
     Loaded="SettingsPage_Loaded"
-    KeyUp="KeyUp_ItemSv"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
@@ -33,7 +32,8 @@
         </Style>
     </Page.Resources>
 
-    <Grid  x:Name="SettingsGrid" Grid.Row="6" Grid.ColumnSpan="3" BorderThickness="0"  BorderBrush="DarkGray">
+    <Grid  x:Name="SettingsGrid" Grid.Row="6" Grid.ColumnSpan="3" BorderThickness="0" 
+           BorderBrush="DarkGray" >
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="0.8*"/>
@@ -125,7 +125,7 @@
         </StackPanel>
 
         <Border x:Name="ItemBorder" Grid.Row="3" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5" >
-            <ScrollViewer x:Name="ItemScrollViewer"  HorizontalScrollBarVisibility="Visible" KeyUp="KeyUp_ItemSv" VerticalScrollBarVisibility="Visible"
+            <ScrollViewer x:Name="ItemScrollViewer"  HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
                     ZoomMode="Enabled">
 
                 <canvas:CanvasControl Draw="CurrentItem_OnDraw" Margin="10,10,10,20" 
