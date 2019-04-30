@@ -2226,7 +2226,7 @@ namespace BeitieSpliter
                 pp.Y += BtImageAdjustRect.Y;
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
-                    if (IsPntInRect(pp, pair.Value.rc, -3))
+                    if (IsPntInRect(pp, pair.Value.rc, -5))
                     {
                         if (CurrentElements.SelectedIndex != (pair.Key - 1))
                             CurrentElements.SelectedIndex = pair.Key - 1;

@@ -38,6 +38,7 @@ using Windows.UI.ViewManagement;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using Windows.UI.Xaml.Automation.Peers;
+using Microsoft.Graphics.Canvas.Text;
 
 /* Open CV: */
 //using EMGU.CV;
@@ -62,16 +63,8 @@ namespace BeitieSpliter
             var messageDialog = new MessageDialog(msg);
 
             // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-            if (handler != null)
-            {
-                messageDialog.Commands.Add(new UICommand(
+            messageDialog.Commands.Add(new UICommand(
                     "关闭", handler));
-            }
-            else
-            {
-                messageDialog.Commands.Add(new UICommand(
-                   "关闭", null));
-            }
 
             // Set the command that will be invoked by default
             messageDialog.DefaultCommandIndex = 0;
@@ -406,12 +399,12 @@ namespace BeitieSpliter
             AutoResetEvent h = new AutoResetEvent(false);
             h.WaitOne(msTime);
         }
-        public BeitieImage(MainPage parent, CanvasControl cvs, StorageFile f)
+        public BeitieImage(MainPage parent, CanvasControl cvs, StorageFile f, AutoResetEvent evt)
         {
             ParentPage = parent;
             creator = cvs;
             file = f;
-            Init();
+            Init(evt);
         }
         public MainPage ParentPage;
         public CanvasControl creator;
@@ -425,14 +418,13 @@ namespace BeitieSpliter
         public CanvasBitmap cvsBmp;
         public bool FileSupported = true;
         public bool PageTextConfirmed = false;
-        public bool InitFinished = false;
         
-        public void Init()
+        public void Init(AutoResetEvent evt)
         {
-            GetJpgSize();
+            GetJpgSize(evt);
         }
 
-        public async void GetJpgSize()
+        public async void GetJpgSize(AutoResetEvent evt)
         {
             try
             {
@@ -445,15 +437,13 @@ namespace BeitieSpliter
                 DipX = sbmp.DpiX;
                 DipY = sbmp.DpiY;
                 FileSupported = true;
-                InitFinished = true;
-                ParentPage.InitAfterImageLoaded();
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.ToString());
                 FileSupported = false;
-                InitFinished = true;
             }
+            evt.Set();
         }
     }
     public class ColorBoxItem
@@ -506,9 +496,7 @@ namespace BeitieSpliter
         public MainPage()
         {
             this.InitializeComponent();
-            InitControls();
             InitMaps();
-            this.SaveSplitted += new EventHandler(this.OnSaveSplitImagesDelegate);
         }
         private void ColumnIllegalHandler(IUICommand command)
         {
@@ -634,9 +622,9 @@ namespace BeitieSpliter
             RowCount.SelectedIndex = 8;
             ColumnCount.SelectedIndex = 5;
             PenWidthCombo.SelectedIndex = 1;
-
-            CurrentPage.Height = ImageScrollViewer.Height;
-            CurrentPage.Width = ImageScrollViewer.Width;
+            
+            CurrentPage.Height = ImageScrollViewer.ViewportHeight;
+            CurrentPage.Width = ImageScrollViewer.ViewportWidth;
         }
 
         public bool InitDrawParameters()
@@ -844,6 +832,13 @@ namespace BeitieSpliter
             BtnMore.IsEnabled = true;
             RefreshPage(1);
         }
+        public void BeitieImageInvalid()
+        {
+            Common.ShowMessageDlg("文件损坏或文件不支持!", null);
+            CurrentBtImage = null;
+            BtGrids = null;
+        }
+
         private void OnImageSlide(object sender, RoutedEventArgs e)
         {
             if (sender == BtnPreviousImg)
@@ -878,18 +873,42 @@ namespace BeitieSpliter
             }
         }
 
-        private void OpenFile(StorageFile file, int no)
+        private void RemoveFileItem(StorageFile file)
+        {
+            string match = "]" + file.Name;
+            foreach (object item in FolderFileCombo.Items)
+            {
+                string strItem = item.ToString();
+                int i = strItem.IndexOf(']');
+                strItem = strItem.Substring(i);
+                if (strItem.Equals(match))
+                {
+                    FolderFileCombo.Items.Remove(item);
+                    break;
+                }
+            }
+        }
+
+        private async void OpenFile(StorageFile file, int no)
         {
             Debug.WriteLine(String.Format("Open FIle: {0}, No: {1}", file.Name, no));
-            CurrentBtImage = new BeitieImage(this, CurrentPage, file);
+            AutoResetEvent evt = new AutoResetEvent(false);
+            CurrentBtImage = new BeitieImage(this, CurrentPage, file, evt);
+            await Task.Run(() => {  evt.WaitOne(); });
             if (!CurrentBtImage.FileSupported)
             {
-                Common.ShowMessageDlg("文件格式不支持!", null);
+                Common.ShowMessageDlg("文件损坏或不支持!", null);
                 CurrentBtImage = null;
                 BtGrids = null;
-                FolderFileCombo.Items.RemoveAt(no);
+                RemoveFileItem(file);
+                if (FolderFileCombo.Items.Count == 0)
+                {
+                    ImageSlidePanel.Visibility = Visibility.Collapsed;
+                    TieAlbum.Text = "";
+                }
                 return;
             }
+            InitAfterImageLoaded();
             StartNoBox.Text = string.Format("{0}", no);
         }
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
@@ -975,6 +994,26 @@ namespace BeitieSpliter
             return true;
         }
 
+        private void CanvasDrawText(CanvasDrawingSession draw, string text, Color color)
+        {
+            Rect rc = new Rect()
+            {
+                X = 0,
+                Y = 0,
+                Width = CurrentPage.Width / 4,
+                Height = CurrentPage.Height / 4,
+            };
+
+            CanvasTextFormat fmt = new CanvasTextFormat()
+            {
+                FontSize = (int)(rc.Height * 0.1),
+                HorizontalAlignment = CanvasHorizontalAlignment.Center,
+                VerticalAlignment = CanvasVerticalAlignment.Center
+            };
+
+            draw.DrawText(text, rc, color, fmt);
+        }
+
         private void CurrentPage_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
         {
             Debug.WriteLine(String.Format("CurrentPage_OnDraw called"));
@@ -984,26 +1023,26 @@ namespace BeitieSpliter
             draw.Clear(Colors.Gray);
             if (CurrentBtImage == null)
             {
-                draw.DrawText("请选择书法字帖图片!", new Vector2(100, 100), Colors.Black);
+                //draw.DrawText(, new Vector2(100, 100), Colors.Black);
+                CanvasDrawText(draw, "请选择书法字帖图片!", Colors.Black);
                 return;
             }
             if (!IsParametersValid())
             {
                 draw.Clear(Colors.Black);
-                draw.DrawText("参数错误，请更改参数后重试!", new Vector2(100, 100), Colors.Red);
+                CanvasDrawText(draw, "参数错误，请更改参数后重试!", Colors.Red);
                 return;
             }
             if (CurrentBtImage.cvsBmp == null)
             {
                 draw.Clear(Colors.Black);
-                draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue);
+                CanvasDrawText(draw, "图片正在加载中...", Colors.Blue);
                 RefreshPage();
                 return;
             }
 
             draw.DrawImage(CurrentBtImage.cvsBmp);
-            PageDrawLines(draw);
-            ImageScrollViewer.Scale = new Vector3(1, 1, 1);
+            PageDrawLines(draw); 
         }
 
         private void Page_OnUnloaded(object sender, RoutedEventArgs e)
@@ -1847,10 +1886,12 @@ namespace BeitieSpliter
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            InitControls();
             UpdateParseStatus();
             
             UpdateColumnCount();
             UpdateRowCount();
+            this.SaveSplitted += new EventHandler(this.OnSaveSplitImagesDelegate);
         }
 
         private void XincaoModeCheck_Clicked(object sender, RoutedEventArgs e)
