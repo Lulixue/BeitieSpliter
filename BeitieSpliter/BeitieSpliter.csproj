@@ -126,6 +126,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Beitie.cs" />
     <Compile Include="GridsConfig.xaml.cs">
       <DependentUpon>GridsConfig.xaml</DependentUpon>
     </Compile>

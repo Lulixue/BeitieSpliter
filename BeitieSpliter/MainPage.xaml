@@ -49,7 +49,7 @@
             <ColumnDefinition Width="6*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,5,0">
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
                 <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
                 <Button x:Name="ImportBtDir" Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
@@ -103,15 +103,14 @@
         
         
         
-        <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="3">
-            <ScrollViewer x:Name="ImageScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible"
+        <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="0,5,5,0"
+                Grid.Column="0" BorderBrush="Gray" BorderThickness="1" >
+            <ScrollViewer x:Name="ImageScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" Margin="3"
                     ZoomMode="Enabled">
 
                 <canvas:CanvasControl Draw="CurrentPage_OnDraw" 
                                       x:Name="CurrentPage" ClearColor="Gray" />
 
-                <!--<Canvas Name="CurrentPage" RenderTransformOrigin="0.5,0.5"/>-->
-                <!--<Image x:Name="CurrentPage" HorizontalAlignment="Center"  VerticalAlignment="Center" Source="/Assets/SplashScreen.png"/>-->
             </ScrollViewer>
         </Border>
 

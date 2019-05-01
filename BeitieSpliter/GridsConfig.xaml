@@ -36,16 +36,16 @@
            BorderBrush="DarkGray" >
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="0.8*"/>
-            <RowDefinition Height="1.4*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="8*"/>
-            <RowDefinition Height="1.2*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.5*"/>
             <ColumnDefinition Width="18*"/>
-            <ColumnDefinition Width="1.1*"/>
+            <ColumnDefinition Width="1.5*"/>
         </Grid.ColumnDefinitions>
         <StackPanel  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Padding="2" >
             <TextBlock Name="HangNoTitle" Text="行号：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
@@ -54,7 +54,7 @@
                        IsDropDownOpen="True"  Width="70"/>
 
             <TextBlock  Text="列号：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <ComboBox  x:Name="ColumnNumber"  Margin="0,0,0,0" SelectionChanged="ColumnNumber_SelectionChanged"  
+            <ComboBox  x:Name="ColumnNumber" Margin="0,0,0,0" SelectionChanged="ColumnNumber_SelectionChanged"  
                         VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                        IsDropDownOpen="True" Width="70" />
 
@@ -98,12 +98,12 @@
             <Button Name="BtnBottomElement" Content="下一字" Margin="2"  Background="Green" Click="ElementMove_Clicked"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="0" Grid.Column="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="BtnSaveAll" Content="保存全部" FontSize="12" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <StackPanel Grid.Row="0" Grid.Column="2" Margin="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="BtnSaveAll" Content="保存全部" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="center" />
 
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="2" Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="BtnSaveCurrent" Content="保存当前" FontSize="12" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button x:Name="BtnSaveCurrent" Content="保存当前" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">

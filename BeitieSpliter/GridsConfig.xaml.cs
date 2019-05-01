@@ -71,6 +71,7 @@ namespace BeitieSpliter
             OperationChange,
             AdjustChange,
             RotateChange,
+            RedrawRequest,
             NotSpecified,
         }
 
@@ -93,6 +94,7 @@ namespace BeitieSpliter
             SingleColumn,
             WholePage,
         }
+
         bool? HideGridChecked = false;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
@@ -284,7 +286,7 @@ namespace BeitieSpliter
             pntLt.Y += offset.top;
             pntRb.Y += offset.bottom;
 
-            if (!CheckOutOfImage(pntLt, pntRb))
+            if (!CheckIfOutOfimage(pntLt, pntRb))
             {
                 PrintRect("Invalid", new Rect(pntLt, pntRb));
                 return false;
@@ -294,7 +296,16 @@ namespace BeitieSpliter
             int colNumber = ColumnNumber.SelectedIndex + 1;
             int elemIndex = CurrentElements.SelectedIndex + 1;
 
-
+            Point lt = new Point
+            {
+                X = ToAdjustRect.X + BtImageAdjustRect.X,
+                Y = ToAdjustRect.Y + BtImageAdjustRect.Y,
+            };
+            Point rb = new Point
+            {
+                X = lt.X + ToAdjustRect.Width,
+                Y = lt.Y + ToAdjustRect.Height
+            };
             if (!BtGrids.XingcaoElements.ContainsKey(elemIndex))
             {
                 if ((ToAdjustRect.Width < 5) ||
@@ -302,16 +313,7 @@ namespace BeitieSpliter
                 {
                     return false;
                 }
-                Point lt = new Point
-                {
-                    X = ToAdjustRect.X + BtImageAdjustRect.X,
-                    Y = ToAdjustRect.Y + BtImageAdjustRect.Y,
-                };
-                Point rb = new Point
-                {
-                    X = lt.X + ToAdjustRect.Width,
-                    Y = lt.Y + ToAdjustRect.Height
-                };
+                
 
                 BeitieGridRect bgr = new BeitieGridRect(new Rect(lt, rb))
                 {
@@ -322,16 +324,16 @@ namespace BeitieSpliter
             }
             else
             {
-
+                
                 BtGrids.XingcaoElements[elemIndex].col = colNumber;
-                BtGrids.XingcaoElements[elemIndex].rc = new Rect(pntLt, pntRb);
-               
+                BtGrids.XingcaoElements[elemIndex].rc = new Rect(lt, rb);
+                
             }
 
             return true;
         }
 
-        bool CheckOutOfImage(Point pntLt, Point pntRb)
+        bool CheckIfOutOfimage(Point pntLt, Point pntRb)
         {
             if (pntLt.X < 0)
             {
@@ -515,7 +517,7 @@ namespace BeitieSpliter
                     {
                         FixedChangedRect(chgType, ref pntLt, ref pntRb, offset);
                     }
-                    if (!CheckOutOfImage(pntLt, pntRb))
+                    if (!CheckIfOutOfimage(pntLt, pntRb))
                     { 
                         PrintRect("[" + (int)pnt.X + "," + (int)pnt.Y + "] Invalid", new Rect(pntLt, pntRb));
                         // 恢复修改的元素
@@ -799,7 +801,9 @@ namespace BeitieSpliter
             }
 
             ChangeRect = new ChangeStruct();
-        
+
+            Debug.WriteLine("Current Element: {0}, Status: {1}", CurrentElements.SelectedIndex + 1,
+                PntrTargetType);
             Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
                BtImageAdjustRect.X, BtImageAdjustRect.Y, BtImageAdjustRect.Width, BtImageAdjustRect.Height);
             Debug.WriteLine("Image Size: ({0}*{1}), ShowRect Size:({4:0},{5:0},{6:0},{7:0})",
@@ -1134,7 +1138,7 @@ namespace BeitieSpliter
                 (float)rect.Width, (float)rect.Height, color, strokeWidth);
         }
 
-        private void DrawBanner(CanvasDrawingSession draw)
+        private void DrawBanner(CanvasDrawingSession draw, int currentElemIndex)
         {
             Rect rc = new Rect()
             {
@@ -1163,18 +1167,25 @@ namespace BeitieSpliter
             }
             Debug.WriteLine("Height: {0:0}, FontSize: {1}", rc.Height, fmt.FontSize);
 
-            int index = CurrentElements.SelectedIndex;
-            BeitieElement be = BtGrids.Elements[index];
-            string notfInfo = string.Format("请用鼠标截取元素{0}({1})所在的区域", index + 1, be.content);
+            string notfInfo;
+            if (currentElemIndex <= 0)
+            {
+                notfInfo = string.Format("请用鼠标截取{0}所在的区域", 
+                                            BtGrids.GetElementString(CurrentElements.SelectedIndex));
+            }
+            else
+            {
+                notfInfo = string.Format("当前选择调整{0}", BtGrids.GetElementString(currentElemIndex - 1));
+            }
 
             draw.FillRectangle(rc, Colors.Green);
             draw.DrawText(notfInfo, rc, Colors.White, fmt);
         }
+
         
-        private void DrawElementText(CanvasDrawingSession draw, Rect rc, int index)
+        private void DrawElementText(CanvasDrawingSession draw, Rect rc, int index, bool moveToCapture = false)
         {
-            BeitieElement be = BtGrids.Elements[index];
-            string name = string.Format("元素{0}({1})", index+1, be.content);
+            string name = BtGrids.GetElementString(index);
             
             double height = rc.Height * 0.2;
             height = (height < 20) ? 20 : height;
@@ -1194,25 +1205,49 @@ namespace BeitieSpliter
             }
             txtRc.Height = height;
             txtRc.Width = rc.Width;
-            
+
+
+            if (moveToCapture)
+            {
+                txtRc.X = rc.Right+ BtGrids.PenWidth;
+                txtRc.Y = rc.Top;
+                txtRc.Width = 40;
+                txtRc.Height = 20;
+                if (txtRc.Right > BtImageShowRect.Width)
+                {
+                    txtRc.X = rc.Left - 40 - BtGrids.PenWidth;
+                    txtRc.Width = 40;
+                }
+            }
+
+
             // 在下方/上方显示当前元素名称
             CanvasTextFormat fmt = new CanvasTextFormat()
             {
-                FontSize = (int)height/2,
+                FontSize = (int)txtRc.Height / 2,
                 HorizontalAlignment = CanvasHorizontalAlignment.Center,
                 VerticalAlignment = CanvasVerticalAlignment.Center
             };
-            
+
             if (fmt.FontSize < 10)
             {
                 fmt.FontSize = 10;
             }
-            Debug.WriteLine("Height: {0:0}, FontSize: {1}", txtRc.Height, fmt.FontSize);
 
 
-            DrawRectangle(draw, rc, Colors.Red, BtGrids.PenWidth + 2);
-            draw.FillRectangle(txtRc, Colors.Red);
-            draw.DrawText(name, txtRc, Colors.White, fmt);
+            if (moveToCapture)
+            {
+
+                DrawRectangle(draw, txtRc, Colors.Black, 1);
+                draw.FillRectangle(txtRc, Colors.White);
+                draw.DrawText(name, txtRc, Colors.Blue, fmt);
+            }
+            else
+            {
+                DrawRectangle(draw, rc, Colors.Red, BtGrids.PenWidth + 2);
+                draw.FillRectangle(txtRc, Colors.Red);
+                draw.DrawText(name, txtRc, Colors.White, fmt);
+            }
         }
         private double GetItemScrollHeight()
         {
@@ -1317,9 +1352,17 @@ namespace BeitieSpliter
                             DrawElementText(draw, rc, pair.Key-1);
                         }
                     }
-                    else if (FirstShowBanner)
+                    else
                     {
-                        DrawBanner(draw);
+                        if (LastPntrStatus == PointerStatus.MoveToCapture)
+                        {
+                            int index = CurrentElements.SelectedIndex;
+                            DrawElementText(draw, drawRect, index, true);
+                        }
+                    }
+                    if (FirstShowBanner)
+                    {
+                        DrawBanner(draw, currentElemIndex);
                     }
 
                 }
@@ -2246,6 +2289,7 @@ namespace BeitieSpliter
             TracePointerLocation(pp, status);
             //NotifyUser(string.Format("Previous Status: {0}, Next: {1}", LastPntrStatus, status), NotifyType.StatusMessage);
 
+            bool NeedRedraw = false;
             switch (status)
             {
                 case PointerStatus.Entered:
@@ -2293,6 +2337,10 @@ namespace BeitieSpliter
                         UpdateElementsRects();
                         Refresh();
                     }
+                    else
+                    {
+                        NeedRedraw = true;
+                    }
                     break;
                 case PointerStatus.Moved:
                     if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
@@ -2312,7 +2360,6 @@ namespace BeitieSpliter
                         if (FirstShowBanner && IsPntInRect(pp, rcBanner, 1))
                         {
                             FirstShowBanner = false;
-                            //Refresh(CtrlMessageType.AdjustChange);
                         }
                     }
                     break;
@@ -2322,6 +2369,10 @@ namespace BeitieSpliter
                         (LastPntrStatus == PointerStatus.MoveToCapture))
                     {
                         Refresh();
+                    }
+                    else
+                    {
+                        NeedRedraw = true;
                     }
                     loc = PointerLocation.OutsideImage;
                     break;
@@ -2335,6 +2386,10 @@ namespace BeitieSpliter
             CurrentPntrStatus = status;
             CurrentLocation = loc;
             CurrentPointerPnt = pp;
+            if (NeedRedraw)
+            {
+                Refresh(CtrlMessageType.RedrawRequest);
+            }
         }
 
         private void TracePointerLocation(Point pp, PointerStatus status)
