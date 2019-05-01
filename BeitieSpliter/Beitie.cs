@@ -3,15 +3,64 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Graphics.Display;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Popups;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 
 namespace BeitieSpliter
 {
+    public sealed class Common
+    {
+        public static Size GetSystemResolution()
+        {
+            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+            return new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+        }
+        public static void Sleep(int msTime)
+        {
+            AutoResetEvent h = new AutoResetEvent(false);
+            h.WaitOne(msTime);
+        }
+        public static async Task<bool> ShowNotifyPageTextDlg()
+        {
+            ContentDialog locationPromptDialog = new ContentDialog
+            {
+                Title = "输入释文",
+                Content = "你还没有输入释文, 是否生成图片?",
+                CloseButtonText = "继续生成",
+                PrimaryButtonText = "输入释文",
+            };
 
+            ContentDialogResult result = await locationPromptDialog.ShowAsync();
+            return (result == ContentDialogResult.Primary);
+        }
+        public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
+        {
+            // Create the message dialog and set its content
+            var messageDialog = new MessageDialog(msg);
+
+            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+            messageDialog.Commands.Add(new UICommand(
+                    "关闭", handler));
+
+            // Set the command that will be invoked by default
+            messageDialog.DefaultCommandIndex = 0;
+
+            // Set the command to be invoked when escape is pressed
+            messageDialog.CancelCommandIndex = 1;
+
+            // Show the message dialog
+            await messageDialog.ShowAsync();
+        }
+    }
     public sealed class BeitieElement
     {
         public BeitieElement(BeitieElementType t, string cont, int n)

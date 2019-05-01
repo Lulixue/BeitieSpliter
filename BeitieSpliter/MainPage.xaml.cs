@@ -35,35 +35,6 @@ using Microsoft.Graphics.Canvas.Text;
 
 namespace BeitieSpliter
 {
-    public sealed class Common
-    {
-        public static void Sleep(int msTime)
-        {
-            AutoResetEvent h = new AutoResetEvent(false);
-            h.WaitOne(msTime);
-        }
-
-        public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
-        {
-            // Create the message dialog and set its content
-            var messageDialog = new MessageDialog(msg);
-
-            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-            messageDialog.Commands.Add(new UICommand(
-                    "关闭", handler));
-
-            // Set the command that will be invoked by default
-            messageDialog.DefaultCommandIndex = 0;
-
-            // Set the command to be invoked when escape is pressed
-            messageDialog.CancelCommandIndex = 1;
-
-            // Show the message dialog
-            await messageDialog.ShowAsync();
-        }
-    }
-   
-
     public sealed class BeitieImage
     {
         public BeitieImage(MainPage parent, CanvasControl cvs, StorageFile f, AutoResetEvent evt)
@@ -134,6 +105,8 @@ namespace BeitieSpliter
         int RowNumber = -1;
         public event EventHandler SaveSplitted;
         bool XingcaoMode = false;
+        string StartNoText = "1";
+        GridsConfig ConfigPage = null;
 
         private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
         public ObservableCollection<ColorBoxItem> ColorBoxItems {
@@ -164,6 +137,14 @@ namespace BeitieSpliter
         {
             this.InitializeComponent();
             InitMaps();
+
+
+            if (ApplicationView.PreferredLaunchWindowingMode != ApplicationViewWindowingMode.Maximized)
+            {
+                ApplicationView.PreferredLaunchViewSize = new Size(1280, 720);
+                ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
+
+            }
         }
         private void ColumnIllegalHandler(IUICommand command)
         {
@@ -886,15 +867,6 @@ namespace BeitieSpliter
         }
 
 
-        enum OperationType
-        {
-            Crop,
-            Blur,
-            HoughLines,
-            Contours,
-            Histogram,
-            MotionDetector
-        }
         private OpenCVHelper _helper = new OpenCVHelper();
 
         void UpdateCanvasBmp(CanvasBitmap bmp)
@@ -978,45 +950,106 @@ namespace BeitieSpliter
             this.SaveSplitted.Invoke(para, null);
         }
 
+        async void SaveSplitImagesProcWait(object para)
+        {
+            InitWait(SaveEvent);
+            await SaveSplitImagesProc(para);
+            WaitForSaving(SaveEvent);
+            ConfigPage.HandlerShowSaveResultEvt(null);
+        }
+
         public async void OnSaveSplitImagesDelegate(object sender, EventArgs e)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                SaveSplitImages(sender);
+                SaveSplitImagesProcWait(sender);
             });
         }
 
-        public async Task<bool> ShowNotifyPageTextDlg()
+        public enum SaveErrorType
         {
-            ContentDialog locationPromptDialog = new ContentDialog
-            {
-                Title = "输入释文",
-                Content = "你还没有输入释文, 是否生成图片?",
-                CloseButtonText = "继续生成",
-                PrimaryButtonText = "输入释文",
-            };
+            NoPageText,
+            NoSelectedItem,
+            ParaError,
+            Success,
+        }
 
-            ContentDialogResult result = await locationPromptDialog.ShowAsync();
-            return (result == ContentDialogResult.Primary);
+        public async Task<bool> NeedNotifyPageText()
+        {
+            bool bRet = false;
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                bRet = (PageText.Text == "") && !CurrentBtImage.PageTextConfirmed;
+            });
+            return bRet;
+        }
+        public SaveErrorType SaveErrType = SaveErrorType.Success;
+        public string SaveNotfInfo = "";
+        public AutoResetEvent SaveEvent = new AutoResetEvent(false);
+        
+        public void SetWait(AutoResetEvent evt)
+        {
+            evt.Set();
+            Debug.WriteLine("SetWait()");
+        }
+
+        public void InitWait(AutoResetEvent evt)
+        {
+            Debug.WriteLine("InitWait()");
+            evt.Reset();
+        }
+
+        public void WaitForSaving(AutoResetEvent evt)
+        {
+            Task.Run(() => {
+                evt.WaitOne();
+            });
+
+            Debug.WriteLine("WaitOne() ok");
         }
 
         public async void SaveSplitImages(object para)
         {
-            string album = TieAlbum.Text;
-            SoftwareBitmap inputBitmap = null;
-            HashSet<int> ElementIndexes = (HashSet<int>)para;
-            int StartNo = int.Parse(StartNoBox.Text);
-
-            if ((PageText.Text == "") && !CurrentBtImage.PageTextConfirmed)
+            if (await NeedNotifyPageText())
             {
-                if (await ShowNotifyPageTextDlg())
+                if (await Common.ShowNotifyPageTextDlg())
                 {
                     return;
                 }
                 CurrentBtImage.PageTextConfirmed = true;
             }
-
+            InitWait(SaveEvent);
             NotifyUser("开始保存分割单字图片...", NotifyType.StatusMessage);
+            await SaveSplitImagesProc(para);
+            WaitForSaving(SaveEvent);
+            SaveErrorType type = SaveErrType;
+            
+            if (type == SaveErrorType.NoSelectedItem)
+            {
+                NotifyUser("未选择元素进行保存!", NotifyType.ErrorMessage);
+                Common.ShowMessageDlg("未选择元素进行保存!", null);
+            }
+            else if (type == SaveErrorType.ParaError)
+            {
+                NotifyUser(SaveNotfInfo, NotifyType.ErrorMessage);
+                Common.ShowMessageDlg(SaveNotfInfo, null);
+            }
+            else if (type == SaveErrorType.Success)
+            {
+                NotifyUser(SaveNotfInfo, NotifyType.StatusMessage);
+                Common.ShowMessageDlg(SaveNotfInfo, null);
+            }
+        }
+
+        public async Task<SaveErrorType> SaveSplitImagesProc(object para)
+        {
+            string album = TieAlbum.Text;
+            SoftwareBitmap inputBitmap;
+            HashSet<int> ElementIndexes = (HashSet<int>)para;
+            int StartNo = int.Parse(StartNoText);
+            SaveErrType = SaveErrorType.Success;
+
+            SaveNotfInfo = "";
 
             if (BtGrids.IsImageRotated())
             {
@@ -1055,9 +1088,9 @@ namespace BeitieSpliter
             }
             if (ElementIndexes.Count == 0)
             {
-                NotifyUser("未选择元素进行保存!", NotifyType.ErrorMessage);
-                Common.ShowMessageDlg("未选择元素进行保存!", null);
-                return;
+                SetWait(SaveEvent);
+                SaveErrType = SaveErrorType.NoSelectedItem;
+                return SaveErrType;
             }
             
             foreach (int index in ElementIndexes)
@@ -1086,7 +1119,8 @@ namespace BeitieSpliter
 
                 if (!BtGrids.GetElementRoi(index, ref roi))
                 {
-                    Common.ShowMessageDlg("保存图片" + filename + "出现错误!", null);
+                    SaveNotfInfo += "保存图片" + filename + "出现错误!";
+                    SaveErrType = SaveErrorType.ParaError;
                     continue;
                 }
 
@@ -1099,12 +1133,15 @@ namespace BeitieSpliter
                     Debug.WriteLine(err.ToString());
                 }
             }
+            if (SaveErrType == SaveErrorType.Success)
+            {
+                StorageFolder folder = await GetSaveFolder(album);
+                SaveNotfInfo = string.Format("单字分割图片({0}张)已保存到文件夹{1}",
+                    ElementIndexes.Count, folder.Path);
+            }
 
-            StorageFolder folder = await GetSaveFolder(album);
-            string notfInfo = string.Format("单字分割图片({0}张)已保存到文件夹{1}", 
-                ElementIndexes.Count, folder.Path);
-            NotifyUser(notfInfo, NotifyType.StatusMessage);
-            Common.ShowMessageDlg(notfInfo, null);
+            SetWait(SaveEvent);
+            return SaveErrType;
         }
         private void OnSaveSplitImages(object sender, RoutedEventArgs e)
         {
@@ -1441,6 +1478,15 @@ namespace BeitieSpliter
         }
         #endregion
 
+
+        int SettingPageViewID = 0;
+        bool SettingPageShown = false;
+        bool SettingPageClosed = false;
+        public void SetConfigPage(GridsConfig page)
+        {
+            ConfigPage = page;
+        }
+
         private async void BtnMore_Clicked(object sender, RoutedEventArgs e)
         {
             //if (true)
@@ -1448,6 +1494,17 @@ namespace BeitieSpliter
             //    TestOpenCV();
             //    return;
             //}
+            Debug.WriteLine("ID: {0}, shown: {1}, closed: {2}", SettingPageViewID,
+                SettingPageShown, SettingPageClosed);
+            var views = CoreApplication.Views;
+            if (views.Count > 1)
+            {
+                if (!SettingPageClosed)
+                {
+                    await ApplicationViewSwitcher.SwitchAsync(SettingPageViewID);
+                    return;
+                }
+            }
 
             CoreApplicationView newView = CoreApplication.CreateNewView();
             int newViewId = 0;
@@ -1459,12 +1516,19 @@ namespace BeitieSpliter
                 Window.Current.Content = frame;
                 // You have to activate the window in order to show it later.
                 Window.Current.Activate();
-
+                var newAppView = ApplicationView.GetForCurrentView();
+                newAppView.Consolidated += NewAppView_Consolidated;
                 newViewId = ApplicationView.GetForCurrentView().Id;
             });
-            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId/*, ViewSizePreference.UseMore*/);
-
+            SettingPageViewID = newViewId;
+            SettingPageShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId/*, ViewSizePreference.UseMore*/);
         }
+        private void NewAppView_Consolidated(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
+        {
+            Debug.WriteLine("NewAppView_Consolidated()");
+            SettingPageClosed = true;
+        }
+
         bool HaveGotFocus = true;
         protected override void OnGotFocus(RoutedEventArgs e)
         {
@@ -1562,6 +1626,7 @@ namespace BeitieSpliter
             UpdateColumnCount();
             UpdateRowCount();
             this.SaveSplitted += new EventHandler(this.OnSaveSplitImagesDelegate);
+            //ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.Maximized;
         }
 
         private void XincaoModeCheck_Clicked(object sender, RoutedEventArgs e)
@@ -1597,6 +1662,17 @@ namespace BeitieSpliter
         {
             InitDrawParameters();
             RefreshPage();
+        }
+
+        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (CurrentBtImage == null)
+            { 
+                CurrentPage.Height = ImageScrollViewer.ViewportHeight;
+                CurrentPage.Width = ImageScrollViewer.ViewportWidth;
+                RefreshPage();  
+            }
+            
         }
     }
 }

@@ -9,7 +9,8 @@
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     RequestedTheme="Dark"
     Loaded="SettingsPage_Loaded"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Unloaded="SettingsPage_Unloaded"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" LostFocus="SettingPage_LostFocus">
 
     <Page.Resources>
         <Style x:Key="LeftFriendly" TargetType="TextBlock">
@@ -33,7 +34,7 @@
     </Page.Resources>
 
     <Grid  x:Name="SettingsGrid" Grid.Row="6" Grid.ColumnSpan="3" BorderThickness="0" 
-           BorderBrush="DarkGray" >
+           BorderBrush="DarkGray" SizeChanged="OnSizeChanged" >
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="auto"/>

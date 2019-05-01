@@ -29,6 +29,7 @@ using Windows.UI.Input;
 using Windows.UI.ViewManagement;
 using Microsoft.Graphics.Canvas.Text;
 using Windows.System;
+using static BeitieSpliter.MainPage;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -95,6 +96,7 @@ namespace BeitieSpliter
             WholePage,
         }
 
+        public event EventHandler ShowSaveResultEvtHdlr;
         bool? HideGridChecked = false;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
@@ -121,7 +123,12 @@ namespace BeitieSpliter
             var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
             coreTitleBar.ExtendViewIntoTitleBar = true;
 
-            // Set XAML element as a draggable region.
+            if (ApplicationView.PreferredLaunchWindowingMode != ApplicationViewWindowingMode.Maximized)
+            {
+                ApplicationView.PreferredLaunchViewSize = new Size(1280, 720);
+                ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
+
+            }
         }
 
         private int GetPreviousColRow(int current, int MIN)
@@ -986,6 +993,18 @@ namespace BeitieSpliter
             CurrentItem.Width = BtImage.resolutionX;
         }
 
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            Debug.WriteLine("OnNavigatedFrom() called");
+            base.OnNavigatedFrom(e);
+
+        }
+
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            Debug.WriteLine("OnNavigatedFrom() called");
+            base.OnNavigatingFrom(e);
+        }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             Debug.WriteLine("OnNavigatedTo() called");
@@ -1009,6 +1028,7 @@ namespace BeitieSpliter
 
             //BtImage = new BeitieImage(CurrentItem, BtGrids.ImageFile);
             BtImage = BtGrids.BtImageParent;
+            ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.Maximized;
         }
 
         void AdjustAddHandler(Button btn)
@@ -1028,6 +1048,11 @@ namespace BeitieSpliter
             ChangeStep = 1;     // 有了鼠标调节，按钮调节只是辅助性微调
 
             ChangeStepTxtBox.Text = string.Format("{0:0}", ChangeStep);
+        }
+
+        private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ParentPage.SetConfigPage(null);
         }
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
@@ -1069,8 +1094,12 @@ namespace BeitieSpliter
 
             }
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
+            this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);
+            ParentPage.SetConfigPage(this);
 
         }
+
+
         private void GetCurrentRowCol(ref int row, ref int col)
         {
             col = ColumnNumber.SelectedIndex + 1;
@@ -1209,6 +1238,10 @@ namespace BeitieSpliter
 
             if (moveToCapture)
             {
+                if ((rc.Width == 0) || (rc.Height == 0))
+                {
+                    return;
+                }
                 txtRc.X = rc.Right+ BtGrids.PenWidth;
                 txtRc.Y = rc.Top;
                 txtRc.Width = 40;
@@ -1242,6 +1275,7 @@ namespace BeitieSpliter
                 draw.FillRectangle(txtRc, Colors.White);
                 draw.DrawText(name, txtRc, Colors.Blue, fmt);
             }
+
             else
             {
                 DrawRectangle(draw, rc, Colors.Red, BtGrids.PenWidth + 2);
@@ -1370,6 +1404,7 @@ namespace BeitieSpliter
         }
         private void CurrentItem_OnDraw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
+            Debug.WriteLine("CurrentItem_OnDraw() called");
             lock(BtImage.cvsBmp)
             {
                 var draw = args.DrawingSession;
@@ -1781,21 +1816,61 @@ namespace BeitieSpliter
 
             return new Rect(new Point(minRow, minCol), new Point(maxRow, maxCol));
         }
+        private async void SaveSplittedImages(object para)
+        {
+            if (await ParentPage.NeedNotifyPageText())
+            {
+                if (await Common.ShowNotifyPageTextDlg())
+                {
+                    return;
+                }
+                BtGrids.BtImageParent.PageTextConfirmed = true;
+            }
+            ParentPage.HandlerSaveSplittedImages(para);
+        }
+        public void HandlerShowSaveResultEvt(object para)
+        {
+            this.ShowSaveResultEvtHdlr.Invoke(para, null);
+        }
+
+        private async void OnShowSaveResultEvtHdlr(object sender, EventArgs e)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                SaveErrorType type = ParentPage.SaveErrType;
+
+                if (type == SaveErrorType.NoSelectedItem)
+                {
+                    NotifyUser("未选择元素进行保存!", NotifyType.ErrorMessage);
+                    Common.ShowMessageDlg("未选择元素进行保存!", null);
+                }
+                else if (type == SaveErrorType.ParaError)
+                {
+                    NotifyUser(ParentPage.SaveNotfInfo, NotifyType.ErrorMessage);
+                    Common.ShowMessageDlg(ParentPage.SaveNotfInfo, null);
+                }
+                else if (type == SaveErrorType.Success)
+                {
+                    NotifyUser(ParentPage.SaveNotfInfo, NotifyType.StatusMessage);
+                    Common.ShowMessageDlg(ParentPage.SaveNotfInfo, null);
+                }
+            });
+        }
 
         private void BtnSave_Clicked(object sender, RoutedEventArgs e)
         {
+            HashSet<int> elementIndexes = new HashSet<int>();
             if (sender == BtnSaveAll)
             {
-                ParentPage.HandlerSaveSplittedImages(null);
+                elementIndexes = null;
             }
             else
             {
-                HashSet<int> elementIndexes = new HashSet<int>();
                 if (!BtGrids.XingcaoMode)
                 {
                     foreach (Point pnt in DrawLineElements)
                     {
-                        elementIndexes.Add(BtGrids.GetIndex((int)pnt.X, (int)pnt.Y, true));
+                        elementIndexes.Add(BtGrids.GetIndex((int)pnt.X, (int)pnt.Y, true)+1);
                     }
                 }
                 else
@@ -1820,9 +1895,11 @@ namespace BeitieSpliter
                         elementIndexes = null;
                     }
                 }
-               
-                ParentPage.HandlerSaveSplittedImages(elementIndexes);
+
+                //ParentPage.HandlerSaveSplittedImages(elementIndexes);
+
             }
+            SaveSplittedImages(elementIndexes);
         }
         
 
@@ -1973,7 +2050,7 @@ namespace BeitieSpliter
             if (this.IsLoaded && !HaveGotFocus)
             {
                 HaveGotFocus = true;
-                Refresh(CtrlMessageType.AdjustChange);
+                Refresh(CtrlMessageType.RedrawRequest);
             }
             base.OnGotFocus(e);
         }
@@ -1984,7 +2061,7 @@ namespace BeitieSpliter
             HaveGotFocus = false;
             base.OnLostFocus(e);
         }
-
+        
         double ChangeStep = 1.0;
         private void ChangeStepTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -2529,6 +2606,17 @@ namespace BeitieSpliter
                     UpdatePointer(args.VirtualKey, args.EventType);
                     break;
             }
+        }
+
+        private void SettingPage_LostFocus(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Debug.WriteLine("OnSizeChanged() called");
+            Debug.WriteLine("New Size: {0}", e.NewSize);
         }
     }
 }
