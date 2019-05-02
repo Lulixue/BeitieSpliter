@@ -18,11 +18,26 @@ namespace BeitieSpliter
 {
     public sealed class Common
     {
-        public static Size GetSystemResolution()
+        public static void SetWindowSize()
         {
-            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
-            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
-            return new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+            {
+                ApplicationView.PreferredLaunchViewSize = Common.GetSystemResolution(true);
+                ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
+                ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size(1280, 720));
+                ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseVisible);
+            }
+        }
+        public static Size GetSystemResolution(bool second=false)
+        {
+            var view = DisplayInformation.GetForCurrentView();
+            var resolution = new Size(view.ScreenWidthInRawPixels, view.ScreenHeightInRawPixels);
+            var scale = view.ResolutionScale == ResolutionScale.Invalid ? 1 : view.RawPixelsPerViewPixel;
+            var bounds = new Size(resolution.Width / scale, resolution.Height / scale);
+            if (second)
+            {
+                bounds = new Size(1280, 720);
+            }
+            return bounds;
         }
         public static void Sleep(int msTime)
         {

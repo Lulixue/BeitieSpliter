@@ -135,16 +135,9 @@ namespace BeitieSpliter
 
         public MainPage()
         {
+            Common.SetWindowSize();
             this.InitializeComponent();
             InitMaps();
-
-
-            if (ApplicationView.PreferredLaunchWindowingMode != ApplicationViewWindowingMode.Maximized)
-            {
-                ApplicationView.PreferredLaunchViewSize = new Size(1280, 720);
-                ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
-
-            }
         }
         private void ColumnIllegalHandler(IUICommand command)
         {
@@ -155,7 +148,6 @@ namespace BeitieSpliter
         {
             RowCount.SelectedIndex = 6;
         }
-
 
         public int GetColumnCount()
         {
@@ -1333,6 +1325,18 @@ namespace BeitieSpliter
                     BtGrids.ElementCount = BtGrids.Elements.Count;
                     ZiCountBox.Text = string.Format("{0}", BtGrids.ElementCount);
                 }
+                else
+                {
+                    int sizeDelta = BtGrids.ElementCount - BtGrids.Elements.Count;
+                    if (sizeDelta > 0)
+                    {
+                        for (int i = 0; i < sizeDelta; i++)
+                        {
+                            BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi,
+                                                "", ZiNo++));
+                        }
+                    }
+                }
             }
             UpdateBeitieAlbumItemNo(ZiNo);
             UpdateParseStatus();
@@ -1487,6 +1491,21 @@ namespace BeitieSpliter
             ConfigPage = page;
         }
 
+        private async void EnableRowColumn(bool bEnable)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                ColumnCount.IsEnabled = bEnable;
+                RowCount.IsEnabled = bEnable;
+                XingcaoModeCheck.IsEnabled = bEnable;
+                if (XingcaoMode)
+                {
+                    ZiCountBox.IsEnabled = bEnable;
+                    PageText.IsEnabled = bEnable;
+                }
+            });
+        }
+
         private async void BtnMore_Clicked(object sender, RoutedEventArgs e)
         {
             //if (true)
@@ -1505,7 +1524,7 @@ namespace BeitieSpliter
                     return;
                 }
             }
-
+            SettingPageClosed = false;
             CoreApplicationView newView = CoreApplication.CreateNewView();
             int newViewId = 0;
             await newView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
@@ -1521,12 +1540,17 @@ namespace BeitieSpliter
                 newViewId = ApplicationView.GetForCurrentView().Id;
             });
             SettingPageViewID = newViewId;
-            SettingPageShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId/*, ViewSizePreference.UseMore*/);
+            SettingPageShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId, ViewSizePreference.Custom);
+            if (SettingPageShown)
+            {
+                EnableRowColumn(false);
+            }
         }
         private void NewAppView_Consolidated(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
         {
             Debug.WriteLine("NewAppView_Consolidated()");
             SettingPageClosed = true;
+            EnableRowColumn(true);
         }
 
         bool HaveGotFocus = true;
@@ -1627,6 +1651,8 @@ namespace BeitieSpliter
             UpdateRowCount();
             this.SaveSplitted += new EventHandler(this.OnSaveSplitImagesDelegate);
             //ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.Maximized;
+            Debug.WriteLine("Actual W/H: {0},{1}, W/H: {2}，{3},",
+               this.ActualWidth, this.ActualHeight, this.Height, this.Width);
         }
 
         private void XincaoModeCheck_Clicked(object sender, RoutedEventArgs e)

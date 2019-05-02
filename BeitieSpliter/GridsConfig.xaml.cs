@@ -120,15 +120,6 @@ namespace BeitieSpliter
         {
             this.InitializeComponent();
 
-            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
-            coreTitleBar.ExtendViewIntoTitleBar = true;
-
-            if (ApplicationView.PreferredLaunchWindowingMode != ApplicationViewWindowingMode.Maximized)
-            {
-                ApplicationView.PreferredLaunchViewSize = new Size(1280, 720);
-                ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
-
-            }
         }
 
         private int GetPreviousColRow(int current, int MIN)
@@ -1054,7 +1045,7 @@ namespace BeitieSpliter
         {
             ParentPage.SetConfigPage(null);
         }
-        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("SettingsPage_Loaded() called");
 
@@ -1096,7 +1087,7 @@ namespace BeitieSpliter
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
             this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);
             ParentPage.SetConfigPage(this);
-
+            Common.SetWindowSize();
         }
 
 
@@ -1854,6 +1845,8 @@ namespace BeitieSpliter
                     NotifyUser(ParentPage.SaveNotfInfo, NotifyType.StatusMessage);
                     Common.ShowMessageDlg(ParentPage.SaveNotfInfo, null);
                 }
+
+                ApplicationView.GetForCurrentView().ExitFullScreenMode();
             });
         }
 
