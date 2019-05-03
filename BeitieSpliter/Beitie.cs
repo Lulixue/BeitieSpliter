@@ -84,10 +84,37 @@ namespace BeitieSpliter
             content = cont;
             this.no = n;
         }
+        public void AddSuffix(int no)
+        {
+            content += "-" + TypeToString(type);
+            content += no;
+        }
         public bool NeedAddNo()
         {
             return no != -1;
         }
+        public string TypeToString()
+        {
+            return TypeToString(type);
+        }
+        public static string TypeToString(BeitieElementType t)
+        {
+            switch (t)
+            {
+                case BeitieElementType.Yinzhang:
+                    return "印章";
+                case BeitieElementType.Kongbai:
+                    return "空白";
+                case BeitieElementType.Other:
+                    return "其他";
+                case BeitieElementType.Zi:
+                    return "字";
+                case BeitieElementType.Quezi:
+                    return "阙字";
+            }
+            return "";
+        }
+
         public enum BeitieElementType
         {
             Zi,
@@ -101,6 +128,7 @@ namespace BeitieSpliter
         public int row = -1;
         public int col = -1;
         public int no = -1;
+        public string text = "";
     }
     public class BeitieGridRect
     {
@@ -167,7 +195,9 @@ namespace BeitieSpliter
         public StorageFile ImageFile = null;
         public StorageFile RotateFile = null;
         public List<BeitieGridRect> ElementRects = new List<BeitieGridRect>();
-        public List<BeitieElement> Elements = new List<BeitieElement>();
+        public bool OnlyZiNo = true;
+        //public List<BeitieElement> Elements = new List<BeitieElement>();
+        public Dictionary<int, BeitieElement> Elements = new Dictionary<int, BeitieElement>();
         // Point -> X: ColumnNo, Y: Index
         public Dictionary<int, BeitieGridRect> XingcaoElements = new Dictionary<int, BeitieGridRect>();
         public bool IsImageRotated() { return angle != 0; }
@@ -175,8 +205,18 @@ namespace BeitieSpliter
 
         public string GetElementString(int index)
         {
-            BeitieElement be = Elements[index];
-            string name = string.Format("元素{0}({1})", index + 1, be.content);
+            BeitieElement be;
+            Elements.TryGetValue(index, out be);
+            if (be == null)
+            {
+                be = new BeitieElement(BeitieElement.BeitieElementType.Kongbai, "", -1);
+            }
+            string name = "";
+            if (!XingcaoMode)
+            {
+                name = be.TypeToString();
+            }
+            name += string.Format("元素{0}({1})", index + 1, be.content);
             if (be.content == "")
             {
                 name = name.Replace("()", "");
@@ -184,7 +224,15 @@ namespace BeitieSpliter
             return name;
         }
 
-        public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol)
+        public void AddElement(int i, BeitieElement be)
+        {
+            if (i < ElementCount)
+            {
+                Elements.Add(i, be);
+            }
+        }
+
+        public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol, bool actualSize = false)
         {
             Point pntLt = new Point();
             Point pntRb = new Point();
@@ -192,47 +240,52 @@ namespace BeitieSpliter
             GetMinLeftTop(minRow, maxRow, minCol, maxCol, ref pntLt);
             GetMaxRightBottom(minRow, maxRow, minCol, maxCol, ref pntRb);
 
-            pntLt.X -= ExtraSize;
-            pntLt.Y -= ExtraSize;
-            pntRb.X += ExtraSize;
-            pntRb.Y += ExtraSize;
 
-            if (pntLt.X < 0)
+            if (!actualSize)
             {
-                pntLt.X = 0;
+                pntLt.X -= ExtraSize;
+                pntLt.Y -= ExtraSize;
+                pntRb.X += ExtraSize;
+                pntRb.Y += ExtraSize;
+
+                if (pntLt.X < 0)
+                {
+                    pntLt.X = 0;
+                }
+
+                if (pntLt.Y < 0)
+                {
+                    pntLt.Y = 0;
+                }
+
+                if (pntRb.X > BtImageParent.resolutionX)
+                {
+                    pntRb.X = BtImageParent.resolutionX;
+                }
+
+                if (pntRb.Y > BtImageParent.resolutionY)
+                {
+                    pntRb.Y = BtImageParent.resolutionY;
+                }
+                // 显示全图
+                if (minRow == MIN_ROW_COL)
+                {
+                    pntLt.Y = 0;
+                }
+                if (maxRow == Rows)
+                {
+                    pntRb.Y = BtImageParent.resolutionY;
+                }
+                if (minCol == MIN_ROW_COL)
+                {
+                    pntLt.X = 0;
+                }
+                if (maxCol == Columns)
+                {
+                    pntRb.X = BtImageParent.resolutionX;
+                }
             }
 
-            if (pntLt.Y < 0)
-            {
-                pntLt.Y = 0;
-            }
-
-            if (pntRb.X > BtImageParent.resolutionX)
-            {
-                pntRb.X = BtImageParent.resolutionX;
-            }
-
-            if (pntRb.Y > BtImageParent.resolutionY)
-            {
-                pntRb.Y = BtImageParent.resolutionY;
-            }
-            // 显示全图
-            if (minRow == MIN_ROW_COL)
-            {
-                pntLt.Y = 0;
-            }
-            if (maxRow == Rows)
-            {
-                pntRb.Y = BtImageParent.resolutionY;
-            }
-            if (minCol == MIN_ROW_COL)
-            {
-                pntLt.X = 0;
-            }
-            if (maxCol == Columns)
-            {
-                pntRb.X = BtImageParent.resolutionX;
-            }
 
             return new Rect(pntLt, pntRb);
         }
@@ -248,6 +301,89 @@ namespace BeitieSpliter
                 ElementRects.Add(new BeitieGridRect(new Rect(pntLt.X, pntLt.Y,
                     GridWidth, DrawHeight)));
             }
+        }
+        public bool ElementIsKongbai(int index)
+        {
+            BeitieElement be;
+            Elements.TryGetValue(index, out be);
+            if (be == null)
+            {
+                return false;
+            }
+            return be.type == BeitieElement.BeitieElementType.Kongbai;
+        }
+        public void UpdateElement(int index, BeitieElement.BeitieElementType dstType)
+        {
+            int ElementNo = 0;
+            int IndexNo = 0;
+            int othersNo = 1;
+            Dictionary<int, BeitieElement> newElements = new Dictionary<int, BeitieElement>();
+            foreach (KeyValuePair<int, BeitieElement> pair in Elements)
+            {
+                BeitieElement newBe = new BeitieElement(pair.Value.type,
+                    pair.Value.content, pair.Value.no)
+                {
+                    col = pair.Value.col,
+                    text = pair.Value.text
+                };
+
+                if (IndexNo == index)
+                {
+                    if ((newBe.type == dstType) && (dstType == BeitieElement.BeitieElementType.Kongbai))
+                    {
+                        newElements.Add(IndexNo++, new BeitieElement(BeitieElement.BeitieElementType.Kongbai, "", -1));
+                        if (IndexNo == ElementCount)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        newBe.type = dstType;
+                    }
+                }
+                BeitieElement.BeitieElementType type = newBe.type;
+                switch (type)
+                {
+                    case BeitieElement.BeitieElementType.Kongbai:
+                        newBe.no = -1;
+                        break;
+                    case BeitieElement.BeitieElementType.Yinzhang:
+                    case BeitieElement.BeitieElementType.Other:
+                    case BeitieElement.BeitieElementType.Quezi:
+                        if (!OnlyZiNo)
+                        {
+                            newBe.no = ElementNo++;
+                        }
+                        else
+                        {
+                            newBe.no = -1;
+                        }
+                        break;
+                    case BeitieElement.BeitieElementType.Zi:
+                    default:
+                        newBe.no = ElementNo++;
+                        break;
+                }
+                newBe.content = newBe.text;
+                if (newBe.content == "")
+                {
+                    switch (type)
+                    {
+                        case BeitieElement.BeitieElementType.Yinzhang:
+                        case BeitieElement.BeitieElementType.Other:
+                        case BeitieElement.BeitieElementType.Quezi:
+                            newBe.AddSuffix(othersNo++);
+                            break;
+                    }
+                }
+                newElements.Add(IndexNo++, newBe);
+                if (IndexNo == ElementCount)
+                {
+                    break;
+                }
+            }
+            Elements = newElements;
         }
 
         public bool GetElementRoi(int index, ref Rect rc)
@@ -364,6 +500,12 @@ namespace BeitieSpliter
                 int index = col * Rows + row - 1;
                 return index;
             }
+        }
+        public int IndexToOldStyle(int index)
+        {
+            int row = 1, col = 1;
+            IndexToRowCol(index, ref row, ref col, false);
+            return GetIndex(row, col, true);
         }
         public bool IndexToRowCol(int index, ref int row, ref int col, bool oldStyle)
         {

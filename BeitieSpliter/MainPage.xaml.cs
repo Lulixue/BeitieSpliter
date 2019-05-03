@@ -1032,6 +1032,22 @@ namespace BeitieSpliter
                 Common.ShowMessageDlg(SaveNotfInfo, null);
             }
         }
+        public bool HashsetHasValue(HashSet<string> hs, string val)
+        {
+            string actual;
+            if (hs.TryGetValue(val, out actual))
+            {
+                if (actual != null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public string GetTimeStamp()
+        {
+            return System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        }
 
         public async Task<SaveErrorType> SaveSplitImagesProc(object para)
         {
@@ -1055,8 +1071,7 @@ namespace BeitieSpliter
             // 从左到右，自上而下
             if (album == "")
             {
-                System.DateTime currentTime = System.DateTime.Now;
-                album = currentTime.ToString("yyyyMMdd_HHmmss");
+                album = GetTimeStamp();
             }
 
             if (ElementIndexes == null)
@@ -1084,11 +1099,19 @@ namespace BeitieSpliter
                 SaveErrType = SaveErrorType.NoSelectedItem;
                 return SaveErrType;
             }
-            
+            HashSet<string> SaveFileNames = new HashSet<string>();
+
+
+            int saveCount = 0;
             foreach (int index in ElementIndexes)
             {
                 Rect roi = new Rect();
                 BeitieElement element = BtGrids.Elements[index-1];
+                if (element.type == BeitieElement.BeitieElementType.Kongbai)
+                {
+                    continue;
+                }
+
                 string filename = "";
                 if (!element.NeedAddNo())
                 {
@@ -1101,13 +1124,15 @@ namespace BeitieSpliter
                     {
                         filename += "-" + element.content;
                     }
+                    if (HashsetHasValue(SaveFileNames, filename))
+                    {
+                        filename += "-" + GetTimeStamp();
+                    }
+
+                    SaveFileNames.Add(filename);
                     filename += ".jpg";
                 }
-                
-                if (element.type == BeitieElement.BeitieElementType.Kongbai)
-                {
-                    continue;
-                }
+
 
                 if (!BtGrids.GetElementRoi(index, ref roi))
                 {
@@ -1119,6 +1144,8 @@ namespace BeitieSpliter
                 try
                 {
                     SaveSingleCropImage(inputBitmap, roi, album, filename);
+                    saveCount++;
+
                 }
                 catch (Exception err)
                 {
@@ -1129,7 +1156,7 @@ namespace BeitieSpliter
             {
                 StorageFolder folder = await GetSaveFolder(album);
                 SaveNotfInfo = string.Format("单字分割图片({0}张)已保存到文件夹{1}",
-                    ElementIndexes.Count, folder.Path);
+                    saveCount, folder.Path);
             }
 
             SetWait(SaveEvent);
@@ -1183,15 +1210,14 @@ namespace BeitieSpliter
 
         private void UpdateParseStatus()
         {
-            int totalElements = BtGrids.Elements.Count;
             int CharCount = 0;
             int LostCharCount = 0;
             int SpaceCount = 0;
             int SealCount = 0;
             int OtherCount = 0;
-            for (int i = 0; i < totalElements; i++)
+            foreach (KeyValuePair<int, BeitieElement> pair in BtGrids.Elements)
             {
-                switch (BtGrids.Elements[i].type)
+                switch (pair.Value.type)
                 {
                     case BeitieElement.BeitieElementType.Kongbai:
                         SpaceCount++;
@@ -1258,7 +1284,7 @@ namespace BeitieSpliter
                 length = BtGrids.ElementCount;
                 for (int i = 0; i < length; i++)
                 {
-                    BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi,
+                    BtGrids.Elements.Add(i, new BeitieElement(BeitieElement.BeitieElementType.Zi,
                            "", ZiNo++));
                 }
             }
@@ -1275,8 +1301,11 @@ namespace BeitieSpliter
                     {
                         string name = new string(single, 1);
                         name += OthersNo++;
-                        BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Quezi,
-                            name, ZiNo++));
+                        BtGrids.AddElement(i, new BeitieElement(BeitieElement.BeitieElementType.Quezi,
+                            name, ZiNo++)
+                        {
+                            text = name
+                        });
                     }
                     else if (single == '{')
                     {
@@ -1290,25 +1319,29 @@ namespace BeitieSpliter
 
                         if (name.Contains("印"))
                         {
-                            name += OthersNo++;
                             type = BeitieElement.BeitieElementType.Yinzhang;
                         }
                         else if (name.Length == 0)
                         {
-                            name += OthersNo++;
                             type = BeitieElement.BeitieElementType.Kongbai;
                         }
                         else if (name.Contains("缺"))
                         {
-                            name += OthersNo++;
                             type = BeitieElement.BeitieElementType.Quezi;
                         }
                         else
                         {
-                            name += OthersNo++;
                             type = BeitieElement.BeitieElementType.Other;
                         }
-                        BtGrids.Elements.Add(new BeitieElement(type, name, OnlyZiNo ? -1 : ZiNo++));
+                        BeitieElement newBe = new BeitieElement(type, name, OnlyZiNo ? -1 : ZiNo++)
+                        {
+                            text = sb.ToString()
+                        };
+                        if (type != BeitieElement.BeitieElementType.Kongbai)
+                        {
+                            newBe.AddSuffix(OthersNo++);
+                        }
+                        BtGrids.AddElement(ZiNo, newBe);
                         sb.Clear();
                     }
                     else if (specialTypeDetected)
@@ -1317,7 +1350,9 @@ namespace BeitieSpliter
                     }
                     else
                     {
-                        BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi, new string(single, 1), ZiNo++));
+                        string content = new string(single, 1);
+                        BtGrids.AddElement(ZiNo, new BeitieElement(BeitieElement.BeitieElementType.Zi, content, ZiNo++)
+                            { text = content});
                     }
                 }
                 if (BtGrids.XingcaoMode)
@@ -1330,9 +1365,10 @@ namespace BeitieSpliter
                     int sizeDelta = BtGrids.ElementCount - BtGrids.Elements.Count;
                     if (sizeDelta > 0)
                     {
-                        for (int i = 0; i < sizeDelta; i++)
+                        int count = BtGrids.Elements.Count;
+                        for (int i = 1; i < sizeDelta; i++)
                         {
-                            BtGrids.Elements.Add(new BeitieElement(BeitieElement.BeitieElementType.Zi,
+                            BtGrids.AddElement(count + i, new BeitieElement(BeitieElement.BeitieElementType.Zi,
                                                 "", ZiNo++));
                         }
                     }
