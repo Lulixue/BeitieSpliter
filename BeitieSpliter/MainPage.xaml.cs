@@ -30,6 +30,8 @@ using Windows.ApplicationModel.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml.Automation.Peers;
 using Microsoft.Graphics.Canvas.Text;
+using Microsoft.Graphics.Canvas.Geometry;
+using Microsoft.Graphics.Canvas.Brushes;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -586,17 +588,25 @@ namespace BeitieSpliter
             }
         }
 
+        CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
+        {
+            TransformBehavior = CanvasStrokeTransformBehavior.Hairline,
+            DashStyle = CanvasDashStyle.Dot,
+        };
         private void PageDrawLines(CanvasDrawingSession draw)
         {
+            CanvasSolidColorBrush brush = new CanvasSolidColorBrush(draw, BtGrids.PenColor);
+
             for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
-                draw.DrawRectangle(BtGrids.ElementRects[i].rc, BtGrids.PenColor, BtGrids.PenWidth);
+
+                draw.DrawRectangle(BtGrids.ElementRects[i].rc, brush, BtGrids.PenWidth, StrokeStyle);
             }
             if (XingcaoMode)
             {
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
-                    draw.DrawRectangle(pair.Value.rc, BtGrids.PenColor, BtGrids.PenWidth);
+                    draw.DrawRectangle(pair.Value.rc, brush, BtGrids.PenWidth, StrokeStyle);
                 }
             }
         }
@@ -1274,7 +1284,9 @@ namespace BeitieSpliter
             int length = txt.Length;
             char single;
             bool specialTypeDetected = false;
-            int OthersNo = 1;
+            int OthersNo = 0;
+            int YinzhangNo = 0;
+            int QueziNo = 0;
             int ZiNo = 0;
             StringBuilder sb = new StringBuilder();
 
@@ -1316,10 +1328,12 @@ namespace BeitieSpliter
                         specialTypeDetected = false;
                         string name = sb.ToString();
                         BeitieElement.BeitieElementType type;
+                        int no = 0;
 
                         if (name.Contains("印"))
                         {
                             type = BeitieElement.BeitieElementType.Yinzhang;
+                            no = ++YinzhangNo;
                         }
                         else if (name.Length == 0)
                         {
@@ -1328,18 +1342,20 @@ namespace BeitieSpliter
                         else if (name.Contains("缺"))
                         {
                             type = BeitieElement.BeitieElementType.Quezi;
+                            no = ++QueziNo;
                         }
                         else
                         {
                             type = BeitieElement.BeitieElementType.Other;
+                            no = ++OthersNo;
                         }
-                        BeitieElement newBe = new BeitieElement(type, name, OnlyZiNo ? -1 : ZiNo++)
+                        BeitieElement newBe = new BeitieElement(type, name, BtGrids.OnlyZiNo ? -1 : ZiNo++)
                         {
                             text = sb.ToString()
                         };
                         if (type != BeitieElement.BeitieElementType.Kongbai)
                         {
-                            newBe.AddSuffix(OthersNo++);
+                            newBe.AddSuffix(no);
                         }
                         BtGrids.AddElement(ZiNo, newBe);
                         sb.Clear();
@@ -1609,10 +1625,9 @@ namespace BeitieSpliter
             base.OnLostFocus(e);
         }
 
-        bool OnlyZiNo = true;
         private void NoNameSwitch_Toggled(object sender, RoutedEventArgs e)
         {
-            OnlyZiNo = !NoNameSwitch.IsOn;
+            BtGrids.OnlyZiNo = !NoNameSwitch.IsOn;
             ParsePageText();
         }
 

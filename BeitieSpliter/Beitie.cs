@@ -86,7 +86,11 @@ namespace BeitieSpliter
         }
         public void AddSuffix(int no)
         {
-            content += "-" + TypeToString(type);
+            if (content != "")
+            {
+                content += "-";
+            }
+            content += TypeToString(type);
             content += no;
         }
         public bool NeedAddNo()
@@ -316,7 +320,9 @@ namespace BeitieSpliter
         {
             int ElementNo = 0;
             int IndexNo = 0;
-            int othersNo = 1;
+            int OthersNo = 0;
+            int YinzhangNo = 0;
+            int QueziNo = 0;
             Dictionary<int, BeitieElement> newElements = new Dictionary<int, BeitieElement>();
             foreach (KeyValuePair<int, BeitieElement> pair in Elements)
             {
@@ -371,9 +377,13 @@ namespace BeitieSpliter
                     switch (type)
                     {
                         case BeitieElement.BeitieElementType.Yinzhang:
+                            newBe.AddSuffix(++YinzhangNo);
+                            break;
                         case BeitieElement.BeitieElementType.Other:
+                            newBe.AddSuffix(++OthersNo);
+                            break;
                         case BeitieElement.BeitieElementType.Quezi:
-                            newBe.AddSuffix(othersNo++);
+                            newBe.AddSuffix(++QueziNo);
                             break;
                     }
                 }
