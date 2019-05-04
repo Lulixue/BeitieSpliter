@@ -32,6 +32,7 @@ using Windows.UI.Xaml.Automation.Peers;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Canvas.Brushes;
+using Windows.ApplicationModel;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -674,6 +675,40 @@ namespace BeitieSpliter
             draw.DrawText(text, rc, color, fmt);
         }
 
+        private void CanvasDrawHelpInfo(CanvasDrawingSession draw, Color color)
+        {
+
+            string appVersion = string.Format("软件版本：{0}.{1}.{2}.{3}",
+                                Package.Current.Id.Version.Major,
+                                Package.Current.Id.Version.Minor,
+                                Package.Current.Id.Version.Build,
+                                Package.Current.Id.Version.Revision);
+            string help = "Ctrl+鼠标滚轮进行放大缩小\r\n\r\n" +
+                "作者：卢立雪\r\n" +
+                "微信：13612977027\r\n" +
+                "邮箱：jackreagan@163.com\r\n\r\n" +
+                appVersion + 
+                "\r\n感谢使用，欢迎反馈软件问题！";
+
+            Rect rc = new Rect()
+            {
+                X = 0,
+                Y = CurrentPage.Height / 2,
+                Width = CurrentPage.Width,
+                Height = CurrentPage.Height / 4,
+            };
+
+            CanvasTextFormat fmt = new CanvasTextFormat()
+            {
+                FontSize = (int)(rc.Height * 0.1),
+                FontStyle = Windows.UI.Text.FontStyle.Italic,
+                HorizontalAlignment = CanvasHorizontalAlignment.Center,
+                VerticalAlignment = CanvasVerticalAlignment.Center
+            };
+
+            draw.DrawText(help, rc, color, fmt);
+        }
+
         private void CurrentPage_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
         {
             Debug.WriteLine(String.Format("CurrentPage_OnDraw called"));
@@ -684,7 +719,8 @@ namespace BeitieSpliter
             if (CurrentBtImage == null)
             {
                 //draw.DrawText(, new Vector2(100, 100), Colors.Black);
-                CanvasDrawText(draw, "请选择书法字帖图片!", Colors.Black);
+                CanvasDrawText(draw, "请选择书法碑帖图片!", Colors.Black);
+                CanvasDrawHelpInfo(draw, Colors.White);
                 return;
             }
             if (!IsParametersValid())
