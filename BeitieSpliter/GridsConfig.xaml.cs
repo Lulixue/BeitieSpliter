@@ -1278,12 +1278,15 @@ namespace BeitieSpliter
             double height = rc.Height * 0.2;
             double selectedPenWidth = BtGrids.PenWidth + 1;
             height = (height < 20) ? 20 : height;
+            if (height > 50)
+            {
+                height = 50;
+            }
 
             Rect txtRc = new Rect()
             {
                 X = rc.Left
             };
-
 
             if (moveToCapture)
             {
@@ -1291,14 +1294,16 @@ namespace BeitieSpliter
                 {
                     return;
                 }
+                
+                double width = name.Length * (height / 2) + 30;
                 txtRc.X = rc.Right+ BtGrids.PenWidth;
                 txtRc.Y = rc.Top;
-                txtRc.Width = 40;
-                txtRc.Height = 20;
+                txtRc.Width = width;
+                txtRc.Height = height;
                 if (txtRc.Right > BtImageShowRect.Width)
                 {
-                    txtRc.X = rc.Left - 40 - BtGrids.PenWidth;
-                    txtRc.Width = 40;
+                    txtRc.X = rc.Left - width - BtGrids.PenWidth;
+                    txtRc.Width = width;
                 }
             }
             else
@@ -1325,11 +1330,6 @@ namespace BeitieSpliter
                 HorizontalAlignment = CanvasHorizontalAlignment.Center,
                 VerticalAlignment = CanvasVerticalAlignment.Center
             };
-
-            if (fmt.FontSize < 10)
-            {
-                fmt.FontSize = 10;
-            }
 
 
             if (moveToCapture)
@@ -1433,16 +1433,8 @@ namespace BeitieSpliter
                     if (BtGrids.ElementIsKongbai(BtGrids.GetIndex(row, col, BtGrids.BookOldType)))
                     {
                         InfoCTF.FontSize = (float)rc.Height / 4;
-                        CanvasSolidColorBrush KongbaiBrush = new CanvasSolidColorBrush(draw, Colors.White)
-                        {
-                            Opacity = (float)0.5
-                        };
-                        draw.FillRectangle(rc, KongbaiBrush);
-                        //draw.DrawText("空白", rc, Colors.Gray, InfoCTF);
-                        draw.DrawLine(new Vector2((float)rc.Left, (float)rc.Top), 
-                            new Vector2((float)rc.Right, (float)rc.Bottom), Colors.Gray, 2);
-                        draw.DrawLine(new Vector2((float)rc.Left, (float)rc.Bottom),
-                            new Vector2((float)rc.Right, (float)rc.Top), Colors.Gray, 2);
+
+                        Common.DrawKongbaiElement(draw, rc);
                         drawColor = Colors.Gray;
                         penWidth += 1;
                         DrawRectangle(draw, rc, drawColor, penWidth, true);

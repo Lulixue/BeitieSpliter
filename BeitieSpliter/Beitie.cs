@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +29,20 @@ namespace BeitieSpliter
                 ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size(1280, 720));
                 ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseVisible);
             }
+        }
+        public static void DrawKongbaiElement(CanvasDrawingSession draw, Rect rc)
+        {
+            CanvasSolidColorBrush KongbaiBrush = new CanvasSolidColorBrush(draw, Colors.White)
+            {
+                Opacity = (float)0.5
+            };
+            draw.FillRectangle(rc, KongbaiBrush);
+            //draw.DrawText("空白", rc, Colors.Gray, InfoCTF);
+            draw.DrawLine(new Vector2((float)rc.Left, (float)rc.Top),
+                new Vector2((float)rc.Right, (float)rc.Bottom), Colors.Gray, 2);
+            draw.DrawLine(new Vector2((float)rc.Left, (float)rc.Bottom),
+                new Vector2((float)rc.Right, (float)rc.Top), Colors.Gray, 2);
+
         }
         public static Size GetSystemResolution(bool second=false)
         {
@@ -230,9 +247,23 @@ namespace BeitieSpliter
 
         public void AddElement(int i, BeitieElement be)
         {
-            if (i < ElementCount)
+            if (XingcaoMode || (i < ElementCount))
             {
                 Elements.Add(i, be);
+            }
+        }
+        public void UpdateElementCount(int count)
+        {
+            ElementCount = count;
+            if (XingcaoElements.Count > count)
+            {
+                for (int i = count; i < (XingcaoElements.Count+50); i++)
+                {
+                    if (XingcaoElements.ContainsKey(i))
+                    {
+                        XingcaoElements.Remove(i);
+                    }
+                }
             }
         }
 

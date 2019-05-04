@@ -107,7 +107,6 @@ namespace BeitieSpliter
         int RowNumber = -1;
         public event EventHandler SaveSplitted;
         bool XingcaoMode = false;
-        string StartNoText = "1";
         GridsConfig ConfigPage = null;
 
         private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
@@ -597,7 +596,17 @@ namespace BeitieSpliter
 
             for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
-                draw.DrawRectangle(BtGrids.ElementRects[i].rc, brush, BtGrids.PenWidth, StrokeStyle);
+                Rect rc = BtGrids.ElementRects[i].rc;
+                draw.DrawRectangle(rc, brush, BtGrids.PenWidth, StrokeStyle);
+                if (!BtGrids.XingcaoMode)
+                {
+                    int oldIndex = BtGrids.IndexToOldStyle(i);
+                    if (BtGrids.ElementIsKongbai(oldIndex))
+                    {
+                        Common.DrawKongbaiElement(draw, rc);
+                        draw.DrawRectangle(rc, Colors.Gray, BtGrids.PenWidth+1);
+                    }
+                }
             }
             
             if (XingcaoMode)
@@ -1071,7 +1080,7 @@ namespace BeitieSpliter
             string album = TieAlbum.Text;
             SoftwareBitmap inputBitmap;
             HashSet<int> ElementIndexes = (HashSet<int>)para;
-            int StartNo = int.Parse(StartNoText);
+            int StartNo = int.Parse(StartNoBox.Text);
             SaveErrType = SaveErrorType.Success;
 
             SaveNotfInfo = "";
@@ -1268,6 +1277,33 @@ namespace BeitieSpliter
             NotifyUser(info, NotifyType.StatusMessage);
         }
 
+        private void LostFocus_StartNoBox(object sender, RoutedEventArgs e)
+        {
+            int curZiNo = int.Parse(StartNoBox.Text);
+            UpdateBeitieAlbumNo(curZiNo);
+            RefreshPage();
+        }
+        void UpdateBeitieAlbumNo(int curZiNO)
+        {
+            KeyValuePair<int, BeitieAlbumItem> prev;
+            int selectedIndex = FolderFileCombo.SelectedIndex;
+            foreach (KeyValuePair<int, BeitieAlbumItem> kv in DictBtFiles)
+            {
+                if (kv.Key < selectedIndex)
+                {
+                    //
+                }
+                else if (kv.Key == selectedIndex)
+                {
+                    kv.Value.no = curZiNO;
+                }
+                else if (prev.Value != null)
+                {
+                    kv.Value.no = prev.Value.NumberedCount + prev.Value.no;
+                }
+                prev = kv;
+            }
+        }
         void UpdateBeitieAlbumItemNo(int curMaxZiNo)
         {
             KeyValuePair<int, BeitieAlbumItem> prev;
@@ -1380,7 +1416,7 @@ namespace BeitieSpliter
                 }
                 if (BtGrids.XingcaoMode)
                 {
-                    BtGrids.ElementCount = BtGrids.Elements.Count;
+                    BtGrids.UpdateElementCount(BtGrids.Elements.Count);
                     ZiCountBox.Text = string.Format("{0}", BtGrids.ElementCount);
                 }
                 else
@@ -1404,6 +1440,7 @@ namespace BeitieSpliter
         private void PageText_LostFocus(object sender, RoutedEventArgs e)
         {
             ParsePageText();
+            RefreshPage();
         }
 
         public async Task<CanvasBitmap> RotateImage(float angle)
@@ -1758,5 +1795,6 @@ namespace BeitieSpliter
             }
             
         }
+
     }
 }

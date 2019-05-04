@@ -121,7 +121,7 @@
         <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="3">
             <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
             <RelativePanel RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <TextBox x:Name="StartNoBox" Text="{x:Bind StartNoText, Mode=TwoWay}"  TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number"/>
+                <TextBox x:Name="StartNoBox" Text="1"  TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
             </RelativePanel>
         </StackPanel>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
