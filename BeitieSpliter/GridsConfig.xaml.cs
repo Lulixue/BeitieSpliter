@@ -1200,10 +1200,12 @@ namespace BeitieSpliter
         CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
         {
             TransformBehavior = CanvasStrokeTransformBehavior.Hairline,
-            DashStyle = CanvasDashStyle.DashDot,
+            DashCap = CanvasCapStyle.Round,
+            DashOffset = 1.0F
         };
        
-        private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color, float strokeWidth, bool solid = false)
+        private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color, 
+            float strokeWidth, bool solid = false, CanvasDashStyle style = CanvasDashStyle.Dash)
         {
             //Debug.WriteLine("Draw Rectangle: ({0:0},{1:0},{2:0},{3:0}), Color: {4}, Width: {5}", rect.X, rect.Y, rect.Width, rect.Height,
             //    color, strokeWidth);
@@ -1222,6 +1224,7 @@ namespace BeitieSpliter
             }
             else
             {
+                StrokeStyle.DashStyle = style;
                 draw.DrawRectangle(rc, brush, strokeWidth, StrokeStyle);
             }
         }
@@ -1441,7 +1444,15 @@ namespace BeitieSpliter
                     }
                     else
                     {
-                        DrawRectangle(draw, rc, drawColor, penWidth);
+                        //辅助线使用点
+                        if (BtGrids.XingcaoMode)
+                        {
+                            DrawRectangle(draw, rc, drawColor, penWidth, false, CanvasDashStyle.Dot);
+                        }
+                        else
+                        {
+                            DrawRectangle(draw, rc, drawColor, penWidth);
+                        }
                     }
                 }
                 if (!BtGrids.XingcaoMode)

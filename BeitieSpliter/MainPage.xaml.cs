@@ -595,6 +595,15 @@ namespace BeitieSpliter
         {
             CanvasSolidColorBrush brush = new CanvasSolidColorBrush(draw, BtGrids.PenColor);
 
+            // 将行草模式下的辅助线和元素区域使用dash和dot区分开
+            if (XingcaoMode)
+            {
+                StrokeStyle.DashStyle = CanvasDashStyle.Dot;
+            }
+            else
+            {
+                StrokeStyle.DashStyle = CanvasDashStyle.Dash;
+            }
             for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
                 Rect rc = BtGrids.ElementRects[i].rc;
@@ -612,6 +621,7 @@ namespace BeitieSpliter
             
             if (XingcaoMode)
             {
+                StrokeStyle.DashStyle = CanvasDashStyle.Dash;
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
                     draw.DrawRectangle(pair.Value.rc, brush, BtGrids.PenWidth, StrokeStyle);
@@ -1630,6 +1640,8 @@ namespace BeitieSpliter
                 ColumnCount.IsEnabled = bEnable;
                 RowCount.IsEnabled = bEnable;
                 XingcaoModeCheck.IsEnabled = bEnable;
+                ImportBtFile.IsEnabled = bEnable;
+                ImportBtDir.IsEnabled = bEnable;
                 if (XingcaoMode)
                 {
                     ZiCountBox.IsEnabled = bEnable;
