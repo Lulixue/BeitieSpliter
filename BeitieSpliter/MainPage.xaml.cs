@@ -212,6 +212,7 @@ namespace BeitieSpliter
             }
 
             BtGrids.BackupColors.Clear();
+            BtGrids.GridType = BeitieGrids.ColorType.Dark;
             foreach (ColorBoxItem item in DarkColorItems)
             {
                 if (item.Value == BtGrids.PenColor)
@@ -219,7 +220,6 @@ namespace BeitieSpliter
                     NeedContinue = false;
                     continue;
                 }
-                BtGrids.GridType = BeitieGrids.ColorType.Dark;
                 BtGrids.BackupColors.Add(item.Value);
             }
         }
@@ -227,11 +227,11 @@ namespace BeitieSpliter
         void InitControls()
         {
             // 添加颜色
-            LightColorItems.Add(new ColorBoxItem(Colors.White, "白色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.Gray, "灰色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.Orange, "橙色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
             LightColorItems.Add(new ColorBoxItem(Colors.Green, "绿色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.White, "白色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Orange, "橙色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Gray, "灰色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
 
             DarkColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
@@ -262,7 +262,7 @@ namespace BeitieSpliter
             }
             RowCount.SelectedIndex = 8;
             ColumnCount.SelectedIndex = 5;
-            PenWidthCombo.SelectedIndex = 1;
+            PenWidthCombo.SelectedIndex = 2;
             
             CurrentPage.Height = ImageScrollViewer.ViewportHeight;
             CurrentPage.Width = ImageScrollViewer.ViewportWidth;
@@ -280,6 +280,7 @@ namespace BeitieSpliter
             BtGrids.BtImageParent = CurrentBtImage;
 
             BtGrids.PenColor = ColorBoxSelectedItem.Value;
+            BtGrids.PenWidth = float.Parse(PenWidthCombo.Text);
 
             ColumnNumber = GetColumnCount();
             RowNumber = GetRowCount();
@@ -445,9 +446,7 @@ namespace BeitieSpliter
                 }
                 StartFolderFiles();
                 SetDirFilePath("文件夹: " + BtFolder.Path);
-
-                if (TieAlbum.Text == "")
-                    TieAlbum.Text = BtFolder.Name;
+                TieAlbum.Text = BtFolder.Name;
             }
             else
             {
@@ -579,8 +578,7 @@ namespace BeitieSpliter
                 StartFolderFiles();
                 
                 SetDirFilePath("图片: " + file.Path);
-                if (TieAlbum.Text == "")
-                    TieAlbum.Text = GetFileTitle(file);
+                TieAlbum.Text = GetFileTitle(file);
             }
             else
             {
@@ -599,9 +597,9 @@ namespace BeitieSpliter
 
             for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
-
                 draw.DrawRectangle(BtGrids.ElementRects[i].rc, brush, BtGrids.PenWidth, StrokeStyle);
             }
+            
             if (XingcaoMode)
             {
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
@@ -609,6 +607,14 @@ namespace BeitieSpliter
                     draw.DrawRectangle(pair.Value.rc, brush, BtGrids.PenWidth, StrokeStyle);
                 }
             }
+            Rect bodyRect = new Rect()
+            {
+                X = BtGrids.PageMargin.Left,
+                Y = BtGrids.PageMargin.Top,
+                Width = BtGrids.DrawWidth,
+                Height = BtGrids.DrawHeight
+            };
+            draw.DrawRectangle(bodyRect, BtGrids.PenColor, BtGrids.PenWidth);
         }
 
         private bool IsColumnRowValid()
@@ -779,6 +785,7 @@ namespace BeitieSpliter
         {
             string TotalPattern = "([\\d\\.]+),?([\\d\\.]?),?([\\d\\.]?),?([\\d\\.]?)";
             var textbox = (TextBox)sender;
+            string backupText = textbox.Text;
             if (Regex.IsMatch(textbox.Text, TotalPattern) && textbox.Text != "")
             {
                 InitDrawParameters();
@@ -786,8 +793,8 @@ namespace BeitieSpliter
             }
             else
             {
-                textbox.Text = "";
                 Common.ShowMessageDlg("Invalid margin: " + textbox.Text, null);
+                textbox.Text = backupText;
             }
         }
         private void PenWidth_SelectionChanged(object sender, SelectionChangedEventArgs e)

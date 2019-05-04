@@ -247,46 +247,48 @@ namespace BeitieSpliter
 
             if (!actualSize)
             {
-                pntLt.X -= ExtraSize;
-                pntLt.Y -= ExtraSize;
-                pntRb.X += ExtraSize;
-                pntRb.Y += ExtraSize;
+                //pntLt.X -= ExtraSize;
+                //pntLt.Y -= ExtraSize;
+                //pntRb.X += ExtraSize;
+                //pntRb.Y += ExtraSize;
 
-                if (pntLt.X < 0)
-                {
-                    pntLt.X = 0;
-                }
+                //if (pntLt.X < 0)
+                //{
+                //    pntLt.X = 0;
+                //}
 
-                if (pntLt.Y < 0)
-                {
-                    pntLt.Y = 0;
-                }
+                //if (pntLt.Y < 0)
+                //{
+                //    pntLt.Y = 0;
+                //}
 
-                if (pntRb.X > BtImageParent.resolutionX)
-                {
-                    pntRb.X = BtImageParent.resolutionX;
-                }
+                //if (pntRb.X > BtImageParent.resolutionX)
+                //{
+                //    pntRb.X = BtImageParent.resolutionX;
+                //}
 
-                if (pntRb.Y > BtImageParent.resolutionY)
-                {
-                    pntRb.Y = BtImageParent.resolutionY;
-                }
+                //if (pntRb.Y > BtImageParent.resolutionY)
+                //{
+                //    pntRb.Y = BtImageParent.resolutionY;
+                //}
                 // 显示全图
                 if (minRow == MIN_ROW_COL)
                 {
-                    pntLt.Y = 0;
+                    pntLt.Y = 0 + PageMargin.Top;
                 }
                 if (maxRow == Rows)
                 {
-                    pntRb.Y = BtImageParent.resolutionY;
+                    double tailored = BtImageParent.resolutionY - PageMargin.Bottom;
+                    pntRb.Y = (tailored < pntRb.Y) ? pntRb.Y : tailored;
                 }
                 if (minCol == MIN_ROW_COL)
                 {
-                    pntLt.X = 0;
+                    pntLt.X = 0 + PageMargin.Left;
                 }
                 if (maxCol == Columns)
                 {
-                    pntRb.X = BtImageParent.resolutionX;
+                    double tailored = BtImageParent.resolutionX - PageMargin.Right;
+                    pntRb.X = (tailored < pntRb.X) ? pntRb.X : tailored;
                 }
             }
 

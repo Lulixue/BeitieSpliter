@@ -376,6 +376,7 @@ namespace BeitieSpliter
             return Math.Abs(delta) < 1.0;
         }
 
+        private readonly double MAX_STABLIZATION_OFFSET = 30;
 
         bool UpdateElementsRects()
         {
@@ -403,9 +404,12 @@ namespace BeitieSpliter
                 {
                     if (offset.left == offset.right)
                     {
-                        offset.left  = 0;
-                        Debug.WriteLine("Stablization Horizon: {0:0}->{1:0}", offset.right, offset.left);
-                        offset.right = offset.left;
+                        if (Math.Abs(offset.left) < MAX_STABLIZATION_OFFSET)
+                        {
+                            offset.left = 0;
+                            Debug.WriteLine("Stablization Horizon: {0:0}->{1:0}", offset.right, offset.left);
+                            offset.right = offset.left;
+                        }
                     }
                 }
             }
@@ -416,9 +420,13 @@ namespace BeitieSpliter
                 {
                     if (offset.top == offset.bottom)
                     {
-                        offset.top = 0;
-                        Debug.WriteLine("Stablization Horizon: {0:0}->{1:0}", offset.bottom, offset.top);
-                        offset.bottom = offset.top;
+
+                        if (Math.Abs(offset.top) < MAX_STABLIZATION_OFFSET)
+                        {
+                            offset.top = 0;
+                            Debug.WriteLine("Stablization Horizon: {0:0}->{1:0}", offset.bottom, offset.top);
+                            offset.bottom = offset.top;
+                        }
                     }
                 }
             }
@@ -1192,7 +1200,7 @@ namespace BeitieSpliter
         CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
         {
             TransformBehavior = CanvasStrokeTransformBehavior.Hairline,
-            DashStyle = CanvasDashStyle.Dot,
+            DashStyle = CanvasDashStyle.DashDot,
         };
        
         private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color, float strokeWidth, bool solid = false)
@@ -1268,7 +1276,7 @@ namespace BeitieSpliter
             string name = BtGrids.GetElementString(index);
             
             double height = rc.Height * 0.2;
-            double selectedPenWidth = BtGrids.PenWidth + 2;
+            double selectedPenWidth = BtGrids.PenWidth + 1;
             height = (height < 20) ? 20 : height;
 
             Rect txtRc = new Rect()
@@ -1365,11 +1373,21 @@ namespace BeitieSpliter
         bool FirstShowBanner = true;
         Rect rcBanner = new Rect();
         
+        private void FillOpacity(CanvasDrawingSession draw, Rect rc, Color clr, double opacity)
+        {
+
+            CanvasSolidColorBrush opBrush = new CanvasSolidColorBrush(draw, clr)
+            {
+                Opacity = (float)opacity
+            };
+            draw.FillRectangle(rc, opBrush);
+        }
+
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
             GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb);
-            Color BaseColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
+            Color BaseColor = BtGrids.PenColor;// (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
             float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
            
@@ -1378,6 +1396,8 @@ namespace BeitieSpliter
             pntRb.X += ChangeRect.right;
             pntRb.Y += ChangeRect.bottom;
             Rect drawRect = new Rect(pntLt, pntRb);
+
+
 
             DrawRectangle(draw, drawRect, BaseColor, penWidth, true);
 
@@ -1443,22 +1463,18 @@ namespace BeitieSpliter
 
                     if ((OperationType.SingleElement == OpType))
                     {
+                        FillOpacity(draw, BtImageShowRect, Colors.White, 0.1);
                         DrawElementText(draw, rc, index);
                     }
                     else
                     {
-                        rc.X += BtGrids.PenWidth / 2 + 1;
-                        rc.Y += BtGrids.PenWidth / 2 + 1;
-                        rc.Width -= BtGrids.PenWidth + 2;
-                        rc.Height -= BtGrids.PenWidth + 2;
+                        rc.X += BtGrids.PenWidth / 2;
+                        rc.Y += BtGrids.PenWidth / 2;
+                        rc.Width -= BtGrids.PenWidth;
+                        rc.Height -= BtGrids.PenWidth;
                         RedrawImageRect(draw, rc);
                         //draw.DrawRectangle(rc, Colors.Red);
-                        CanvasSolidColorBrush SelectedElemBrush = new CanvasSolidColorBrush(draw, Colors.White)
-                        {
-                            Opacity = (float)0.05
-                        };
-                        draw.FillRectangle(rc, SelectedElemBrush);
-
+                        FillOpacity(draw, rc, Colors.White, 0.1);
                     }
 
                 }
@@ -1485,7 +1501,8 @@ namespace BeitieSpliter
                             DrawRectangle(draw, rc, drawColor, penWidth);
                         }
                     }
-                    // 最后绘制所选中元素，达到覆盖其他的目的
+
+                        // 最后绘制所选中元素，达到覆盖其他的目的
                     if (currentElemIndex > 0)
                     {
                         var result = BtGrids.XingcaoElements.Where(p => (p.Key == currentElemIndex));
@@ -1495,6 +1512,7 @@ namespace BeitieSpliter
                             rc.X -= BtImageAdjustRect.X;
                             rc.Y -= BtImageAdjustRect.Y;
 
+                            RedrawImageRect(draw, drawRect);
                             DrawElementText(draw, rc, pair.Key-1);
                         }
                     }
@@ -1502,7 +1520,9 @@ namespace BeitieSpliter
                     {
                         if (LastPntrStatus == PointerStatus.MoveToCapture)
                         {
+                            FillOpacity(draw, BtImageShowRect, Colors.White, 0.15);
                             int index = CurrentElements.SelectedIndex;
+                            RedrawImageRect(draw, drawRect);
                             DrawElementText(draw, drawRect, index, true);
                         }
                     }
@@ -1516,6 +1536,8 @@ namespace BeitieSpliter
             if ((CurrentPntrStatus == PointerStatus.MoveToScalingBorder) ||
                (CurrentPntrStatus == PointerStatus.PressedToDrag))
             {
+                FillOpacity(draw, BtImageShowRect, Colors.White, 0.05);
+                RedrawImageRect(draw, drawRect);
                 DrawRectangle(draw, drawRect, BaseColor, penWidth, true);
             }
         }
@@ -2450,7 +2472,7 @@ namespace BeitieSpliter
                 default:
                     return;
             }
-            Refresh(CtrlMessageType.AdjustChange, false);
+            Refresh(CtrlMessageType.RedrawRequest);
         }
 
 
