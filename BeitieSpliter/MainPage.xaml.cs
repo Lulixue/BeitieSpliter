@@ -589,25 +589,30 @@ namespace BeitieSpliter
         CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
         {
             TransformBehavior = CanvasStrokeTransformBehavior.Hairline,
+            DashCap = CanvasCapStyle.Round,
+            DashOffset = 1.0F,
             DashStyle = CanvasDashStyle.Dot,
         };
+        readonly CanvasDashStyle StyleElement = CanvasDashStyle.Dash;
+        readonly CanvasDashStyle StyleAssistant = CanvasDashStyle.Dot;
         private void PageDrawLines(CanvasDrawingSession draw)
         {
             CanvasSolidColorBrush brush = new CanvasSolidColorBrush(draw, BtGrids.PenColor);
+            float penW = BtGrids.PenWidth;
 
             // 将行草模式下的辅助线和元素区域使用dash和dot区分开
             if (XingcaoMode)
             {
-                StrokeStyle.DashStyle = CanvasDashStyle.Dot;
+                StrokeStyle.DashStyle = StyleAssistant;
             }
             else
             {
-                StrokeStyle.DashStyle = CanvasDashStyle.Dash;
+                StrokeStyle.DashStyle = StyleElement;
             }
             for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
                 Rect rc = BtGrids.ElementRects[i].rc;
-                draw.DrawRectangle(rc, brush, BtGrids.PenWidth, StrokeStyle);
+                draw.DrawRectangle(rc, brush, penW, StrokeStyle);
                 if (!BtGrids.XingcaoMode)
                 {
                     int oldIndex = BtGrids.IndexToOldStyle(i);
@@ -621,7 +626,7 @@ namespace BeitieSpliter
             
             if (XingcaoMode)
             {
-                StrokeStyle.DashStyle = CanvasDashStyle.Dash;
+                StrokeStyle.DashStyle = StyleElement;
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
                     draw.DrawRectangle(pair.Value.rc, brush, BtGrids.PenWidth, StrokeStyle);
