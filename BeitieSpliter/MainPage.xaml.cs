@@ -719,7 +719,7 @@ namespace BeitieSpliter
                                 Package.Current.Id.Version.Minor,
                                 Package.Current.Id.Version.Build,
                                 Package.Current.Id.Version.Revision);
-            string help = "Ctrl+鼠标滚轮进行放大缩小\r\n\r\n" +
+            string help = "\r\n\r\nCtrl+鼠标滚轮进行放大缩小\r\n\r\n" +
                 "作者：卢立雪\r\n" +
                 "微信：13612977027\r\n" +
                 "邮箱：jackreagan@163.com\r\n\r\n" +
