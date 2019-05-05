@@ -254,7 +254,7 @@ namespace BeitieSpliter
         {
             lock (BtGrids.XingcaoElements)
             {
-                int maxIndex = 1;
+                int maxIndex = Common.MIN_INDEX;
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
                     if (pair.Key > maxIndex)
@@ -262,17 +262,17 @@ namespace BeitieSpliter
                         maxIndex = pair.Key;
                     }
                 }
-                if (maxIndex == BtGrids.ElementCount)
+                if (maxIndex == (BtGrids.ElementCount-1))
                 {
-                    maxIndex = 1;
+                    maxIndex = Common.MIN_INDEX;
                 }
                 else
                 {
                     maxIndex++;
                 }
-                if (CurrentElements.SelectedIndex != maxIndex - 1)
+                if (CurrentElements.SelectedIndex != maxIndex)
                 {
-                    CurrentElements.SelectedIndex = maxIndex - 1;
+                    CurrentElements.SelectedIndex = maxIndex;
                 }
             }
         }
@@ -302,8 +302,8 @@ namespace BeitieSpliter
             }
             ToAdjustRect = new Rect(pntLt, pntRb);
 
-            int colNumber = ColumnNumber.SelectedIndex + 1;
-            int elemIndex = CurrentElements.SelectedIndex + 1;
+            int colNumber = ColumnNumber.SelectedIndex+1;
+            int elemIndex = CurrentElements.SelectedIndex;
 
             Point lt = new Point
             {
@@ -694,7 +694,7 @@ namespace BeitieSpliter
         {
             Rect rc = BtGrids.GetMaxRectangle(MIN_ROW_COLUMN, rol, MIN_ROW_COLUMN, rol);
             double minDelta = 10000;
-            int retIndex = 1;
+            int retIndex = Common.MIN_INDEX;
             foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
             {
                 Rect itemRc = pair.Value.rc;
@@ -728,7 +728,7 @@ namespace BeitieSpliter
             Point pntLt = new Point();
             Point pntRb = new Point();
             int SelectedCol = ColumnNumber.SelectedIndex + 1;
-            int SelectedElementNo = CurrentElements.SelectedIndex + 1;
+            int SelectedElementNo = CurrentElements.SelectedIndex;
             int PreCol = GetPreviousColRow(SelectedCol, MIN_ROW_COLUMN);
             int NextCol = GetNextColRow(SelectedCol, BtGrids.Columns);
             int minCol = MIN_ROW_COLUMN;
@@ -785,7 +785,7 @@ namespace BeitieSpliter
             else
             { 
                 int colNumber = ColumnNumber.SelectedIndex + 1;
-                int elemIndex = CurrentElements.SelectedIndex + 1;
+                int elemIndex = CurrentElements.SelectedIndex;
 
                 if ((CtrlMessageType.ColumnChange == type)||
                     (CtrlMessageType.OperationChange == type))
@@ -793,7 +793,7 @@ namespace BeitieSpliter
                     int firstIndex = GetFirstXcElementInRect(colNumber);
                     if (firstIndex != elemIndex)
                     {
-                        CurrentElements.SelectedIndex = firstIndex - 1;
+                        CurrentElements.SelectedIndex = firstIndex;
                     }
                     Debug.WriteLine("Index first: {0}, selected: {1}", firstIndex, elemIndex);
                     elemIndex = firstIndex;
@@ -1259,14 +1259,14 @@ namespace BeitieSpliter
             Debug.WriteLine("Height: {0:0}, FontSize: {1}", rc.Height, fmt.FontSize);
 
             string notfInfo;
-            if (currentElemIndex <= 0)
+            if (currentElemIndex < 0)
             {
                 notfInfo = string.Format("请用鼠标截取{0}所在的区域", 
                                             BtGrids.GetElementString(CurrentElements.SelectedIndex));
             }
             else
             {
-                notfInfo = string.Format("当前选择调整{0}", BtGrids.GetElementString(currentElemIndex - 1));
+                notfInfo = string.Format("当前选择调整{0}", BtGrids.GetElementString(currentElemIndex));
             }
 
             draw.FillRectangle(rc, Colors.Green);
@@ -1359,6 +1359,27 @@ namespace BeitieSpliter
                 Width = rc.Width,
                 Height = rc.Height,
             };
+            // 确保图片不变形
+            if (srcRc.X < BtGrids.PageMargin.Left)
+            {
+                srcRc.X = BtGrids.PageMargin.Left;
+            }
+            if (srcRc.Y < BtGrids.PageMargin.Top)
+            {
+                srcRc.Y = BtGrids.PageMargin.Top;
+            }
+            if (srcRc.Right > BtGrids.DrawWidth)
+            {
+                srcRc.Width = BtGrids.DrawWidth - srcRc.X;
+            }
+            if (srcRc.Bottom > BtGrids.DrawHeight)
+            {
+                srcRc.Height = BtGrids.DrawHeight - srcRc.Y;
+            }
+            rc.Width = srcRc.Width;
+            rc.Height = srcRc.Height;
+
+            draw.FillRectangle(rc, Colors.Red);
             draw.DrawImage(BtImage.cvsBmp, rc, srcRc);
         }
         private double GetItemScrollHeight()
@@ -1390,7 +1411,8 @@ namespace BeitieSpliter
         {
             Point pntLt, pntRb;
             GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb);
-            Color BaseColor = BtGrids.PenColor;// (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
+            Color BaseColor = BtGrids.PenColor;
+            //Color OpacityColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
             float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
            
@@ -1399,9 +1421,7 @@ namespace BeitieSpliter
             pntRb.X += ChangeRect.right;
             pntRb.Y += ChangeRect.bottom;
             Rect drawRect = new Rect(pntLt, pntRb);
-
-
-
+            
             DrawRectangle(draw, drawRect, BaseColor, penWidth, true);
 
             lock (DrawLineElements)
@@ -1476,7 +1496,7 @@ namespace BeitieSpliter
                         rc.Height -= BtGrids.PenWidth;
                         RedrawImageRect(draw, rc);
                         //draw.DrawRectangle(rc, Colors.Red);
-                        FillOpacity(draw, rc, Colors.White, 0.1);
+                        FillOpacity(draw, rc, Colors.White, 0.2);
                     }
 
                 }
@@ -1493,7 +1513,7 @@ namespace BeitieSpliter
                         rc.X -= BtImageAdjustRect.X;
                         rc.Y -= BtImageAdjustRect.Y;
 
-                        if (pair.Key == (CurrentElements.SelectedIndex + 1))
+                        if (pair.Key == CurrentElements.SelectedIndex)
                         {
                             currentElemIndex = pair.Key;
                            
@@ -1505,7 +1525,7 @@ namespace BeitieSpliter
                     }
 
                         // 最后绘制所选中元素，达到覆盖其他的目的
-                    if (currentElemIndex > 0)
+                    if (currentElemIndex >= 0)
                     {
                         var result = BtGrids.XingcaoElements.Where(p => (p.Key == currentElemIndex));
                         foreach (KeyValuePair<int, BeitieGridRect> pair in result)
@@ -1515,7 +1535,7 @@ namespace BeitieSpliter
                             rc.Y -= BtImageAdjustRect.Y;
 
                             RedrawImageRect(draw, drawRect);
-                            DrawElementText(draw, rc, pair.Key-1);
+                            DrawElementText(draw, rc, pair.Key);
                         }
                     }
                     else
@@ -2015,14 +2035,14 @@ namespace BeitieSpliter
                 {
                     foreach (IntIndex pnt in DrawLineElements)
                     {
-                        elementIndexes.Add(BtGrids.GetIndex(pnt.row, pnt.col, true)+1);
+                        elementIndexes.Add(BtGrids.GetIndex(pnt.row, pnt.col, true));
                     }
                 }
                 else
                 {
                     if (OperationType.SingleElement == OpType)
                     {
-                        elementIndexes.Add(CurrentElements.SelectedIndex + 1);
+                        elementIndexes.Add(CurrentElements.SelectedIndex);
                     }
                     else if (OperationType.SingleColumn == OpType)
                     {
@@ -2089,7 +2109,7 @@ namespace BeitieSpliter
             GetCurrentRowCol(ref row, ref col);
             BtGrids.ElementRects[BtGrids.ToIndex(row, col)] = new BeitieGridRect(LastBtGrids.GetElement(row, col).rc);
 
-            int selectedElemIndex = CurrentElements.SelectedIndex + 1;
+            int selectedElemIndex = CurrentElements.SelectedIndex;
             BtGrids.XingcaoElements.Remove(selectedElemIndex);
             if (LastBtGrids.XingcaoElements.ContainsKey(selectedElemIndex))
             {
@@ -2101,13 +2121,11 @@ namespace BeitieSpliter
                     revised = false
                 });
             }
-
-            selectedElemIndex = CurrentElements.SelectedIndex;
+            
             BtGrids.Elements.Remove(selectedElemIndex);
             if (LastBtGrids.Elements.ContainsKey(selectedElemIndex))
             {
-                BeitieElement be;
-                LastBtGrids.Elements.TryGetValue(selectedElemIndex, out be);
+                LastBtGrids.Elements.TryGetValue(selectedElemIndex, out BeitieElement be);
                 BtGrids.Elements.Add(selectedElemIndex, new BeitieElement(be.type,
                     be.content, be.no)
                 {
@@ -2521,8 +2539,8 @@ namespace BeitieSpliter
                 {
                     if (IsPntInRect(pp, pair.Value.rc, -5))
                     {
-                        if (CurrentElements.SelectedIndex != (pair.Key - 1))
-                            CurrentElements.SelectedIndex = pair.Key - 1;
+                        if (CurrentElements.SelectedIndex != pair.Key)
+                            CurrentElements.SelectedIndex = pair.Key;
                         break;
                     }
                 }
@@ -2670,7 +2688,10 @@ namespace BeitieSpliter
                 case PointerStatus.RBtnPressed:
                     if (IsOnElement(loc))
                     {
-                        GetCursorOnElement(pp);
+                        if (!BtGrids.XingcaoMode)
+                        {
+                            GetCursorOnElement(pp);
+                        }
                         ShowElementMenu(pp);
                     }
                     break;
@@ -2967,7 +2988,7 @@ namespace BeitieSpliter
         private void ElementMenuSaveElement_Click(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("ElementMenuSaveElement_Click();");
-            int index = CurrentElements.SelectedIndex + 1;
+            int index = CurrentElements.SelectedIndex;
 
             HashSet<int> elementIndexes = new HashSet<int>();
             elementIndexes.Add(index);

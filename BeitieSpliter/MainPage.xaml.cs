@@ -262,7 +262,7 @@ namespace BeitieSpliter
             }
             RowCount.SelectedIndex = 8;
             ColumnCount.SelectedIndex = 5;
-            PenWidthCombo.SelectedIndex = 2;
+            PenWidthCombo.SelectedIndex = 1;
             
             CurrentPage.Height = ImageScrollViewer.ViewportHeight;
             CurrentPage.Width = ImageScrollViewer.ViewportWidth;
@@ -1042,9 +1042,9 @@ namespace BeitieSpliter
 
         async void SaveSplitImagesProcWait(object para)
         {
-            InitWait(SaveEvent);
+            InitWait();
             await SaveSplitImagesProc(para);
-            WaitForSaving(SaveEvent);
+            WaitForSaving();
             ConfigPage.HandlerShowSaveResultEvt(null);
         }
 
@@ -1077,22 +1077,23 @@ namespace BeitieSpliter
         public string SaveNotfInfo = "";
         public AutoResetEvent SaveEvent = new AutoResetEvent(false);
         
-        public void SetWait(AutoResetEvent evt)
+        public void SetWait()
         {
-            evt.Set();
+            SaveEvent.Set();
             Debug.WriteLine("SetWait()");
         }
 
-        public void InitWait(AutoResetEvent evt)
+        public void InitWait()
         {
             Debug.WriteLine("InitWait()");
-            evt.Reset();
+            SaveEvent = new AutoResetEvent(false);
+            //evt.Reset();
         }
 
-        public void WaitForSaving(AutoResetEvent evt)
+        public void WaitForSaving()
         {
             Task.Run(() => {
-                evt.WaitOne();
+                SaveEvent.WaitOne();
             });
 
             Debug.WriteLine("WaitOne() ok");
@@ -1108,10 +1109,10 @@ namespace BeitieSpliter
                 }
                 CurrentBtImage.PageTextConfirmed = true;
             }
-            InitWait(SaveEvent);
+            InitWait();
             NotifyUser("开始保存分割单字图片...", NotifyType.StatusMessage);
             await SaveSplitImagesProc(para);
-            WaitForSaving(SaveEvent);
+            WaitForSaving();
             SaveErrorType type = SaveErrType;
             
             if (type == SaveErrorType.NoSelectedItem)
@@ -1184,7 +1185,7 @@ namespace BeitieSpliter
                 }
                 else
                 {
-                    for (int i = 1; i <= BtGrids.ElementCount; i++)
+                    for (int i = 0; i < BtGrids.ElementCount; i++)
                     {
                         ElementIndexes.Add(i);
                     }
@@ -1193,7 +1194,7 @@ namespace BeitieSpliter
             }
             if (ElementIndexes.Count == 0)
             {
-                SetWait(SaveEvent);
+                SetWait();
                 SaveErrType = SaveErrorType.NoSelectedItem;
                 return SaveErrType;
             }
@@ -1204,7 +1205,7 @@ namespace BeitieSpliter
             foreach (int index in ElementIndexes)
             {
                 Rect roi = new Rect();
-                BeitieElement element = BtGrids.Elements[index-1];
+                BeitieElement element = BtGrids.Elements[index];
                 if (element.type == BeitieElement.BeitieElementType.Kongbai)
                 {
                     continue;
@@ -1257,7 +1258,7 @@ namespace BeitieSpliter
                     saveCount, folder.Path);
             }
 
-            SetWait(SaveEvent);
+            SetWait();
             return SaveErrType;
         }
         private void OnSaveSplitImages(object sender, RoutedEventArgs e)

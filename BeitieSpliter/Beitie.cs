@@ -24,6 +24,8 @@ namespace BeitieSpliter
         public static readonly float ZOOM_FACTOR_SCALE = 0.05F;
         public static readonly float KONGBAI_OPACITY = 0.5F;
         public static readonly float KONGBAI_X_LINE_WIDTH = 2F;
+        public static readonly int MIN_ROW_COL = 1;
+        public static readonly int MIN_INDEX = 0;
 
         public static void SetWindowSize()
         {
@@ -191,7 +193,8 @@ namespace BeitieSpliter
         public int no = 0;
         public int NumberedCount = 0;
     }
-
+    // 所有的index从0开始
+    // 行列号row/col从1开始
     public sealed class BeitieGrids : ICloneable
     {
         public enum ColorType
@@ -199,7 +202,6 @@ namespace BeitieSpliter
             Light,
             Dark,
         }
-        public static int MIN_ROW_COL = 1;
         public double GridHeight = 0.0;
         public double GridWidth = 0;
         public bool XingcaoMode = false;
@@ -307,7 +309,7 @@ namespace BeitieSpliter
                 //    pntRb.Y = BtImageParent.resolutionY;
                 //}
                 // 显示全图
-                if (minRow == MIN_ROW_COL)
+                if (minRow == Common.MIN_ROW_COL)
                 {
                     pntLt.Y = 0 + PageMargin.Top;
                 }
@@ -316,7 +318,7 @@ namespace BeitieSpliter
                     double tailored = BtImageParent.resolutionY - PageMargin.Bottom;
                     pntRb.Y = (tailored < pntRb.Y) ? pntRb.Y : tailored;
                 }
-                if (minCol == MIN_ROW_COL)
+                if (minCol == Common.MIN_ROW_COL)
                 {
                     pntLt.X = 0 + PageMargin.Left;
                 }
@@ -437,12 +439,12 @@ namespace BeitieSpliter
         {
             if (!XingcaoMode)
             {
-                if (index > ElementRects.Count)
+                if (index > (ElementRects.Count-1))
                 {
                     return false;
                 }
                 int row = 0, col = 0;
-                IndexToRowCol(index - 1, ref row, ref col, BookOldType);
+                IndexToRowCol(index , ref row, ref col, BookOldType);
                 rc = GetRectangle(row, col);
             }
             else
@@ -537,16 +539,18 @@ namespace BeitieSpliter
         {
             Debug.Assert(row > 0);
             Debug.Assert(col > 0);
+            int retIndex;
             if (!oldStyle)
             {
-                return ToIndex(row, col);
+                retIndex = ToIndex(row, col);
             }
             else
             {
                 col = Columns - col;
-                int index = col * Rows + row - 1;
-                return index;
+                retIndex = col * Rows + row - 1;
             }
+            Debug.Assert(retIndex >= 0);
+            return retIndex;
         }
         public int IndexToOldStyle(int index)
         {
