@@ -80,6 +80,19 @@ namespace BeitieSpliter
             ContentDialogResult result = await locationPromptDialog.ShowAsync();
             return (result == ContentDialogResult.Primary);
         }
+        public static async Task<bool> ShowCloseSwitchToMainDlg()
+        {
+            ContentDialog locationPromptDialog = new ContentDialog
+            {
+                Title = "关闭当前窗口",
+                Content = "输入释文需要关闭本窗口，转到主界面输入，是否转到主界面输入？",
+                CloseButtonText = "直接生成",
+                PrimaryButtonText = "好的",
+            };
+
+            ContentDialogResult result = await locationPromptDialog.ShowAsync();
+            return (result == ContentDialogResult.Primary);
+        }
         public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
         {
             // Create the message dialog and set its content

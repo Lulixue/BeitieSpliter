@@ -1811,7 +1811,7 @@ namespace BeitieSpliter
                 peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
             }
         }
-
+        public int PageViewId = 0;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             InitControls();
@@ -1823,6 +1823,7 @@ namespace BeitieSpliter
             //ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.Maximized;
             Debug.WriteLine("Actual W/H: {0},{1}, W/H: {2}，{3},",
                this.ActualWidth, this.ActualHeight, this.Height, this.Width);
+            PageViewId = ApplicationView.GetForCurrentView().Id;
         }
 
         private void XincaoModeCheck_Clicked(object sender, RoutedEventArgs e)

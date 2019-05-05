@@ -1989,7 +1989,29 @@ namespace BeitieSpliter
             {
                 if (await Common.ShowNotifyPageTextDlg())
                 {
-                    return;
+                    bool bContinue = true;
+                    if (BtGrids.XingcaoMode)
+                    {
+                        bool bRet = await Common.ShowCloseSwitchToMainDlg();
+                        if (!bRet)
+                        {
+                            bContinue = false;
+                        }
+                        else
+                        {
+                            await ApplicationViewSwitcher.SwitchAsync(ParentPage.PageViewId,
+                                     ApplicationView.GetForCurrentView().Id,
+                                    ApplicationViewSwitchingOptions.ConsolidateViews);
+                        }
+                    }
+                    else
+                    {
+                       await ApplicationViewSwitcher.SwitchAsync(ParentPage.PageViewId);
+                    }
+                    if (bContinue)
+                    {
+                        return;
+                    }
                 }
                 BtGrids.BtImageParent.PageTextConfirmed = true;
             }
@@ -2781,7 +2803,7 @@ namespace BeitieSpliter
                     }
                     else
                     {
-                        if ((OpType != OperationType.SingleElement))
+                        if (OpType != OperationType.SingleElement)
                         {
                             GetCursorOnElement(pp);
                         }
