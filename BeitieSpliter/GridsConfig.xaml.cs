@@ -1625,6 +1625,10 @@ namespace BeitieSpliter
 
         private void Operation_Checked(object sender, RoutedEventArgs e)
         {
+            if (BtGrids == null)
+            {
+                return;
+            }
             if (OpSingleElement?.IsChecked ?? false)
             {
                 OpType = OperationType.SingleElement;
@@ -3060,6 +3064,12 @@ namespace BeitieSpliter
 #pragma warning disable CS0618 // Type or member is obsolete
             ItemScrollViewer.ZoomToFactor(factor);
 #pragma warning restore CS0618 // Type or member is obsolete
+        }
+
+        private void ClickedToggleMenu(object sender, RoutedEventArgs e)
+        {
+
+            Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
         }
     }
 }
