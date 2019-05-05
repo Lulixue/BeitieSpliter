@@ -98,7 +98,12 @@
             <Button Name="BtnRightElement" Content="右一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
             <Button Name="BtnBottomElement" Content="下一字" Margin="2"  Background="Green" Click="ElementMove_Clicked"/>
         </StackPanel>
-
+        <StackPanel Grid.Row="4" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Right" >
+            <Button Name="BtnZoomIn" Content="放大" Margin="2" Background="Green" Click="Clicked_Zoom"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Grid.Column="3" VerticalAlignment="Top" HorizontalAlignment="Left" >
+            <Button Name="BtnZoomOut" Content="缩小" Margin="2" Background="Green" Click="Clicked_Zoom"/>
+        </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="2" Margin="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button x:Name="BtnSaveAll" Content="保存全部" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="center" />
 

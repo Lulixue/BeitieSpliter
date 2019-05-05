@@ -1439,8 +1439,7 @@ namespace BeitieSpliter
 
                         Common.DrawKongbaiElement(draw, rc);
                         drawColor = Colors.Gray;
-                        penWidth += 1;
-                        DrawRectangle(draw, rc, drawColor, penWidth, true);
+                        DrawRectangle(draw, rc, drawColor, penWidth+1, true);
                     }
                     else
                     {
@@ -2671,6 +2670,7 @@ namespace BeitieSpliter
                 case PointerStatus.RBtnPressed:
                     if (IsOnElement(loc))
                     {
+                        GetCursorOnElement(pp);
                         ShowElementMenu(pp);
                     }
                     break;
@@ -2681,6 +2681,8 @@ namespace BeitieSpliter
                         if ((OpType == OperationType.WholePage) &&
                               !BtGrids.XingcaoMode)
                         {
+                            GetCursorOnElement(pp);
+                            ShowElementMenu(pp);
                             loc = PointerLocation.InsideImageButNotElement;
                             status = PointerStatus.Entered;
                         }
@@ -3022,5 +3024,21 @@ namespace BeitieSpliter
             Refresh();
         }
 
+        private void Clicked_Zoom(object sender, RoutedEventArgs e)
+        {
+            var btn = (Button)sender;
+            float factor = ItemScrollViewer.ZoomFactor;
+            if (btn == BtnZoomIn)
+            {
+                factor += Common.ZOOM_FACTOR_SCALE;
+            }
+            else
+            {
+                factor -= Common.ZOOM_FACTOR_SCALE;
+            }
+#pragma warning disable CS0618 // Type or member is obsolete
+            ItemScrollViewer.ZoomToFactor(factor);
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
     }
 }

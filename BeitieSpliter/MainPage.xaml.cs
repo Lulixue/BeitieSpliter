@@ -467,10 +467,23 @@ namespace BeitieSpliter
         public void InitAfterImageLoaded()
         {
             BtGrids = new BeitieGrids();
+           
+            // 将图片适应屏幕大小
+            float factor = (float)(ImageScrollViewer.ActualWidth / CurrentBtImage.resolutionX);
+            if (factor > 1F)
+            {
+                factor = 1F;
+            }
+#pragma warning disable CS0618 // Type or member is obsolete
+            ImageScrollViewer.ZoomToFactor(factor);
+#pragma warning restore CS0618 // Type or member is obsolete
+
             InitDrawParameters();
             ParsePageText();
             BtnMore.IsEnabled = true;
+
             RefreshPage(1);
+
         }
         public void BeitieImageInvalid()
         {
@@ -532,9 +545,11 @@ namespace BeitieSpliter
         private async void OpenFile(StorageFile file, int no)
         {
             Debug.WriteLine(String.Format("Open FIle: {0}, No: {1}", file.Name, no));
+            CurrentBtImage = null;
             AutoResetEvent evt = new AutoResetEvent(false);
-            CurrentBtImage = new BeitieImage(this, CurrentPage, file, evt);
+            BeitieImage btimg = new BeitieImage(this, CurrentPage, file, evt);
             await Task.Run(() => {  evt.WaitOne(); });
+            CurrentBtImage = btimg;
             if (!CurrentBtImage.FileSupported)
             {
                 Common.ShowMessageDlg("文件损坏或不支持!", null);
@@ -549,7 +564,11 @@ namespace BeitieSpliter
                 return;
             }
             InitAfterImageLoaded();
+
             StartNoBox.Text = string.Format("{0}", no);
+
+
+            
         }
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
@@ -590,10 +609,10 @@ namespace BeitieSpliter
         {
             TransformBehavior = CanvasStrokeTransformBehavior.Hairline,
             DashCap = CanvasCapStyle.Round,
-            DashOffset = 1.0F,
             DashStyle = CanvasDashStyle.Dot,
         };
-        readonly CanvasDashStyle StyleElement = CanvasDashStyle.Dash;
+        readonly CanvasDashStyle StyleKaiElem = CanvasDashStyle.Solid;
+        readonly CanvasDashStyle StyleXcElement = CanvasDashStyle.Dash;
         readonly CanvasDashStyle StyleAssistant = CanvasDashStyle.Dot;
         private void PageDrawLines(CanvasDrawingSession draw)
         {
@@ -603,11 +622,13 @@ namespace BeitieSpliter
             // 将行草模式下的辅助线和元素区域使用dash和dot区分开
             if (XingcaoMode)
             {
+                StrokeStyle.TransformBehavior = CanvasStrokeTransformBehavior.Hairline;
                 StrokeStyle.DashStyle = StyleAssistant;
             }
             else
             {
-                StrokeStyle.DashStyle = StyleElement;
+                StrokeStyle.TransformBehavior = CanvasStrokeTransformBehavior.Normal;
+                StrokeStyle.DashStyle = StyleKaiElem;
             }
             for (int i = 0; i < BtGrids.ElementRects.Count; i++)
             {
@@ -626,7 +647,7 @@ namespace BeitieSpliter
             
             if (XingcaoMode)
             {
-                StrokeStyle.DashStyle = StyleElement;
+                StrokeStyle.DashStyle = StyleXcElement;
                 foreach (KeyValuePair<int, BeitieGridRect> pair in BtGrids.XingcaoElements)
                 {
                     draw.DrawRectangle(pair.Value.rc, brush, BtGrids.PenWidth, StrokeStyle);

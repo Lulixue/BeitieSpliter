@@ -21,6 +21,10 @@ namespace BeitieSpliter
 {
     public sealed class Common
     {
+        public static readonly float ZOOM_FACTOR_SCALE = 0.05F;
+        public static readonly float KONGBAI_OPACITY = 0.5F;
+        public static readonly float KONGBAI_X_LINE_WIDTH = 2F;
+
         public static void SetWindowSize()
         {
             {
@@ -34,14 +38,14 @@ namespace BeitieSpliter
         {
             CanvasSolidColorBrush KongbaiBrush = new CanvasSolidColorBrush(draw, Colors.White)
             {
-                Opacity = (float)0.5
+                Opacity = KONGBAI_OPACITY
             };
             draw.FillRectangle(rc, KongbaiBrush);
             //draw.DrawText("空白", rc, Colors.Gray, InfoCTF);
             draw.DrawLine(new Vector2((float)rc.Left, (float)rc.Top),
-                new Vector2((float)rc.Right, (float)rc.Bottom), Colors.Gray, 2);
+                new Vector2((float)rc.Right, (float)rc.Bottom), Colors.Gray, KONGBAI_X_LINE_WIDTH);
             draw.DrawLine(new Vector2((float)rc.Left, (float)rc.Bottom),
-                new Vector2((float)rc.Right, (float)rc.Top), Colors.Gray, 2);
+                new Vector2((float)rc.Right, (float)rc.Top), Colors.Gray, KONGBAI_X_LINE_WIDTH);
 
         }
         public static Size GetSystemResolution(bool second=false)
