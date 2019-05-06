@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="com.beitie.splitter" Publisher="CN=v-ligxia" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="2bdad46f-c0ac-488e-9e6f-b42efe800426" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="7306CBEBBB89.2446588ED59CF" Publisher="CN=3A7406AE-57BC-445A-A17D-01ACE0CBE125" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="368ed0cf-984f-4934-9683-69faa232b2a5" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>BeitieSpliter</DisplayName>
-    <PublisherDisplayName>v-ligxia</PublisherDisplayName>
+    <DisplayName>碑帖分割器</DisplayName>
+    <PublisherDisplayName>卢立雪</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
@@ -16,7 +16,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="BeitieSpliter.App">
       <uap:VisualElements DisplayName="碑帖分割器" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\BeitieSpliter44X44Logo.png" Description="对碑帖图片进行单字分割" BackgroundColor="transparent">
-        <uap:DefaultTile ShortName="碑帖分割工具">
+        <uap:DefaultTile>
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo" />
           </uap:ShowNameOnTiles>
