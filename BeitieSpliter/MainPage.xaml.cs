@@ -33,6 +33,7 @@ using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Canvas.Brushes;
 using Windows.ApplicationModel;
+using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -87,16 +88,6 @@ namespace BeitieSpliter
             evt.Set();
         }
     }
-    public class ColorBoxItem
-    {
-        public Color Value { get; set; }
-        public string Text { get; set; }
-        public ColorBoxItem(Color Value, string Text)
-        {
-            this.Value = Value;
-            this.Text = Text;
-        }
-    }
 
 
     public sealed partial class MainPage : Page, INotifyPropertyChanged
@@ -140,6 +131,7 @@ namespace BeitieSpliter
             Common.SetWindowSize();
             this.InitializeComponent();
             InitMaps();
+            Common.Init();
         }
         private void ColumnIllegalHandler(IUICommand command)
         {
@@ -188,14 +180,12 @@ namespace BeitieSpliter
             }
             return columns;
         }
-        List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
-        List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
         
         void UpdateBackupColors()
         {
             BtGrids.BackupColors.Clear();
             bool NeedContinue = true;
-            foreach (ColorBoxItem item in LightColorItems)
+            foreach (ColorBoxItem item in Common.LightColorItems)
             {
                 if (item.Value == BtGrids.PenColor)
                 {
@@ -213,7 +203,7 @@ namespace BeitieSpliter
 
             BtGrids.BackupColors.Clear();
             BtGrids.GridType = BeitieGrids.ColorType.Dark;
-            foreach (ColorBoxItem item in DarkColorItems)
+            foreach (ColorBoxItem item in Common.DarkColorItems)
             {
                 if (item.Value == BtGrids.PenColor)
                 {
@@ -226,24 +216,12 @@ namespace BeitieSpliter
 
         void InitControls()
         {
-            // 添加颜色
-            LightColorItems.Add(new ColorBoxItem(Colors.Green, "绿色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.White, "白色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.Orange, "橙色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.Gray, "灰色"));
-            LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
-
-            DarkColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Navy, "海军蓝色"));
-
-            foreach (ColorBoxItem item in LightColorItems)
+           
+            foreach (ColorBoxItem item in Common.LightColorItems)
             {
                 ColorBoxItems.Add(item);
             }
-            foreach (ColorBoxItem item in DarkColorItems)
+            foreach (ColorBoxItem item in Common.DarkColorItems)
             {
                 ColorBoxItems.Add(item);
             }
@@ -251,12 +229,12 @@ namespace BeitieSpliter
             BtGrids.PenColor = ColorBoxSelectedItem.Value;
             UpdateBackupColors();
 
-            for (int i = 1; i < 20; i++)
+            for (int i = 1; i < Common.DEFAULT_MAX_ROW_COLUMN; i++)
             {
                 RowCount.Items.Add(i);
                 ColumnCount.Items.Add(i);
             }
-            for (int i = 1; i < 10; i++)
+            for (int i = 1; i < Common.DEFAULT_MAX_PEN_WIDTH; i++)
             {
                 PenWidthCombo.Items.Add(i);
             }
@@ -407,9 +385,11 @@ namespace BeitieSpliter
 
         private async void OnImportBeitieDir(object sender, RoutedEventArgs e)
         {
-            var folderPicker = new Windows.Storage.Pickers.FolderPicker();
-            folderPicker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
-            folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop;
+            var folderPicker = new Windows.Storage.Pickers.FolderPicker
+            {
+                ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail,
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop
+            };
             folderPicker.FileTypeFilter.Add("*");
 
             BtFolder = await folderPicker.PickSingleFolderAsync();
@@ -835,11 +815,24 @@ namespace BeitieSpliter
             UpdateRowCount();
         }
 
-        private void PenColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public async void SetPenColor(string clr)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Text == clr);
+                UpdatePenColor();
+            });
+        }
+        public void UpdatePenColor()
         {
             BtGrids.PenColor = ColorBoxSelectedItem.Value;
             UpdateBackupColors();
             CurrentPage.Invalidate();
+        }
+
+        private void PenColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdatePenColor();
         }
         
         private void InitPageMargin()
@@ -878,6 +871,26 @@ namespace BeitieSpliter
                 textbox.Text = backupText;
             }
         }
+
+        public async Task<bool> SetPenWidth(string txt)
+        {
+            bool bRet = true;
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                if (Regex.IsMatch(txt, "^[\\d]+\\.?[\\d]?$") && (txt != ""))
+                {
+                    PenWidthCombo.Text = txt;
+                    BtGrids.PenWidth = float.Parse(PenWidthCombo.Text);
+                }
+                else
+                {
+                    bRet = false;
+                }
+            });
+
+            return bRet;
+        }
+
         private void PenWidth_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             BtGrids.PenWidth = (PenWidthCombo?.SelectedIndex + 1) ?? 2;
@@ -900,7 +913,7 @@ namespace BeitieSpliter
             else
             {
                 BtGrids.PenWidth = 2;
-                Common.ShowMessageDlg("Invalid pen width: " + combo.Text, null);
+                Common.ShowMessageDlg("无效宽度: " + combo.Text, null);
             }
             CurrentPage.Invalidate();
         }
@@ -1824,6 +1837,32 @@ namespace BeitieSpliter
             Debug.WriteLine("Actual W/H: {0},{1}, W/H: {2}，{3},",
                this.ActualWidth, this.ActualHeight, this.Height, this.Width);
             PageViewId = ApplicationView.GetForCurrentView().Id;
+
+            var CurrentView = ApplicationView.GetForCurrentView();
+            ApplicationView.TerminateAppOnFinalViewClose = false;
+            CurrentView.Consolidated += ConsolidatedMainView;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            Debug.WriteLine("OnNavigatedFrom()");
+            base.OnNavigatedFrom(e);
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            Debug.WriteLine("OnNavigatedFrom()");
+            base.OnNavigatedTo(e);
+        }
+        private void ConsolidatedMainView(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
+        {
+            //if (!SettingPageClosed)
+            //{
+            //   await ApplicationViewSwitcher.SwitchAsync(PageViewId,
+            //                         SettingPageViewID,
+            //                        ApplicationViewSwitchingOptions.ConsolidateViews);
+            //}
+            CoreApplication.Exit();
         }
 
         private void XincaoModeCheck_Clicked(object sender, RoutedEventArgs e)

@@ -19,6 +19,18 @@ using Windows.UI.Xaml.Controls;
 
 namespace BeitieSpliter
 {
+    public class ColorBoxItem
+    {
+        public Color Value { get; set; }
+        public string Text { get; set; }
+        public ColorBoxItem(Color Value, string Text)
+        {
+            this.Value = Value;
+            this.Text = Text;
+        }
+    }
+
+
     public sealed class Common
     {
         public static readonly float ZOOM_FACTOR_SCALE = 0.05F;
@@ -26,6 +38,33 @@ namespace BeitieSpliter
         public static readonly float KONGBAI_X_LINE_WIDTH = 2F;
         public static readonly int MIN_ROW_COL = 1;
         public static readonly int MIN_INDEX = 0;
+        public static readonly int DEFAULT_MAX_PEN_WIDTH = 10;
+        public static readonly int DEFAULT_MAX_ROW_COLUMN = 20;
+        public static readonly int MIN_ELEMENT_TEXT_HEIGHT = 20;
+        public static readonly int MAX_ELEMENT_TEXT_HEIGHT = 50;
+        public static readonly int EXTRA_MAX_ELEM_TXT_HEIGHT = 100;
+
+
+        public static List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
+        public static List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
+        
+        public static void Init()
+        {
+            // 添加颜色
+            LightColorItems.Clear();
+            LightColorItems.Add(new ColorBoxItem(Colors.Green, "绿色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.White, "白色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Orange, "橙色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Gray, "灰色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
+
+            DarkColorItems.Clear();
+            DarkColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Navy, "海军蓝色"));
+        }
 
         public static void SetWindowSize()
         {

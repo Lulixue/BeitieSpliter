@@ -31,6 +31,9 @@ using Microsoft.Graphics.Canvas.Text;
 using Windows.System;
 using static BeitieSpliter.MainPage;
 using Microsoft.Graphics.Canvas.Brushes;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -74,7 +77,7 @@ namespace BeitieSpliter
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class GridsConfig : Page
+    public sealed partial class GridsConfig : Page, INotifyPropertyChanged
     {
         enum CtrlMessageType
         {
@@ -107,8 +110,18 @@ namespace BeitieSpliter
             WholePage,
         }
 
+        enum PenLineType
+        {
+            Dash = 0,
+            Dot = 1,
+            Line = 2
+        }
+        
         public event EventHandler ShowSaveResultEvtHdlr;
-        bool? HideGridChecked = false;
+        static bool HideGridChecked = false;
+        static bool SingleFocusMode = false;
+        static bool ShowSizeMode = false;
+        PenLineType LineType = PenLineType.Dash;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
         BeitieGrids LastBtGrids = new BeitieGrids();
@@ -127,10 +140,65 @@ namespace BeitieSpliter
         ChangeStruct LastValidChange = new ChangeStruct();
         static readonly int MIN_ROW_COLUMN = 1;
 
+        private ObservableCollection<ColorBoxItem> _ColorBoxItems = new ObservableCollection<ColorBoxItem>();
+        public ObservableCollection<ColorBoxItem> ColorBoxItems
+        {
+            get { return _ColorBoxItems; }
+            set { Set(ref _ColorBoxItems, value); }
+        }
+
+        private ColorBoxItem _ColorBoxSelectedItem = null;
+        public ColorBoxItem ColorBoxSelectedItem { get { return _ColorBoxSelectedItem; } set { Set(ref _ColorBoxSelectedItem, value); } }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void Set<T>(ref T storage, T value, [CallerMemberName]string propertyName = null)
+        {
+            if (Equals(storage, value))
+            {
+                return;
+            }
+            storage = value;
+            OnPropertyChanged(propertyName);
+        }
+
+        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+
+        string GetLineTypeString(PenLineType type)
+        {
+            switch (type)
+            {
+                case PenLineType.Dash:
+                    return "虚线";
+                case PenLineType.Dot:
+                    return "点线";
+                case PenLineType.Line:
+                    return "实线";
+            }
+            return "未知";
+        }
+        PenLineType GetLineType(string t)
+        {
+            if (t == "虚线")
+            {
+                return PenLineType.Dash;
+            }
+            else if (t == "点线")
+            {
+                return PenLineType.Dot;
+            }
+            else
+            {
+                return PenLineType.Line;
+            }
+        }
+        
         public GridsConfig()
         {
             this.InitializeComponent();
-
+            
         }
 
         private int GetPreviousColRow(int current, int MIN)
@@ -876,8 +944,20 @@ namespace BeitieSpliter
             }
             else if (OperationType.SingleElement == OpType)
             {
-                minCol = maxCol = SelectedCol;
-                minRow = maxRow = SelectedRow;
+                // 单字专注，只显示周围区域
+                if (SingleFocusMode)
+                {
+                    minCol = maxCol = SelectedCol;
+                    minRow = maxRow = SelectedRow;
+                }
+                else
+                {
+                    // 单字显示全部区域
+                    PreRow = minRow;
+                    PreCol = minCol;
+                    NextRow = maxRow;
+                    NextCol = maxCol;
+                }
             }
             else 
             {
@@ -910,6 +990,8 @@ namespace BeitieSpliter
                         DrawLineElements.Add(new IntIndex(row, col));
                     }
                 }
+                minCol = maxCol = SelectedCol;
+                minRow = maxRow = SelectedRow;
             }
             else
             {
@@ -928,9 +1010,9 @@ namespace BeitieSpliter
             ToAdjustRect.Y = maxRect.Y - BtImageAdjustRect.Y;
             ToAdjustRect.Width = maxRect.Width;
             ToAdjustRect.Height = maxRect.Height;
+
             ChangeRect = new ChangeStruct();
-
-
+            UpdateOpInfoBox();
             Debug.WriteLine("Operation: {0}, Previous: {1},{2}; Current: {3},{4}; Next: {5},{6}",
                OpType, PreRow, PreCol, SelectedRow, SelectedCol, NextRow, NextCol);
             Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
@@ -989,18 +1071,20 @@ namespace BeitieSpliter
         }
         void TestCase()
         {
-            int row = 4;
-            int col = 4;
-            int index = BtGrids.GetIndex(4, 4, true);
-            Debug.Assert(BtGrids.GetIndex(1, 1, true) == 45);
-            Debug.Assert(BtGrids.GetIndex(1, 6, true) == 0);
-            BtGrids.IndexToRowCol(index, ref row,  ref col, true);
-            Debug.Assert(row == 4);
-            Debug.Assert(col == 4);
-            Debug.WriteLine("float: {0},{0:F1}", 1.24F, 1.24F);
+            //int row = 4;
+            //int col = 4;
+            //int index = BtGrids.GetIndex(4, 4, true);
+            //Debug.Assert(BtGrids.GetIndex(1, 1, true) == 45);
+            //Debug.Assert(BtGrids.GetIndex(1, 6, true) == 0);
+            //BtGrids.IndexToRowCol(index, ref row,  ref col, true);
+            //Debug.Assert(row == 4);
+            //Debug.Assert(col == 4);
+            Debug.WriteLine("float: {0},{0:F1},{0:F0}, {0:0}", 1.24F, 1.24F, 1.4F, 1.4F);
         }
         void InitControls()
         {
+            TestCase();
+
             int index = 0;
             foreach (KeyValuePair<int, BeitieElement> pair in BtGrids.Elements)
             {
@@ -1020,13 +1104,52 @@ namespace BeitieSpliter
             ColumnNumber.SelectedIndex = BtGrids.Columns - 1;
             CurrentItem.Height = BtImage.resolutionY;
             CurrentItem.Width = BtImage.resolutionX;
+
+            foreach (ColorBoxItem item in Common.LightColorItems)
+            {
+                ColorBoxItems.Add(item);
+            }
+            foreach (ColorBoxItem item in Common.DarkColorItems)
+            {
+                ColorBoxItems.Add(item);
+            }
+            ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Value == BtGrids.PenColor);
+
+            //////网格
+            for (int i = 1; i < Common.DEFAULT_MAX_PEN_WIDTH; i++)
+            {
+                PenWidthCombo.Items.Add(i);
+            }
+            bool IsFloat = (BtGrids.PenWidth - (int)BtGrids.PenWidth) > 0;
+            string strWidth;
+            if (IsFloat)
+            {
+                strWidth = string.Format("{0:F1}", BtGrids.PenWidth);
+            }
+            else
+            {
+                strWidth = string.Format("{0:0}", BtGrids.PenWidth);
+
+            }
+            PenWidthCombo.Text = strWidth;
+
+            PenLineTypeCombo.Items.Clear();
+            PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dash));
+            PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dot));
+            PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Line));
+
+            PenLineTypeCombo.SelectedIndex = (int)LineType;
+
+            // 设置存储变量
+            ChkSingleFocus.IsChecked = SingleFocusMode;
+            ChkHideGrid.IsChecked = HideGridChecked;
+            ChkShowSize.IsChecked = ShowSizeMode;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             Debug.WriteLine("OnNavigatedFrom() called");
             base.OnNavigatedFrom(e);
-
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -1126,7 +1249,8 @@ namespace BeitieSpliter
                 ChkFixedWidth.Visibility = Visibility.Collapsed;
                 ChkAvgCol.Visibility = Visibility.Collapsed;
                 ChkAvgRow.Visibility = Visibility.Collapsed;
-                OpObjectTitle.Text = "选取蓝本：";
+                ChkSingleFocus.Visibility = Visibility.Collapsed;
+                OpObjectTitle.Text = "选取蓝本";
 
                 AdjustGridsSwitch.Visibility = Visibility.Visible;
                 ChkHideGrid.Visibility = Visibility.Visible;
@@ -1203,7 +1327,22 @@ namespace BeitieSpliter
             DashCap = CanvasCapStyle.Round,
             DashOffset = 1.0F
         };
-       
+        private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color,
+            float strokeWidth, PenLineType type)
+        {
+            if (type == PenLineType.Line)
+            {
+                DrawRectangle(draw, rect, color, strokeWidth, true);
+            }
+            else if (type == PenLineType.Dash)
+            {
+                DrawRectangle(draw, rect, color, strokeWidth, false, CanvasDashStyle.Dash);
+            }
+            else
+            {
+                DrawRectangle(draw, rect, color, strokeWidth, false, CanvasDashStyle.Dot);
+            }
+        }
         private void DrawRectangle(CanvasDrawingSession draw, Rect rect, Color color, 
             float strokeWidth, bool solid = false, CanvasDashStyle style = CanvasDashStyle.Dash)
         {
@@ -1273,23 +1412,55 @@ namespace BeitieSpliter
             draw.DrawText(notfInfo, rc, Colors.White, fmt);
         }
 
-        
+        private Size MeasureTextSize(string text, CanvasTextFormat textFormat, float limitedToWidth = 0.0f, float limitedToHeight = 0.0f)
+        {
+            /*
+            var device = CanvasDevice.GetSharedDevice();
+
+            var layout = new CanvasTextLayout(device, text, textFormat, limitedToWidth, limitedToHeight);
+
+            var width = layout.DrawBounds.Width;
+            var height = layout.DrawBounds.Height;
+            return new Size(width, height);*/
+
+
+            var tb = new TextBlock { Text = text, FontSize = textFormat.FontSize };
+            tb.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+            return tb.DesiredSize;
+
+        }
+
         private void DrawElementText(CanvasDrawingSession draw, Rect rc, int index, bool moveToCapture = false)
         {
             string name = BtGrids.GetElementString(index);
-            
-            double height = rc.Height * 0.2;
+            string sizeTxt = string.Format("{0:0}✕{1:0}", rc.Width, rc.Height);
             double selectedPenWidth = BtGrids.PenWidth + 1;
-            height = (height < 20) ? 20 : height;
-            if (height > 50)
-            {
-                height = 50;
-            }
+            double smallerLength = (rc.Height > rc.Width) ? rc.Width : rc.Height;
+            
+            double height = smallerLength * 0.2;
+            double maxTxtHeight = Common.MAX_ELEMENT_TEXT_HEIGHT;
 
+            if (LineType == PenLineType.Line)
+            {
+                maxTxtHeight = Common.EXTRA_MAX_ELEM_TXT_HEIGHT;
+            }
+            height = (height < Common.MIN_ELEMENT_TEXT_HEIGHT) ? Common.MIN_ELEMENT_TEXT_HEIGHT : height;
+            height = (height > maxTxtHeight) ? maxTxtHeight : height;
+
+            int szFontSize = (int)height / 2;
+            string maxString = (name.Length > sizeTxt.Length) ? name : sizeTxt;
+            
             Rect txtRc = new Rect()
             {
                 X = rc.Left
             };
+
+            Rect szRc = new Rect()
+            {
+                X = rc.Right + BtGrids.PenWidth,
+                Y = rc.Top,
+            };
+            
 
             if (moveToCapture)
             {
@@ -1297,16 +1468,13 @@ namespace BeitieSpliter
                 {
                     return;
                 }
-                
-                double width = name.Length * (height / 2) + 30;
-                txtRc.X = rc.Right+ BtGrids.PenWidth;
-                txtRc.Y = rc.Top;
-                txtRc.Width = width;
-                txtRc.Height = height;
-                if (txtRc.Right > BtImageShowRect.Width)
+                if (ShowSizeMode)
                 {
-                    txtRc.X = rc.Left - width - BtGrids.PenWidth;
-                    txtRc.Width = width;
+                    sizeTxt = name + "\r\n" + sizeTxt;
+                }
+                else
+                {
+                    sizeTxt = name;
                 }
             }
             else
@@ -1325,24 +1493,53 @@ namespace BeitieSpliter
 
             }
 
-
-            // 在下方/上方显示当前元素名称
-            CanvasTextFormat fmt = new CanvasTextFormat()
+            // 绘制尺寸
             {
-                FontSize = (int)txtRc.Height / 2,
-                HorizontalAlignment = CanvasHorizontalAlignment.Center,
-                VerticalAlignment = CanvasVerticalAlignment.Center
-            };
 
+                CanvasTextFormat szFmt = new CanvasTextFormat()
+                {
+                    FontSize = szFontSize,
+                    HorizontalAlignment = CanvasHorizontalAlignment.Center,
+                    VerticalAlignment = CanvasVerticalAlignment.Center
+                };
+                Size sz = MeasureTextSize(maxString, szFmt);
 
-            if (moveToCapture)
-            {
-                DrawRectangle(draw, txtRc, Colors.Black, 1);
-                draw.FillRectangle(txtRc, Colors.White);
-                draw.DrawText(name, txtRc, Colors.Blue, fmt);
+                szRc.Width = sz.Width + 10;
+                szRc.Height = sz.Height + 2;
+                if (szRc.Right > BtImageShowRect.Width)
+                {
+                    szRc.X = rc.Left - szRc.Width - BtGrids.PenWidth;
+                    szRc.Width = szRc.Width;
+                }
+                if (!moveToCapture)
+                {
+                    if (ShowSizeMode)
+                    {
+                        FillOpacity(draw, szRc, Colors.White, 0.7);
+                        draw.DrawText(sizeTxt, szRc, Colors.Black, szFmt);
+                    }
+                }
+                else
+                {
+                    szRc.Height *= 2;
+                    DrawRectangle(draw, szRc, Colors.Black, 1);
+                    draw.FillRectangle(szRc, Colors.White);
+                    draw.DrawText(sizeTxt, szRc, Colors.Blue, szFmt);
+                }
+
             }
-            else
+
+            if (!moveToCapture)
             {
+
+                // 在下方/上方显示当前元素名称
+                CanvasTextFormat fmt = new CanvasTextFormat()
+                {
+                    FontSize = (int)txtRc.Height / 2,
+                    HorizontalAlignment = CanvasHorizontalAlignment.Center,
+                    VerticalAlignment = CanvasVerticalAlignment.Center
+                };
+
                 // 在调整区域时不覆盖
                 RedrawImageRect(draw, rc);
                 DrawRectangle(draw, rc, Colors.Red, (float)selectedPenWidth, true);
@@ -1407,6 +1604,13 @@ namespace BeitieSpliter
             draw.FillRectangle(rc, opBrush);
         }
 
+        private Color GetRandomColor()
+        {
+            Random ran = new Random();
+            int n = ran.Next(1, BtGrids.BackupColors.Count);
+            return BtGrids.BackupColors.ElementAt(n);
+        }
+
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
@@ -1415,7 +1619,9 @@ namespace BeitieSpliter
             //Color OpacityColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
             float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
-           
+            Color RevisedColor = GetRandomColor();
+            
+
             pntLt.X += ChangeRect.left;
             pntLt.Y += ChangeRect.top;
             pntRb.X += ChangeRect.right;
@@ -1436,21 +1642,15 @@ namespace BeitieSpliter
                     drawColor = BtGrids.PenColor;
                     if (BtGrids.GetRevised(row, col))
                     {
-                        if (DrawLineElements.Count == 1)
+                        if (DrawLineElements.Count > 1)
                         {
-                            //if (BtGrids.BackupColors.Count > 1)
-                            //{
-                            //    drawColor = BtGrids.BackupColors.ElementAt(1);
-                            //}
-                        }
-                        else
-                        {
-                            if (BtGrids.BackupColors.Count > 0)
+                            //  在改变过程中不变化颜色
+                            if ((CurrentPntrStatus != PointerStatus.MoveToScalingBorder) &&
+                                (CurrentPntrStatus != PointerStatus.PressedToDrag))
                             {
-                                Random ran = new Random();
-                                int n = ran.Next(1, BtGrids.BackupColors.Count);
-                                drawColor = BtGrids.BackupColors.ElementAt(n);
+                                drawColor = RevisedColor;
                             }
+                             
                         }
                     }
                     if (BtGrids.ElementIsKongbai(BtGrids.GetIndex(row, col, BtGrids.BookOldType)))
@@ -1468,9 +1668,9 @@ namespace BeitieSpliter
                         {
                             DrawRectangle(draw, rc, drawColor, penWidth, false, CanvasDashStyle.Dot);
                         }
-                        else
+                        else 
                         {
-                            DrawRectangle(draw, rc, drawColor, penWidth);
+                            DrawRectangle(draw, rc, drawColor, penWidth, LineType);
                         }
                     }
                 }
@@ -1490,10 +1690,10 @@ namespace BeitieSpliter
                     }
                     else
                     {
-                        rc.X += BtGrids.PenWidth / 2;
-                        rc.Y += BtGrids.PenWidth / 2;
-                        rc.Width -= BtGrids.PenWidth;
-                        rc.Height -= BtGrids.PenWidth;
+                        rc.X += 1;
+                        rc.Y += 1;
+                        rc.Width -= 2;
+                        rc.Height -= 2;
                         RedrawImageRect(draw, rc);
                         //draw.DrawRectangle(rc, Colors.Red);
                         FillOpacity(draw, rc, Colors.White, 0.2);
@@ -1520,12 +1720,12 @@ namespace BeitieSpliter
                         }
                         else
                         {
-                            DrawRectangle(draw, rc, drawColor, penWidth);
+                            DrawRectangle(draw, rc, drawColor, penWidth, LineType);
                         }
                     }
 
-                        // 最后绘制所选中元素，达到覆盖其他的目的
-                    if (currentElemIndex >= 0)
+                    // 最后绘制所选中元素，达到覆盖其他的目的
+                    if (currentElemIndex >= Common.MIN_INDEX)
                     {
                         var result = BtGrids.XingcaoElements.Where(p => (p.Key == currentElemIndex));
                         foreach (KeyValuePair<int, BeitieGridRect> pair in result)
@@ -1707,6 +1907,28 @@ namespace BeitieSpliter
             Refresh(CtrlMessageType.OperationChange);
         }
         
+        private void UpdateOpInfoBox()
+        {
+            string txt = "";
+            if (ChangeRect.left != 0)
+            {
+                txt += string.Format("左移:{0:0} ", ChangeRect.left);
+            }
+            if (ChangeRect.right != 0)
+            {
+                txt += string.Format("右移:{0:0} ", ChangeRect.right);
+            }
+            if (ChangeRect.top != 0)
+            {
+                txt += string.Format("上移:{0:0} ", ChangeRect.top);
+            }
+            if (ChangeRect.bottom != 0)
+            {
+                txt += string.Format("下移:{0:0} ", ChangeRect.bottom);
+            }
+            AdjustOpInfoBox.Text = txt;
+        }
+
         private void AdjustFunction(object sender, bool UpdateRect)
         {
             if (sender == BtnBottomAdd)
@@ -1741,6 +1963,7 @@ namespace BeitieSpliter
             {
                 ChangeRect.top -= ChangeStep;
             }
+            UpdateOpInfoBox();
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
             if (!IsChangeNoteOverflow())
             {
@@ -2580,51 +2803,17 @@ namespace BeitieSpliter
                 pp.X += BtImageAdjustRect.X;
                 pp.Y += BtImageAdjustRect.Y;
                 int count = BtGrids.ElementRects.Count;
-                double delta;
 
-                if (IsSingle)
+                foreach (IntIndex ii in DrawLineElements)
                 {
-                    int SelectedCol = ColumnNumber.SelectedIndex + 1;
-                    int SelectedRow = RowNumber.SelectedIndex + 1;
-
-
-                    int PreCol = GetPreviousColRow(SelectedCol, MIN_ROW_COLUMN);
-                    int PreRow = GetPreviousColRow(SelectedRow, MIN_ROW_COLUMN);
-                    int NextCol = GetNextColRow(SelectedCol, BtGrids.Columns);
-                    int NextRow = GetNextColRow(SelectedRow, BtGrids.Rows);
-
-
-                    for (int row = PreRow; row <= NextRow; row++)
+                    BeitieGridRect bgr = BtGrids.GetElement(ii.row, ii.col);
+                    if (IsPntInRect(pp, bgr.rc, -5))
                     {
-                        for (int col = PreCol; col <= NextCol; col++)
-                        {
-                            BeitieGridRect bgr = BtGrids.GetElement(row, col);
-                            double max = (bgr.rc.Height > bgr.rc.Width) ? bgr.rc.Height : bgr.rc.Width;
-                            delta = -max * 0.15;
-                            if (IsPntInRect(pp, bgr.rc, delta))
-                            {
-                                int index = BtGrids.GetIndex(row, col, BtGrids.BookOldType);
+                        int index = BtGrids.GetIndex(ii.row, ii.col, BtGrids.BookOldType);
 
-                                if (CurrentElements.SelectedIndex != index)
-                                    CurrentElements.SelectedIndex = index;
-                                return;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (IntIndex ii in DrawLineElements)
-                    {
-                        BeitieGridRect bgr = BtGrids.GetElement(ii.row, ii.col);
-                        if (IsPntInRect(pp, bgr.rc, -5))
-                        {
-                            int index = BtGrids.GetIndex(ii.row, ii.col, BtGrids.BookOldType);
-
-                            if (CurrentElements.SelectedIndex != index)
-                                CurrentElements.SelectedIndex = index;
-                            break;
-                        }
+                        if (CurrentElements.SelectedIndex != index)
+                            CurrentElements.SelectedIndex = index;
+                        break;
                     }
                 }
                 
@@ -2928,12 +3117,12 @@ namespace BeitieSpliter
             {
                 ChkAvgCol.Visibility = Visibility.Visible;
                 ChkHideGrid.IsChecked = false;
-                OpObjectTitle.Text = "操作对象：";
+                OpObjectTitle.Text = "操作对象";
             }
             else
             {
                 ChkAvgCol.Visibility = Visibility.Collapsed;
-                OpObjectTitle.Text = "选取蓝本：";
+                OpObjectTitle.Text = "选取蓝本";
             }
             Refresh();
         }
@@ -3092,6 +3281,47 @@ namespace BeitieSpliter
         {
 
             Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
+        }
+
+        private async void LostFocusPen(object sender, RoutedEventArgs e)
+        {
+            bool bRet = await ParentPage.SetPenWidth(PenWidthCombo.Text);
+            if (!bRet)
+            {
+                Common.ShowMessageDlg("无效宽度: " + PenWidthCombo.Text, null);
+                PenWidthCombo.Text = string.Format("{0:F0}", BtGrids.PenWidth);
+                await ParentPage.SetPenWidth(PenWidthCombo.Text);
+            }
+            Refresh(CtrlMessageType.RedrawRequest);
+        }
+
+        private async void SelectionChangedPen(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender == PenColorCombo)
+            {
+                ParentPage.SetPenColor(ColorBoxSelectedItem.Text);
+            }
+            else if (sender == PenWidthCombo)
+            {
+                await ParentPage.SetPenWidth(PenWidthCombo.Text);
+            }
+            else if (sender == PenLineTypeCombo)
+            {
+                LineType = (PenLineType)PenLineTypeCombo.SelectedIndex;
+            }
+            Refresh(CtrlMessageType.RedrawRequest);
+        }
+
+        private void ClickedSingleFocus(object sender, RoutedEventArgs e)
+        {
+            SingleFocusMode = ChkSingleFocus?.IsChecked ?? true;
+            Refresh();
+        }
+
+        private void ClickedShowSize(object sender, RoutedEventArgs e)
+        {
+            ShowSizeMode = ChkShowSize?.IsChecked ?? false;
+            Refresh(CtrlMessageType.RedrawRequest);
         }
     }
 }
