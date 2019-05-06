@@ -788,6 +788,11 @@ namespace BeitieSpliter
 
             return retIndex;
         }
+        private void ResetChangeRect()
+        {
+            ChangeRect = new ChangeStruct();
+            UpdateOpInfoBox();
+        }
 
         private void CalculateXingcaoDrawRect(CtrlMessageType type)
         {
@@ -893,8 +898,7 @@ namespace BeitieSpliter
 
             }
 
-            ChangeRect = new ChangeStruct();
-
+            ResetChangeRect();
             Debug.WriteLine("Current Element: {0}, Status: {1}", CurrentElements.SelectedIndex + 1,
                 PntrTargetType);
             Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
@@ -1011,8 +1015,7 @@ namespace BeitieSpliter
             ToAdjustRect.Width = maxRect.Width;
             ToAdjustRect.Height = maxRect.Height;
 
-            ChangeRect = new ChangeStruct();
-            UpdateOpInfoBox();
+            ResetChangeRect();
             Debug.WriteLine("Operation: {0}, Previous: {1},{2}; Current: {3},{4}; Next: {5},{6}",
                OpType, PreRow, PreCol, SelectedRow, SelectedCol, NextRow, NextCol);
             Debug.WriteLine("Show Area Rect: ({1:0},{2:0},{3:0},{4:0})", 0,
@@ -1979,7 +1982,7 @@ namespace BeitieSpliter
                     ChangeRect.Copy(LastChangeRect);
                     return;
                 }
-                Refresh(CtrlMessageType.AdjustChange);
+                Refresh();
             }
             else
             {
