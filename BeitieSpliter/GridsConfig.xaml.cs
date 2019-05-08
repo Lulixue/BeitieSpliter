@@ -121,6 +121,7 @@ namespace BeitieSpliter
         static bool HideGridChecked = false;
         static bool SingleFocusMode = false;
         static bool ShowSizeMode = false;
+        static bool NoOpacityMode = false;
         PenLineType LineType = PenLineType.Dash;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
@@ -1147,6 +1148,7 @@ namespace BeitieSpliter
             ChkSingleFocus.IsChecked = SingleFocusMode;
             ChkHideGrid.IsChecked = HideGridChecked;
             ChkShowSize.IsChecked = ShowSizeMode;
+            ChkNoOpacity.IsChecked = NoOpacityMode;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -1597,8 +1599,12 @@ namespace BeitieSpliter
         bool FirstShowBanner = true;
         Rect rcBanner = new Rect();
         
-        private void FillOpacity(CanvasDrawingSession draw, Rect rc, Color clr, double opacity)
+        private void FillOpacity(CanvasDrawingSession draw, Rect rc, Color clr, double opacity, bool noOpacity=false)
         {
+            if (noOpacity)
+            {
+                return;
+            }
 
             CanvasSolidColorBrush opBrush = new CanvasSolidColorBrush(draw, clr)
             {
@@ -1745,7 +1751,8 @@ namespace BeitieSpliter
                     {
                         if (LastPntrStatus == PointerStatus.MoveToCapture)
                         {
-                            FillOpacity(draw, BtImageShowRect, Colors.White, 0.15);
+
+                            FillOpacity(draw, BtImageShowRect, Colors.White, 0.15, NoOpacityMode);
                             int index = CurrentElements.SelectedIndex;
                             RedrawImageRect(draw, drawRect);
                             DrawElementText(draw, drawRect, index, true);
@@ -1761,7 +1768,13 @@ namespace BeitieSpliter
             if ((CurrentPntrStatus == PointerStatus.MoveToScalingBorder) ||
                (CurrentPntrStatus == PointerStatus.PressedToDrag))
             {
-                FillOpacity(draw, BtImageShowRect, Colors.White, 0.05);
+                if ((OpType != OperationType.SingleElement))
+                {
+                    RedrawImageRect(draw, BtImageShowRect);
+                }
+                
+                FillOpacity(draw, BtImageShowRect, Colors.White, 0.15, NoOpacityMode);
+
                 RedrawImageRect(draw, drawRect);
                 DrawRectangle(draw, drawRect, BaseColor, penWidth, true);
             }
@@ -2128,11 +2141,11 @@ namespace BeitieSpliter
         {
             if (sender == BtnRotateLeft)
             {
-                BtGrids.angle += 0.3F;
+                BtGrids.angle -= 0.1F;
             }
             else if (sender == BtnRotateRight)
             {
-                BtGrids.angle -= 0.3F;
+                BtGrids.angle += 0.1F;
             }
             UpdateAngle(false);
 
@@ -3324,6 +3337,12 @@ namespace BeitieSpliter
         private void ClickedShowSize(object sender, RoutedEventArgs e)
         {
             ShowSizeMode = ChkShowSize?.IsChecked ?? false;
+            Refresh(CtrlMessageType.RedrawRequest);
+        }
+
+        private void ClickedNoOpacity(object sender, RoutedEventArgs e)
+        {
+            NoOpacityMode = ChkNoOpacity?.IsChecked ?? false;
             Refresh(CtrlMessageType.RedrawRequest);
         }
     }

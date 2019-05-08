@@ -25,7 +25,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Windows.Graphics.Display;
-using OpenCVBridge;
 using Windows.ApplicationModel.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml.Automation.Peers;
@@ -34,6 +33,7 @@ using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Canvas.Brushes;
 using Windows.ApplicationModel;
 using Windows.UI.Xaml.Navigation;
+using System.IO;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -970,8 +970,6 @@ namespace BeitieSpliter
         }
 
 
-        private OpenCVHelper _helper = new OpenCVHelper();
-
         void UpdateCanvasBmp(CanvasBitmap bmp)
         {
             CurrentBtImage.cvsBmp = bmp;
@@ -980,7 +978,7 @@ namespace BeitieSpliter
             Debug.WriteLine("New Bitmap: {0:0},{1:0}", CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
             InitDrawParameters();
         }
-        private async Task<StorageFolder> GetSaveFolder(string dir)
+        private static async Task<StorageFolder> GetSaveFolder(string dir)
         {
             //StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
             StorageFolder picFolder = KnownFolders.PicturesLibrary;
@@ -988,7 +986,52 @@ namespace BeitieSpliter
 
             return folder;
         }
+        private static async Task<StorageFile> SaveWriteableBitmapToFile(WriteableBitmap image, string dir, string filename)
+        {
+            //BitmapEncoder 存放格式
+            Guid bitmapEncoderGuid = BitmapEncoder.JpegEncoderId;
+            if (filename.EndsWith("jpg"))
+            {
+                bitmapEncoderGuid = BitmapEncoder.JpegEncoderId;
+            }
+            else if (filename.EndsWith("png"))
+            {
+                bitmapEncoderGuid = BitmapEncoder.PngEncoderId;
+            }
+            else if (filename.EndsWith("bmp"))
+            {
+                bitmapEncoderGuid = BitmapEncoder.BmpEncoderId;
+            }
+            else if (filename.EndsWith("tiff"))
+            {
+                bitmapEncoderGuid = BitmapEncoder.TiffEncoderId;
+            }
+            else if (filename.EndsWith("gif"))
+            {
+                bitmapEncoderGuid = BitmapEncoder.GifEncoderId;
+            }
 
+            StorageFolder folder = await GetSaveFolder(dir);
+            StorageFile outputFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
+
+            using (IRandomAccessStream stream = await outputFile.OpenAsync(FileAccessMode.ReadWrite, StorageOpenOptions.None))
+            {
+                BitmapEncoder encoder = await BitmapEncoder.CreateAsync(bitmapEncoderGuid, stream);
+                Stream pixelStream = image.PixelBuffer.AsStream();
+                byte[] pixels = new byte[pixelStream.Length];
+                await pixelStream.ReadAsync(pixels, 0, pixels.Length);
+
+                encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore,
+                          (uint)image.PixelWidth,
+                          (uint)image.PixelHeight,
+                          96.0,
+                          96.0,
+                          pixels);
+
+                await encoder.FlushAsync();
+            }
+            return outputFile;
+        }
         private async Task<StorageFile> SaveSoftwareBitmapToFile(SoftwareBitmap softwareBitmap, string dir, string filename)
         {
             StorageFolder folder = await GetSaveFolder(dir);
@@ -1035,17 +1078,13 @@ namespace BeitieSpliter
             }
             return outputFile;
         }
-        async void SaveSingleCropImage(SoftwareBitmap input, Rect roi, string album, string filename)
+        async void SaveSingleCropImage(WriteableBitmap input, Rect roi, string album, string filename)
         {
-            SoftwareBitmap croppedBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                       (int)roi.Width, (int)roi.Height, BitmapAlphaMode.Premultiplied);
-
-            _helper.Crop(input, croppedBmp, (int)roi.Left, (int)roi.Top, (int)roi.Width, (int)roi.Height);
-
-
+            WriteableBitmap croppedBmp = input.Crop(roi);
+             
             Debug.WriteLine("Save Single Crop Image: ({0:0},{3:0},{4:0},{5:0}), -> {1}\\{2}", roi.X, album, filename,
                 roi.Y, roi.Width, roi.Height);
-            await SaveSoftwareBitmapToFile(croppedBmp, album, filename);
+            await SaveWriteableBitmapToFile(croppedBmp, album, filename);
         }
 
         public void HandlerSaveSplittedImages(object para)
@@ -1164,7 +1203,7 @@ namespace BeitieSpliter
         public async Task<SaveErrorType> SaveSplitImagesProc(object para)
         {
             string album = TieAlbum.Text;
-            SoftwareBitmap inputBitmap;
+            WriteableBitmap inputBitmap;
             HashSet<int> ElementIndexes = (HashSet<int>)para;
             int StartNo = int.Parse(StartNoBox.Text);
             SaveErrType = SaveErrorType.Success;
@@ -1173,11 +1212,11 @@ namespace BeitieSpliter
 
             if (BtGrids.IsImageRotated())
             {
-                inputBitmap = await GetSoftwareBitmap(BtGrids.RotateFile);
+                inputBitmap = await OpenWriteableBitmapFile(BtGrids.RotateFile);
             }
             else
             {
-                inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
+                inputBitmap = await OpenWriteableBitmapFile(CurrentBtImage.file);
             }
             
             // 从左到右，自上而下
@@ -1529,140 +1568,27 @@ namespace BeitieSpliter
             RefreshPage();
         }
 
+        private static async Task<WriteableBitmap> OpenWriteableBitmapFile(StorageFile file)
+        {
+            using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read))
+            {
+                BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
+                WriteableBitmap image = new WriteableBitmap((int)decoder.PixelWidth, (int)decoder.PixelHeight);
+                image.SetSource(stream);
+
+                return image;
+            }
+        }
+
         public async Task<CanvasBitmap> RotateImage(float angle)
         {
-            // The XAML Image control can only display images in BRGA8 format with premultiplied or no alpha
-            // The frame reader as configured in this sample gives BGRA8 with straight alpha, so need to convert it
-         
-            SoftwareBitmap inputBitmap = await GetSoftwareBitmap(CurrentBtImage.file);
+            WriteableBitmap wbmp = await OpenWriteableBitmapFile(CurrentBtImage.file);
+            WriteableBitmap rotatedWbmp = wbmp.RotateFree(angle);
+            BtGrids.RotateFile = await SaveWriteableBitmapToFile(rotatedWbmp, "Tmp", "Rotate.jpg");
 
-            SoftwareBitmap originalBitmap = SoftwareBitmap.Convert(inputBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-            SoftwareBitmap outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                originalBitmap.PixelWidth, originalBitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
-
-            _helper.Rotate(originalBitmap, outputBitmap, angle);
-
-            BtGrids.RotateFile = await SaveSoftwareBitmapToFile(outputBitmap, "Tmp", "Rotate.jpg");
-            return CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap);
+            var iras = await BtGrids.RotateFile.OpenAsync(FileAccessMode.Read);
+            return await CanvasBitmap.LoadAsync(CurrentPage, iras);
         }
-
-        #region OpenCV Test Code
-        enum OpenCVOperationType
-        {
-            Crop,
-            Rotate,
-            Blur,
-            HoughLines,
-            Contours,
-            Histogram,
-            MotionDetector
-        }
-        OpenCVOperationType currentOperation = OpenCVOperationType.Rotate;
-        CanvasBitmap cvsBmpBak = null;
-        bool pageRedrawed = false;
-        float angleRotate = 30;
-
-        private async void TestOpenCV()
-        {
-            Debug.WriteLine("TestOpenCV: Operation:{0}", currentOperation);
-            BitmapAlphaMode mode = BitmapAlphaMode.Premultiplied;
-            
-            if (CurrentBtImage == null)
-            {
-                return;
-            }
-            SoftwareBitmap originalBitmap = null;
-            if (cvsBmpBak == null)
-            {
-                SaveWholePage("canvas.jpg");
-            }
-            else if (!pageRedrawed)
-            {
-                UpdateCanvasBmp(cvsBmpBak);
-                RefreshPage(50);
-                pageRedrawed = true;
-                return;
-            }
-            else
-            {
-                pageRedrawed = false;
-            }
-
-
-            RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap();
-            await renderTargetBitmap.RenderAsync(CurrentPage);
-            var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
-
-            var inputBitmap = SoftwareBitmap.CreateCopyFromBuffer(pixelBuffer,
-                                                     BitmapPixelFormat.Bgra8,
-                                                     renderTargetBitmap.PixelWidth,
-                                                     renderTargetBitmap.PixelHeight,
-                                                     BitmapAlphaMode.Premultiplied);
-
-            //var inputBitmap = await GetSoftwareBitmap("canvas.jpg");
-            if (cvsBmpBak == null)
-            {
-                var iBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                    (int)CurrentBtImage.cvsBmp.SizeInPixels.Width, (int)CurrentBtImage.cvsBmp.SizeInPixels.Height, mode);
-                cvsBmpBak = CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, iBmp);
-                cvsBmpBak.CopyPixelsFromBitmap(CurrentBtImage.cvsBmp);
-                //return;
-            }
-            if (inputBitmap != null)
-            {
-                // The XAML Image control can only display images in BRGA8 format with premultiplied or no alpha
-                // The frame reader as configured in this sample gives BGRA8 with straight alpha, so need to convert it
-                originalBitmap = /*inputBitmap;// */SoftwareBitmap.Convert(inputBitmap, BitmapPixelFormat.Bgra8, mode);
-
-                SoftwareBitmap outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                    originalBitmap.PixelWidth, originalBitmap.PixelHeight, mode);
-
-                // Operate on the image in the manner chosen by the user.
-                if (currentOperation == OpenCVOperationType.Blur)
-                {
-                    _helper.Blur(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OpenCVOperationType.HoughLines)
-                {
-                    _helper.HoughLines(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OpenCVOperationType.Contours)
-                {
-                    _helper.Contours(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OpenCVOperationType.Histogram)
-                {
-                    _helper.Histogram(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OpenCVOperationType.MotionDetector)
-                {
-                    _helper.MotionDetector(originalBitmap, outputBitmap);
-                }
-                else if (currentOperation == OpenCVOperationType.Crop)
-                {
-                    outputBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
-                        (int)BtGrids.PageMargin.Right, (int)BtGrids.PageMargin.Bottom, mode);
-                    _helper.Crop(originalBitmap, outputBitmap, (int)BtGrids.PageMargin.Left, (int)BtGrids.PageMargin.Top,
-                        (int)BtGrids.PageMargin.Right, (int)BtGrids.PageMargin.Bottom);
-                }
-                else if (currentOperation == OpenCVOperationType.Rotate)
-                {
-                    _helper.Rotate(originalBitmap, outputBitmap, angleRotate);
-                    angleRotate -= 2;
-
-                }
-                //currentOperation++;
-                if (currentOperation > OpenCVOperationType.MotionDetector)
-                {
-                    currentOperation = OpenCVOperationType.Crop;
-                }
-                await SaveSoftwareBitmapToFile(outputBitmap, "Test", "show.jpg");
-                //UpdateCanvasBmp(CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap));
-                UpdateCanvasBmp(await RotateImage(angleRotate));
-                RefreshPage(100);
-            }
-        }
-        #endregion
 
 
         int SettingPageViewID = 0;
@@ -1689,6 +1615,108 @@ namespace BeitieSpliter
                 }
             });
         }
+        #region OpenCV Test Code
+        enum OpenCVOperationType
+        {
+            Crop,
+            Rotate,
+            Blur,
+            HoughLines,
+            Contours,
+            Histogram,
+            MotionDetector
+        }
+        OpenCVOperationType currentOperation = OpenCVOperationType.Rotate;
+        CanvasBitmap cvsBmpBak = null;
+        bool pageRedrawed = false;
+        float angleRotate = 30;
+
+        private async void TestOpenCV()
+        {
+            Debug.WriteLine("TestOpenCV: Operation:{0}", currentOperation);
+            BitmapAlphaMode mode = BitmapAlphaMode.Premultiplied;
+
+            if (CurrentBtImage == null)
+            {
+                return;
+            }
+            if (cvsBmpBak == null)
+            {
+                SaveWholePage("canvas.jpg");
+            }
+            else if (!pageRedrawed)
+            {
+                UpdateCanvasBmp(cvsBmpBak);
+                RefreshPage(50);
+                pageRedrawed = true;
+                return;
+            }
+            else
+            {
+                pageRedrawed = false;
+            }
+
+            WriteableBitmap inputBitmap = await OpenWriteableBitmapFile(CurrentBtImage.file);
+
+
+            //var inputBitmap = await GetSoftwareBitmap("canvas.jpg");
+            if (cvsBmpBak == null)
+            {
+                var iBmp = new SoftwareBitmap(BitmapPixelFormat.Bgra8,
+                    (int)CurrentBtImage.cvsBmp.SizeInPixels.Width, (int)CurrentBtImage.cvsBmp.SizeInPixels.Height, mode);
+                cvsBmpBak = CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, iBmp);
+                cvsBmpBak.CopyPixelsFromBitmap(CurrentBtImage.cvsBmp);
+                //return;
+            }
+            if (inputBitmap != null)
+            {
+
+                WriteableBitmap outputBitmap = inputBitmap;
+
+                // Operate on the image in the manner chosen by the user.
+                if (currentOperation == OpenCVOperationType.Blur)
+                {
+
+                }
+                else if (currentOperation == OpenCVOperationType.HoughLines)
+                {
+
+                }
+                else if (currentOperation == OpenCVOperationType.Contours)
+                {
+
+                }
+                else if (currentOperation == OpenCVOperationType.Histogram)
+                {
+
+                }
+                else if (currentOperation == OpenCVOperationType.MotionDetector)
+                {
+
+                }
+                else if (currentOperation == OpenCVOperationType.Crop)
+                {
+                    outputBitmap = inputBitmap.Crop((int)BtGrids.PageMargin.Left, (int)BtGrids.PageMargin.Top,
+                        (int)BtGrids.PageMargin.Right, (int)BtGrids.PageMargin.Bottom);
+                }
+                else if (currentOperation == OpenCVOperationType.Rotate)
+                {
+                    outputBitmap = inputBitmap.RotateFree(angleRotate);
+                    angleRotate -= 2;
+
+                }
+                //currentOperation++;
+                if (currentOperation > OpenCVOperationType.MotionDetector)
+                {
+                    currentOperation = OpenCVOperationType.Crop;
+                }
+                await SaveWriteableBitmapToFile(outputBitmap, "Test", "show.jpg");
+                //UpdateCanvasBmp(CanvasBitmap.CreateFromSoftwareBitmap(CurrentBtImage.creator, outputBitmap));
+                UpdateCanvasBmp(await RotateImage(angleRotate));
+                RefreshPage(100);
+            }
+        }
+        #endregion
 
         private async void BtnMore_Clicked(object sender, RoutedEventArgs e)
         {
