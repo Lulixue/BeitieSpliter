@@ -47,7 +47,8 @@ namespace BeitieSpliter
 
         public static List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
         public static List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
-        
+
+        public static readonly string[] TEXT_SIZE_GRADES = { "10+", "100+", "1000+", "10000+" };
         public static void Init()
         {
             // 添加颜色

@@ -216,6 +216,11 @@ namespace BeitieSpliter
 
         void InitControls()
         {
+            foreach (string grade in Common.TEXT_SIZE_GRADES)
+            {
+                TextSizeGrade.Items.Add(grade);
+            }
+            TextSizeGrade.SelectedIndex = 2;
            
             foreach (ColorBoxItem item in Common.LightColorItems)
             {
@@ -238,6 +243,7 @@ namespace BeitieSpliter
             {
                 PenWidthCombo.Items.Add(i);
             }
+
             RowCount.SelectedIndex = 8;
             ColumnCount.SelectedIndex = 5;
             PenWidthCombo.SelectedIndex = 1;
@@ -1252,7 +1258,7 @@ namespace BeitieSpliter
             }
             HashSet<string> SaveFileNames = new HashSet<string>();
 
-
+            string noFormatter = string.Format("{0}{1}{2}", "{0:D", TextSizeGrade.SelectedIndex + 1, "}");
             int saveCount = 0;
             foreach (int index in ElementIndexes)
             {
@@ -1270,7 +1276,7 @@ namespace BeitieSpliter
                 }
                 else
                 {
-                    filename = string.Format("{0}", element.no + StartNo);
+                    filename = string.Format(noFormatter, element.no + StartNo);
                     if (element.content != "")
                     {
                         filename += "-" + element.content;
@@ -1939,5 +1945,9 @@ namespace BeitieSpliter
             
         }
 
+        private void SelectionChangedTextSizeGrade(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

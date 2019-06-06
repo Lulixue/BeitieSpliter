@@ -39,14 +39,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>
-            <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="17*"/>
             <RowDefinition Height="1.5*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,5,0">
             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
@@ -113,16 +113,17 @@
             </ScrollViewer>
         </Border>
 
-        <TextBox x:Name="TieAlbum" Grid.Row="2" Grid.Column="1" Margin="3" FontSize="14" 
-                 PlaceholderText="输入碑帖名称" MinWidth="50"  MaxWidth="200"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" 
-                 Text=""  VerticalAlignment="Center"/>
-
-        <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="3">
+        <RelativePanel Margin="3"  Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+            <TextBox x:Name="TieAlbum"  FontSize="14" Header="碑帖名"
+                     PlaceholderText="输入碑帖名称" MaxWidth="100"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" 
+                     Text=""  />
+            <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,0,0" SelectionChanged="SelectionChangedTextSizeGrade"   
+                       IsDropDownOpen="True" RelativePanel.AlignRightWithPanel="True" Width="80" HorizontalAlignment="Stretch" Header="总字数" />
+        </RelativePanel>
+        <RelativePanel  Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Margin="3">
             <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
-            <RelativePanel RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <TextBox x:Name="StartNoBox" Text="1"  TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
-            </RelativePanel>
-        </StackPanel>
+            <TextBox x:Name="StartNoBox" RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0"  Text="1" RelativePanel.AlignRightWithPanel="True" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
+        </RelativePanel>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
                      Text="" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />

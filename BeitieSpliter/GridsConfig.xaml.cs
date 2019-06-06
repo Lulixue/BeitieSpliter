@@ -1620,6 +1620,77 @@ namespace BeitieSpliter
             return BtGrids.BackupColors.ElementAt(n);
         }
 
+        private void AutoSlideToElement(Rect elementRc)
+        {
+            var t = CurrentItem.TransformToVisual(ItemScrollViewer);
+            Point screenOrg = t.TransformPoint(new Point(0, 0));
+            Point screenLt = new Point
+            {
+                X = Math.Abs(screenOrg.X),
+                Y = Math.Abs(screenOrg.Y)
+            };
+            Point screenRb = new Point
+            {
+                X = screenLt.X + ItemScrollViewer.ActualWidth,
+                Y = screenLt.Y + ItemScrollViewer.ActualHeight
+            };
+
+            float zoomFactor = ItemScrollViewer.ZoomFactor;
+            bool needScroll = false;
+
+            Rect rcZoomed = new Rect
+            {
+                X = elementRc.X * zoomFactor - BtImageAdjustRect.Left,
+                Y = elementRc.Y * zoomFactor - BtImageAdjustRect.Top,
+                Width = elementRc.Width * zoomFactor,
+                Height = elementRc.Height * zoomFactor,
+            };
+
+            if ((screenOrg.X > 0) && (screenOrg.Y > 0))
+            {
+                // 图片完全在控件之中
+                if ((screenRb.X > (CurrentItem.Width*zoomFactor)) &&
+                    (screenRb.Y > (CurrentItem.Height*zoomFactor)))
+                {
+                    Debug.WriteLine("image Total in scrollView");
+                    return;
+                }
+            }
+
+            Debug.WriteLine("Screen: {0:F0},{1:F0},{2:F0},{3:F0}", screenLt.X, screenLt.Y, screenRb.X, screenRb.Y);
+            Debug.WriteLine("Point: {0:F0},{1:F0}", rcZoomed.X, rcZoomed.Y);
+
+
+
+            if ((rcZoomed.X < screenLt.X) ||
+                (rcZoomed.Y < screenLt.Y))
+            {
+                needScroll = true;
+            }
+            if ((rcZoomed.Right > screenRb.X) ||
+                (rcZoomed.Bottom > screenRb.Y))
+            {
+                needScroll = true;
+            }
+            if (!needScroll)
+            {
+                return;
+            }
+
+            double offsetX = (rcZoomed.X - 10);
+            double offsetY = (rcZoomed.Y - 10);
+            if (offsetX < 0)
+            {
+                offsetX = 0;
+            }
+            if (offsetY < 0)
+            {
+                offsetY = 0;
+            }
+            Debug.WriteLine("Offset: {0:F0},{1:F0}", offsetX, offsetY);
+            ItemScrollViewer.ChangeView(offsetX, offsetY, ItemScrollViewer.ZoomFactor); 
+        }
+
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
@@ -1629,7 +1700,6 @@ namespace BeitieSpliter
             float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
             Color RevisedColor = GetRandomColor();
-            
 
             pntLt.X += ChangeRect.left;
             pntLt.Y += ChangeRect.top;
@@ -1689,9 +1759,9 @@ namespace BeitieSpliter
                     int selcol = ColumnNumber.SelectedIndex + 1;
                     int index = BtGrids.GetIndex(selrow, selcol, BtGrids.BookOldType);
                     Rect rc = BtGrids.GetRectangle(selrow, selcol);
+                    AutoSlideToElement(rc);
                     rc.X -= BtImageAdjustRect.X;
-                    rc.Y -= BtImageAdjustRect.Y;
-
+                    rc.Y -= BtImageAdjustRect.Y; 
                     if ((OperationType.SingleElement == OpType))
                     {
                         FillOpacity(draw, BtImageShowRect, Colors.White, 0.1);
@@ -1706,8 +1776,7 @@ namespace BeitieSpliter
                         RedrawImageRect(draw, rc);
                         //draw.DrawRectangle(rc, Colors.Red);
                         FillOpacity(draw, rc, Colors.White, 0.2);
-                    }
-
+                    } 
                 }
             }
             
@@ -1745,6 +1814,8 @@ namespace BeitieSpliter
 
                             RedrawImageRect(draw, drawRect);
                             DrawElementText(draw, rc, pair.Key);
+
+                            AutoSlideToElement(rc);
                         }
                     }
                     else
