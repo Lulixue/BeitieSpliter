@@ -1373,6 +1373,46 @@ namespace BeitieSpliter
             }
         }
 
+        private void UpdateOpNotfText(int selRow, int selCol, int index)
+        {
+            string notfInfo;
+            string elemstr = BtGrids.GetElementString(index);
+            switch (OpType)
+            {
+                case OperationType.SingleColumn:
+                    notfInfo = string.Format("当前调整第{0}列，选中{1}", selCol, elemstr);
+                    break;
+                case OperationType.SingleRow:
+                    notfInfo = string.Format("当前调整第{0}行，选中{1}", selRow, elemstr);
+                    break;
+                case OperationType.WholePage:
+                    notfInfo = string.Format("当前调整整页，选中{0}", elemstr);
+                    break;
+                case OperationType.SingleElement:
+                default:
+                    notfInfo = string.Format("当前调整{0}", elemstr);
+                    break;
+
+            }
+            OpNotfText.Text = notfInfo;
+        }
+
+        private void UpdateOpNotfTextXc(int currentElemIndex)
+        {
+            string notfInfo;
+            if (currentElemIndex < 0)
+            {
+                notfInfo = string.Format("请用鼠标截取{0}所在的区域",
+                                            BtGrids.GetElementString(CurrentElements.SelectedIndex));
+            }
+            else
+            {
+                notfInfo = string.Format("当前选择调整{0}", BtGrids.GetElementString(currentElemIndex));
+            }
+
+            OpNotfText.Text = notfInfo;
+        }
+
         private void DrawBanner(CanvasDrawingSession draw, int currentElemIndex)
         {
             Rect rc = new Rect()
@@ -1640,8 +1680,8 @@ namespace BeitieSpliter
 
             Rect rcZoomed = new Rect
             {
-                X = elementRc.X * zoomFactor - BtImageAdjustRect.Left,
-                Y = elementRc.Y * zoomFactor - BtImageAdjustRect.Top,
+                X = (elementRc.X  - BtImageAdjustRect.Left) * zoomFactor,
+                Y = (elementRc.Y - BtImageAdjustRect.Top) * zoomFactor,
                 Width = elementRc.Width * zoomFactor,
                 Height = elementRc.Height * zoomFactor,
             };
@@ -1659,7 +1699,6 @@ namespace BeitieSpliter
 
             Debug.WriteLine("Screen: {0:F0},{1:F0},{2:F0},{3:F0}", screenLt.X, screenLt.Y, screenRb.X, screenRb.Y);
             Debug.WriteLine("Point: {0:F0},{1:F0}", rcZoomed.X, rcZoomed.Y);
-
 
 
             if ((rcZoomed.X < screenLt.X) ||
@@ -1691,6 +1730,7 @@ namespace BeitieSpliter
             ItemScrollViewer.ChangeView(offsetX, offsetY, ItemScrollViewer.ZoomFactor); 
         }
 
+        bool XingCaoAutoSlided = false;
         private void DrawLines(CanvasDrawingSession draw)
         {
             Point pntLt, pntRb;
@@ -1759,7 +1799,10 @@ namespace BeitieSpliter
                     int selcol = ColumnNumber.SelectedIndex + 1;
                     int index = BtGrids.GetIndex(selrow, selcol, BtGrids.BookOldType);
                     Rect rc = BtGrids.GetRectangle(selrow, selcol);
+
                     AutoSlideToElement(rc);
+                    UpdateOpNotfText(selrow, selcol, index);
+
                     rc.X -= BtImageAdjustRect.X;
                     rc.Y -= BtImageAdjustRect.Y; 
                     if ((OperationType.SingleElement == OpType))
@@ -1829,9 +1872,19 @@ namespace BeitieSpliter
                             DrawElementText(draw, drawRect, index, true);
                         }
                     }
-                    if (FirstShowBanner)
+
+                    UpdateOpNotfTextXc(currentElemIndex);
+                    if (!XingCaoAutoSlided && (BtGrids.XingcaoElements.Count == 0))
                     {
-                        DrawBanner(draw, currentElemIndex);
+                        Rect rcDefault = new Rect
+                        {
+                            X = BtGrids.DrawWidth - 10,
+                            Y = 0,
+                            Width = 10,
+                            Height = 10
+                        };
+                        AutoSlideToElement(rcDefault);
+                        XingCaoAutoSlided = true;
                     }
 
                 }

@@ -250,6 +250,7 @@ namespace BeitieSpliter
             
             CurrentPage.Height = ImageScrollViewer.ViewportHeight;
             CurrentPage.Width = ImageScrollViewer.ViewportWidth;
+             
         }
 
         public bool InitDrawParameters()
@@ -460,9 +461,10 @@ namespace BeitieSpliter
             {
                 factor = 1F;
             }
-#pragma warning disable CS0618 // Type or member is obsolete
-            ImageScrollViewer.ZoomToFactor(factor);
-#pragma warning restore CS0618 // Type or member is obsolete
+            var t = CurrentPage.TransformToVisual(ImageScrollViewer);
+            Point screenOrg = t.TransformPoint(new Point(0, 0));
+
+            ImageScrollViewer.ChangeView(screenOrg.X, screenOrg.Y, factor);
 
             InitDrawParameters();
             ParsePageText();
@@ -486,12 +488,20 @@ namespace BeitieSpliter
                 {
                     FolderFileCombo.SelectedIndex--;
                 }
+                else // first
+                {
+                    FolderFileCombo.SelectedIndex = (DictBtFiles.Count - 1);
+                }
             }
             else if (sender == BtnNextImg)
             {
                 if (FolderFileCombo.SelectedIndex < (DictBtFiles.Count - 1))
                 {
                     FolderFileCombo.SelectedIndex++;
+                }
+                else // last
+                {
+                    FolderFileCombo.SelectedIndex = 0;
                 }
             }
         }
@@ -1332,8 +1342,13 @@ namespace BeitieSpliter
         private List<string> FILETYPE_FILTERS = new List<string>();
         private void InitMaps()
         {
+            IGNORED_CHARS.Add('\r');
+            IGNORED_CHARS.Add('\n');
+            IGNORED_CHARS.Add('\t');
+            IGNORED_CHARS.Add(' ');
             IGNORED_CHARS.Add(',');
             IGNORED_CHARS.Add('.');
+            IGNORED_CHARS.Add(':');
             IGNORED_CHARS.Add(';');
             IGNORED_CHARS.Add('(');
             IGNORED_CHARS.Add(')');
@@ -1343,10 +1358,14 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add(']');
             IGNORED_CHARS.Add('\'');
             IGNORED_CHARS.Add('"');
+            IGNORED_CHARS.Add('!');
 
+            IGNORED_CHARS.Add('　');
             IGNORED_CHARS.Add('，');
             IGNORED_CHARS.Add('。');
             IGNORED_CHARS.Add('；');
+            IGNORED_CHARS.Add('：');
+            IGNORED_CHARS.Add('！');
             IGNORED_CHARS.Add('、');
             IGNORED_CHARS.Add('（');
             IGNORED_CHARS.Add('）');

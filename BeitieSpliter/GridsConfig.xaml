@@ -354,10 +354,15 @@
                 </ToggleButton>
             </Border>
         </StackPanel>
+
+        <StackPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+            <TextBlock Name="OpNotfText" Foreground="YellowGreen" Text="000000" FontSize="20"  IsColorFontEnabled="True" />
+        </StackPanel>
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="0,10,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            
             <Button x:Name="BtnSaveAll" Content="保存全部" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
             <Button x:Name="BtnSaveCurrent" Margin="10,0,0,0" Content="保存当前" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-
+            
         </StackPanel>
     </Grid>
 </Page>

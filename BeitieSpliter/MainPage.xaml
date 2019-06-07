@@ -47,64 +47,71 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
             <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,5,0">
-            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
+        <RelativePanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,5,0">
+            <StackPanel Name="ImportBtnPanel" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
                 <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
                 <Button x:Name="ImportBtDir" Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
             </StackPanel>
-            <StackPanel Name="ImageSlidePanel" Visibility="Collapsed" Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+            <RelativePanel RelativePanel.RightOf="ImportBtnPanel" RelativePanel.AlignVerticalCenterWithPanel="True" Name="ImageSlidePanel" Visibility="Collapsed" >
                 <Button Margin="0,2,5,2" x:Name="BtnPreviousImg" Click="OnImageSlide"  Content="&lt;" HorizontalAlignment="Right" VerticalAlignment="Stretch" />
                
-                <Button Margin="0,2,10,2" x:Name="BtnNextImg" Click="OnImageSlide" Content=">"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
-                <ComboBox  x:Name="FolderFileCombo" Margin="0,3,10,0"  SelectionChanged="FolderFileCombo_SelectionChanged"  
-                       IsDropDownOpen="True" IsEditable="False" Width="150"/>
-                <TextBox x:Name="FileDirPath" VerticalContentAlignment="Center"  IsSpellCheckEnabled="False"
-                         MaxWidth="500"  VerticalAlignment="Stretch" Style="{StaticResource LeftFriendlyBox}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
-            </StackPanel>
+                <Button Margin="0,2,10,2" RelativePanel.RightOf="BtnPreviousImg" x:Name="BtnNextImg" Click="OnImageSlide" Content=">"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
+                <ComboBox  x:Name="FolderFileCombo" MinWidth="80" MaxWidth="200" Margin="0,2,10,0"  SelectionChanged="FolderFileCombo_SelectionChanged"  
+                       IsDropDownOpen="True" IsEditable="False" RelativePanel.RightOf="BtnNextImg" />
+                <StackPanel RelativePanel.RightOf="FolderFileCombo" Margin="0,2,0,0" HorizontalAlignment="Stretch">
+                    <TextBox x:Name="FileDirPath"  VerticalContentAlignment="Center"   RelativePanel.AlignRightWithPanel="True" 
+                             IsSpellCheckEnabled="False"  Style="{StaticResource LeftFriendlyBox}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
+                </StackPanel>
+            </RelativePanel>
             
-        </StackPanel>
+        </RelativePanel>
 
-        <Button Grid.Row="0" Grid.Column="1"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
+        <Button Grid.Row="0" Grid.Column="2"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
 
 
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel Name="FastParaPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock Name="ZiCountTitle" Text="总字数：" Visibility="Collapsed" Margin="1,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="ZiCountBox" Text="100" Visibility="Collapsed" InputScope="TelephoneNumber"
-                      LostFocus="ZiCount_LostFocus"
-                      Width="70" FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
+                        LostFocus="ZiCount_LostFocus"
+                        Width="70" FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
             <TextBlock  Name="RowCountTitle" Text="行数：" Margin="1,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
-                       LostFocus="RowCount_LostFocus"
-                       IsDropDownOpen="True" IsEditable="True" Width="70"/>
+                        LostFocus="RowCount_LostFocus"
+                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
             <TextBlock  Text="列数：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="ColumnCount"  Margin="0,3,0,0" SelectionChanged="ColumnCount_SelectionChanged"  
-                       LostFocus="ColumnCount_LostFocus"
-                       IsDropDownOpen="True" IsEditable="True" Width="70" />
+                        LostFocus="ColumnCount_LostFocus"
+                        IsDropDownOpen="True" IsEditable="True" Width="70" />
             <TextBlock Name="MarginTitle" Text="裁边：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1" 
-                      LostFocus="PageMargin_LostFocus"
-                      Width="130" FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
+            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1"   
+                        LostFocus="PageMargin_LostFocus"
+                        FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
+
             <TextBlock  Text="网格颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
 
             <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
-                       SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,3,0,0" 
-                       SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
-                       SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
+                        SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,3,0,0" 
+                        SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
+                        SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
                         Width="70" />
             <TextBlock  Text="网格宽度：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="PenWidthCombo" Margin="0,3,0,0"  SelectionChanged="PenWidth_SelectionChanged"  
-                       LostFocus="PenWidth_LostFocus"
-                       IsDropDownOpen="True" IsEditable="True" Width="70"/>
-            <CheckBox Name="XingcaoModeCheck" Click="XincaoModeCheck_Clicked" Content="行草模式" Margin="15,0,0,0" FontSize="16" MinWidth="100"/>
-            <Button x:Name="BtnMore" Content="高级" Margin="15,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
+                        LostFocus="PenWidth_LostFocus"
+                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
         </StackPanel>
-        
-        
-        
+
+
+
+        <RelativePanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0" >
+            <CheckBox Name="XingcaoModeCheck" Click="XincaoModeCheck_Clicked" Content="行草模式" Margin="15,0,0,0" FontSize="16" MinWidth="100"/>
+            <Button x:Name="BtnMore" Content="高级" RelativePanel.RightOf="XingcaoModeCheck" Margin="10,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
+        </RelativePanel>
+
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="0,5,5,0"
-                Grid.Column="0" BorderBrush="Gray" BorderThickness="1" >
-            <ScrollViewer x:Name="ImageScrollViewer"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" Margin="3"
+                Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" >
+            <ScrollViewer x:Name="ImageScrollViewer" Margin="5"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" 
                     ZoomMode="Enabled">
 
                 <canvas:CanvasControl Draw="CurrentPage_OnDraw" 
@@ -113,21 +120,21 @@
             </ScrollViewer>
         </Border>
 
-        <RelativePanel Margin="3"  Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+        <RelativePanel Margin="3"  Grid.Row="2" Grid.Column="2" VerticalAlignment="Center">
             <TextBox x:Name="TieAlbum"  FontSize="14" Header="碑帖名"
-                     PlaceholderText="输入碑帖名称" MaxWidth="100"  IsSpellCheckEnabled="False" HorizontalAlignment="Left" 
+                     PlaceholderText="输入碑帖名称"  IsSpellCheckEnabled="False" HorizontalAlignment="Stretch" 
                      Text=""  />
             <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,0,0" SelectionChanged="SelectionChangedTextSizeGrade"   
-                       IsDropDownOpen="True" RelativePanel.AlignRightWithPanel="True" Width="80" HorizontalAlignment="Stretch" Header="总字数" />
+                       IsDropDownOpen="True" Width="80" RelativePanel.AlignRightWithPanel="True" Header="总字数" />
         </RelativePanel>
-        <RelativePanel  Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Margin="3">
+        <RelativePanel  Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="3">
             <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
             <TextBox x:Name="StartNoBox" RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0"  Text="1" RelativePanel.AlignRightWithPanel="True" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
         </RelativePanel>
-        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="1" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
-                     Text="" VerticalAlignment="Stretch" Margin="3" TextAlignment="DetectFromContent" TextWrapping="Wrap" IsSpellCheckEnabled="False"
+        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="2" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
+                  MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />
-        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,3,0,0" >
+        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,0,0" >
             <Frame x:Name="ScenarioFrame" Margin="0,1,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
             <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
                 <Border x:Name="StatusBorder" Margin="0,0,0,0">
