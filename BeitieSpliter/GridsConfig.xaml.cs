@@ -2163,10 +2163,10 @@ namespace BeitieSpliter
             info += string.Format("当前修改元素: {0}个, ", BtGrids.XingcaoMode ?
                 GetXingCaoElementCount() : DrawLineElements.Count );
             info += string.Format("当前选中元素：{0}, ", BtGrids.GetElementString(selectedElemIndex));
-            info += string.Format("当前矩形尺寸： {0:0}*{1:0}, ", ToAdjustRect.Width, ToAdjustRect.Height);
+            info += string.Format("当前元素区域尺寸： {0:0}*{1:0}, ", ToAdjustRect.Width, ToAdjustRect.Height);
             if (!BtGrids.XingcaoMode)
             {
-                info += string.Format("当前矩形改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+                info += string.Format("当前元素区域改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
             }
             info += string.Format("修改角度: {0:F1}", BtGrids.angle);
             NotifyUser(info, NotifyType.StatusMessage);

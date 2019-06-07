@@ -250,7 +250,10 @@ namespace BeitieSpliter
             
             CurrentPage.Height = ImageScrollViewer.ViewportHeight;
             CurrentPage.Width = ImageScrollViewer.ViewportWidth;
-             
+
+            StartNoBox.MaxWidth = StartNoBox.ActualWidth;
+            TieAlbum.MaxWidth = TieAlbum.ActualWidth;
+            PageText.MaxWidth = PageText.ActualWidth;
         }
 
         public bool InitDrawParameters()
@@ -1268,7 +1271,7 @@ namespace BeitieSpliter
             }
             HashSet<string> SaveFileNames = new HashSet<string>();
 
-            string noFormatter = string.Format("{0}{1}{2}", "{0:D", TextSizeGrade.SelectedIndex + 1, "}");
+            string noFormatter = string.Format("{0}{1}{2}", "{0:D", TextSizeGrade.SelectedIndex + 2, "}");
             int saveCount = 0;
             foreach (int index in ElementIndexes)
             {
@@ -1369,6 +1372,7 @@ namespace BeitieSpliter
             IGNORED_CHARS.Add('、');
             IGNORED_CHARS.Add('（');
             IGNORED_CHARS.Add('）');
+            IGNORED_CHARS.Add('／');
             IGNORED_CHARS.Add('“');
             IGNORED_CHARS.Add('”');
             IGNORED_CHARS.Add('《');
@@ -1429,9 +1433,17 @@ namespace BeitieSpliter
 
         private void LostFocus_StartNoBox(object sender, RoutedEventArgs e)
         {
-            int curZiNo = int.Parse(StartNoBox.Text);
-            UpdateBeitieAlbumNo(curZiNo);
-            RefreshPage();
+            try
+            {
+                int curZiNo = int.Parse(StartNoBox.Text);
+                UpdateBeitieAlbumNo(curZiNo);
+                RefreshPage();
+            }
+            catch (OverflowException)
+            {
+                Common.ShowMessageDlg("编号(" + StartNoBox.Text + ")超出范围, 请重新输入!", null);
+                StartNoBox.Text = "1";
+            }
         }
         void UpdateBeitieAlbumNo(int curZiNO)
         {
@@ -1557,7 +1569,7 @@ namespace BeitieSpliter
                     {
                         sb.Append(single);
                     }
-                    else
+                    else if (Common.CharIsChineseChar(single))
                     {
                         string content = new string(single, 1);
                         BtGrids.AddElement(ZiNo, new BeitieElement(BeitieElement.BeitieElementType.Zi, content, ZiNo++)

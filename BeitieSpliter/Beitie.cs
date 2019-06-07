@@ -43,6 +43,8 @@ namespace BeitieSpliter
         public static readonly int MIN_ELEMENT_TEXT_HEIGHT = 20;
         public static readonly int MAX_ELEMENT_TEXT_HEIGHT = 50;
         public static readonly int EXTRA_MAX_ELEM_TXT_HEIGHT = 100;
+        public static readonly int UNICODE_CHS_START = 0x4E00;
+        public static readonly int UNICODE_CHS_END = 0x9FBB;
 
 
         public static List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
@@ -67,6 +69,10 @@ namespace BeitieSpliter
             DarkColorItems.Add(new ColorBoxItem(Colors.Navy, "海军蓝色"));
         }
 
+        public static bool CharIsChineseChar(char ch)
+        {
+            return (ch >= UNICODE_CHS_START) && (ch <= UNICODE_CHS_END);
+        }
         public static void SetWindowSize()
         {
             {
@@ -427,7 +433,7 @@ namespace BeitieSpliter
 
                 if (IndexNo == index)
                 {
-                    if ((newBe.type == dstType) && (dstType == BeitieElement.BeitieElementType.Kongbai))
+                    if ((newBe.type != dstType) && (dstType == BeitieElement.BeitieElementType.Kongbai))
                     {
                         newElements.Add(IndexNo++, new BeitieElement(BeitieElement.BeitieElementType.Kongbai, "", -1));
                         if (IndexNo == ElementCount)
