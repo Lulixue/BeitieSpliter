@@ -3469,5 +3469,47 @@ namespace BeitieSpliter
             NoOpacityMode = ChkNoOpacity?.IsChecked ?? false;
             Refresh(CtrlMessageType.RedrawRequest);
         }
+
+        int RewardPageViewID = 0;
+        bool RewardPageClosed = true;
+        private async void ClickedRewardMe(object sender, RoutedEventArgs e)
+        {
+            //this.Frame.Navigate(typeof(RewardMePage));
+            //return;
+
+            var views = CoreApplication.Views;
+            if (views.Count > 1)
+            {
+                if (!RewardPageClosed)
+                {
+                    await ApplicationViewSwitcher.SwitchAsync(RewardPageViewID);
+                    return;
+                }
+            }
+            RewardPageClosed = false;
+            CoreApplicationView newView = CoreApplication.CreateNewView();
+            int newViewId = 0;
+            await newView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                Frame frame = new Frame();
+                frame.Navigate(typeof(RewardMePage), this);
+
+                Window.Current.Content = frame;
+                // You have to activate the window in order to show it later.
+                Window.Current.Activate();
+                var newAppView = ApplicationView.GetForCurrentView();
+                newAppView.Consolidated += ConsolidatedRewardMePage;
+                newViewId = ApplicationView.GetForCurrentView().Id;
+            });
+            RewardPageViewID = newViewId;
+            await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId, ViewSizePreference.Custom);
+
+        }
+        private void ConsolidatedRewardMePage(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
+        {
+            Debug.WriteLine("ConsolidatedRewardMePage()");
+            RewardPageClosed = true; 
+        }
+
     }
 }

@@ -569,6 +569,7 @@ namespace BeitieSpliter
 
             
         }
+        private int FilePickerID = 1;
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
             FileOpenPicker openPicker = new FileOpenPicker
@@ -581,7 +582,7 @@ namespace BeitieSpliter
             {
                 openPicker.FileTypeFilter.Add(type);
             }
-            StorageFile file = await openPicker.PickSingleFileAsync();
+            StorageFile file = await openPicker.PickSingleFileAsync((++FilePickerID).ToString());
             if (file != null)
             {
                 ImageSlidePanel.Visibility = Visibility;

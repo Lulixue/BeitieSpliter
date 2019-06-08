@@ -10,6 +10,7 @@
     RequestedTheme="Dark"
     Loaded="SettingsPage_Loaded"
     Unloaded="SettingsPage_Unloaded"
+    NavigationCacheMode="Required"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" LostFocus="SettingPage_LostFocus">
 
     <Page.Resources>
@@ -233,7 +234,7 @@
                             <CheckBox Margin="0,2,0,2" Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
                         </StackPanel>
 
-                        <Grid Margin="20,10,20,20" HorizontalAlignment="Center">
+                            <Grid Margin="20,10,20,20" HorizontalAlignment="Center">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="2*"/>
@@ -264,9 +265,11 @@
                             </StackPanel>
                             <TextBox Name="AdjustOpInfoBox" IsReadOnly="True" Margin="2" Grid.Row="1" Grid.Column="1" ></TextBox>
                         </Grid>
+                        </StackPanel>
+                        <StackPanel Margin="0,10,0,10" HorizontalAlignment="Center">
+                            <Button Name="RewardMe" Click="ClickedRewardMe"   Content="赞助开发者" />
+                        </StackPanel>
                     </StackPanel>
-
-                </StackPanel>
                 </ScrollViewer>
             </SplitView.Pane>
             <Grid  x:Name="SettingsGrid" BorderThickness="0" 

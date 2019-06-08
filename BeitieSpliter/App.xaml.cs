@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -57,6 +58,11 @@ namespace BeitieSpliter
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
+                // 添加返回键
+                rootFrame.Navigated += OnNavigated;
+                SystemNavigationManager.GetForCurrentView().BackRequested += OnBackrequested;
+                SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = 
+                    rootFrame.CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
             }
 
             if (e.PrelaunchActivated == false)
@@ -71,6 +77,23 @@ namespace BeitieSpliter
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
+        }
+
+        private void OnBackrequested(object sender, BackRequestedEventArgs e)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame != null && rootFrame.CanGoBack)
+            {
+                e.Handled = true;//这句一定要有，不然还会发生默认返回键操作
+                rootFrame.GoBack();
+            }
+        }
+
+        private void OnNavigated(object sender, NavigationEventArgs e)
+        {
+            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =
+                    ((Frame)sender).CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
+
         }
 
         /// <summary>
