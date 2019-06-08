@@ -95,11 +95,11 @@
                         SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,3,0,0" 
                         SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
                         SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
-                        Width="70" />
+                         />
             <TextBlock  Text="网格宽度：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="PenWidthCombo" Margin="0,3,0,0"  SelectionChanged="PenWidth_SelectionChanged"  
                         LostFocus="PenWidth_LostFocus"
-                        IsDropDownOpen="True" IsEditable="True" Width="70"/>
+                        IsDropDownOpen="True" IsEditable="True" />
         </StackPanel>
 
 
@@ -132,7 +132,7 @@
             <TextBox x:Name="StartNoBox" RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0"  Text="1" RelativePanel.AlignRightWithPanel="True" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
         </RelativePanel>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="2" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
-                  MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
+                  MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3,3,3,0"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />
         <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,0,0" >
             <Frame x:Name="ScenarioFrame" Margin="0,1,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>

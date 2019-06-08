@@ -267,7 +267,7 @@
                         </Grid>
                         </StackPanel>
                         <StackPanel Margin="0,10,0,10" HorizontalAlignment="Center">
-                            <Button Name="RewardMe" Click="ClickedRewardMe"   Content="赞助开发者" />
+                            <Button Name="RewardMe" Click="ClickedRewardMe" Background="OrangeRed" Content="赞赏开发者" />
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

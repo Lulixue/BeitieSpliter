@@ -122,7 +122,7 @@ namespace BeitieSpliter
         static bool SingleFocusMode = false;
         static bool ShowSizeMode = false;
         static bool NoOpacityMode = false;
-        PenLineType LineType = PenLineType.Dash;
+        static PenLineType LineType = PenLineType.Dash;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
         BeitieGrids LastBtGrids = new BeitieGrids();
@@ -1142,6 +1142,11 @@ namespace BeitieSpliter
             PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dot));
             PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Line));
 
+            if (BtGrids.PenWidth > 3)
+            {
+                LineType = PenLineType.Line;
+            }
+
             PenLineTypeCombo.SelectedIndex = (int)LineType;
 
             // 设置存储变量
@@ -1260,6 +1265,10 @@ namespace BeitieSpliter
                 AdjustGridsSwitch.Visibility = Visibility.Visible;
                 ChkHideGrid.Visibility = Visibility.Visible;
 
+            }
+            else
+            {
+                MainPage.ImgAutoFitScrollView(BtImage, CurrentItem, ItemScrollViewer);
             }
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
             this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);
@@ -1716,8 +1725,8 @@ namespace BeitieSpliter
                 return;
             }
 
-            double offsetX = (rcZoomed.X - 10);
-            double offsetY = (rcZoomed.Y - 10);
+            double offsetX = (rcZoomed.X - Common.AUTOSLIDE_OFFSET);
+            double offsetY = (rcZoomed.Y - Common.AUTOSLIDE_OFFSET);
             if (offsetX < 0)
             {
                 offsetX = 0;
@@ -1739,7 +1748,7 @@ namespace BeitieSpliter
             //Color OpacityColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
             float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
-            Color RevisedColor = GetRandomColor();
+            Color RevisedColor = BtGrids.PenColor;// GetRandomColor();
 
             pntLt.X += ChangeRect.left;
             pntLt.Y += ChangeRect.top;

@@ -247,7 +247,8 @@ namespace BeitieSpliter
             RowCount.SelectedIndex = 8;
             ColumnCount.SelectedIndex = 5;
             PenWidthCombo.SelectedIndex = 1;
-            
+
+            PenColorCombo.MinWidth = PenColorCombo.ActualWidth;
             CurrentPage.Height = ImageScrollViewer.ViewportHeight;
             CurrentPage.Width = ImageScrollViewer.ViewportWidth;
 
@@ -454,21 +455,26 @@ namespace BeitieSpliter
             }
             return name.Substring(0, index);
         }
-        public void InitAfterImageLoaded()
+
+        public static void ImgAutoFitScrollView(BeitieImage img, CanvasControl ctrl, ScrollViewer scroll)
         {
-            BtGrids = new BeitieGrids();
-           
             // 将图片适应屏幕大小
-            float factor = (float)(ImageScrollViewer.ActualWidth / CurrentBtImage.resolutionX);
+            float factor = (float)(scroll.ActualWidth / img.resolutionX);
             if (factor > 1F)
             {
                 factor = 1F;
             }
-            var t = CurrentPage.TransformToVisual(ImageScrollViewer);
+            var t = ctrl.TransformToVisual(scroll);
             Point screenOrg = t.TransformPoint(new Point(0, 0));
 
-            ImageScrollViewer.ChangeView(screenOrg.X, screenOrg.Y, factor);
+            scroll.ChangeView(screenOrg.X, screenOrg.Y, factor);
+        }
 
+        public void InitAfterImageLoaded()
+        {
+            BtGrids = new BeitieGrids();
+
+            ImgAutoFitScrollView(CurrentBtImage, CurrentPage, ImageScrollViewer);
             InitDrawParameters();
             ParsePageText();
             BtnMore.IsEnabled = true;
@@ -520,9 +526,11 @@ namespace BeitieSpliter
                 if (kv.Key == FolderFileCombo.SelectedIndex)
                 {
                     OpenFile(kv.Value.file, kv.Value.no);
+                    PageText.Text = "";
                     break;
                 }
             }
+
         }
 
         private void RemoveFileItem(StorageFile file)

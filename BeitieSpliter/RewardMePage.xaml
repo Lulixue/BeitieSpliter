@@ -13,32 +13,35 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
-            <TextBlock FontSize="30"  Margin="0,10,0,10" 
+        <StackPanel Grid.Column="0" Grid.Row="0" Margin="50" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock FontSize="40"  
                    Text="感谢使用软件，扫描下方二维码赞赏开发者，谢谢!"  />
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="0" Margin="30"  Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="30" Padding="15" Background="Green" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
 
-            <TextBlock FontSize="26" Margin="10" Foreground="YellowGreen"
+            <Border Background="Green">
+                <TextBlock FontSize="26" Margin="0,10,0,10" Foreground="White"
                    Text="微信" HorizontalAlignment="Center" />
+            </Border>
 
             <Image Width="305" Height="300" Source="/Assets/wechat_rewardme.jpg"/>
 
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="30"  Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="30"  Padding="15" Background="#108ee9" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
 
-            <TextBlock FontSize="26" Margin="10" Foreground="SkyBlue"
-                   Text="支付宝" HorizontalAlignment="Center" />
-
+            <Border Background="#108ee9">
+                <TextBlock FontSize="26" Margin="0,10,0,10" Foreground="White"
+                       Text="支付宝" HorizontalAlignment="Center" />
+            </Border>
             <Image   Width="305" Height="300"  Source="/Assets/alipay_rewardme.jpg"/>
 
         </StackPanel>

@@ -45,6 +45,7 @@ namespace BeitieSpliter
         public static readonly int EXTRA_MAX_ELEM_TXT_HEIGHT = 100;
         public static readonly int UNICODE_CHS_START = 0x4E00;
         public static readonly int UNICODE_CHS_END = 0x9FBB;
+        public static readonly int AUTOSLIDE_OFFSET = 10;
 
 
         public static List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
