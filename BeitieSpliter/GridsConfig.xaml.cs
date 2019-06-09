@@ -1478,7 +1478,7 @@ namespace BeitieSpliter
             return new Size(width, height);*/
 
 
-            var tb = new TextBlock { Text = text, FontSize = textFormat.FontSize };
+            var tb = new TextBlock { Text = text + "add", FontSize = textFormat.FontSize };
             tb.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
             return tb.DesiredSize;
 
@@ -1671,12 +1671,10 @@ namespace BeitieSpliter
 
         private void AutoSlideToElement(Rect elementRc)
         {
-            var t = CurrentItem.TransformToVisual(ItemScrollViewer);
-            Point screenOrg = t.TransformPoint(new Point(0, 0));
             Point screenLt = new Point
             {
-                X = Math.Abs(screenOrg.X),
-                Y = Math.Abs(screenOrg.Y)
+                X = ItemScrollViewer.HorizontalOffset,
+                Y = ItemScrollViewer.VerticalOffset
             };
             Point screenRb = new Point
             {
@@ -1695,29 +1693,22 @@ namespace BeitieSpliter
                 Height = elementRc.Height * zoomFactor,
             };
 
-            if ((screenOrg.X > 0) && (screenOrg.Y > 0))
-            {
-                // 图片完全在控件之中
-                if ((screenRb.X > (CurrentItem.Width*zoomFactor)) &&
-                    (screenRb.Y > (CurrentItem.Height*zoomFactor)))
-                {
-                    Debug.WriteLine("image Total in scrollView");
-                    return;
-                }
-            }
 
             Debug.WriteLine("Screen: {0:F0},{1:F0},{2:F0},{3:F0}", screenLt.X, screenLt.Y, screenRb.X, screenRb.Y);
             Debug.WriteLine("Point: {0:F0},{1:F0}", rcZoomed.X, rcZoomed.Y);
 
-
-            if ((rcZoomed.X < screenLt.X) ||
+            int deltaX = 0;
+            int deltaY = 0;
+            if ((rcZoomed.Bottom > screenRb.Y) ||
                 (rcZoomed.Y < screenLt.Y))
             {
+                deltaY = Common.AUTOSLIDE_OFFSET;
                 needScroll = true;
             }
             if ((rcZoomed.Right > screenRb.X) ||
-                (rcZoomed.Bottom > screenRb.Y))
+                (rcZoomed.X < screenLt.X))
             {
+                deltaX = Common.AUTOSLIDE_OFFSET;
                 needScroll = true;
             }
             if (!needScroll)
@@ -1725,8 +1716,8 @@ namespace BeitieSpliter
                 return;
             }
 
-            double offsetX = (rcZoomed.X - Common.AUTOSLIDE_OFFSET);
-            double offsetY = (rcZoomed.Y - Common.AUTOSLIDE_OFFSET);
+            double offsetX = (rcZoomed.X - deltaX);
+            double offsetY = (rcZoomed.Y - deltaY);
             if (offsetX < 0)
             {
                 offsetX = 0;
@@ -1735,6 +1726,8 @@ namespace BeitieSpliter
             {
                 offsetY = 0;
             }
+            offsetX = (deltaX == 0) ? screenLt.X : offsetX;
+            offsetY = (deltaY == 0) ? screenLt.Y : offsetY;
             Debug.WriteLine("Offset: {0:F0},{1:F0}", offsetX, offsetY);
             ItemScrollViewer.ChangeView(offsetX, offsetY, ItemScrollViewer.ZoomFactor); 
         }
@@ -1809,7 +1802,10 @@ namespace BeitieSpliter
                     int index = BtGrids.GetIndex(selrow, selcol, BtGrids.BookOldType);
                     Rect rc = BtGrids.GetRectangle(selrow, selcol);
 
-                    AutoSlideToElement(rc);
+                    //if (OpType == OperationType.SingleElement)
+                    {
+                        AutoSlideToElement(rc);
+                    }
                     UpdateOpNotfText(selrow, selcol, index);
 
                     rc.X -= BtImageAdjustRect.X;
