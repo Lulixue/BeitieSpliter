@@ -86,8 +86,14 @@
                         IsDropDownOpen="True" IsEditable="True" Width="70" />
             <TextBlock Name="MarginTitle" Text="裁边：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1"   
-                        LostFocus="PageMargin_LostFocus"
-                        FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
+                        LostFocus="PageMargin_LostFocus" 
+                        FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0">
+                <ToolTipService.ToolTip>
+                    <ToolTip Content="左侧，顶部，右侧，底部"
+                     Placement="Bottom"
+                     HorizontalOffset="20"/>
+                </ToolTipService.ToolTip>
+            </TextBox>
 
             <TextBlock  Text="网格颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
 
@@ -121,10 +127,10 @@
         </Border>
 
         <RelativePanel Margin="3"  Grid.Row="2" Grid.Column="2" VerticalAlignment="Center">
-            <TextBox x:Name="TieAlbum"  FontSize="14" Header="碑帖名"
+            <TextBox x:Name="TieAlbum"  FontSize="14" Header="碑帖名" TextChanged="TextChangedTieAlbum"
                      PlaceholderText="输入碑帖名称"  IsSpellCheckEnabled="False" HorizontalAlignment="Stretch" 
                      Text=""  />
-            <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,0,0" SelectionChanged="SelectionChangedTextSizeGrade"   
+            <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,0,0"
                        IsDropDownOpen="True" Width="80" RelativePanel.AlignRightWithPanel="True" Header="总字数" />
         </RelativePanel>
         <RelativePanel  Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="3">
@@ -134,7 +140,7 @@
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="2" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
                   MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3,3,3,0"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />
-        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,0,0" >
+        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,3,0" >
             <Frame x:Name="ScenarioFrame" Margin="0,1,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
             <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
                 <Border x:Name="StatusBorder" Margin="0,0,0,0">

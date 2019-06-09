@@ -1268,7 +1268,7 @@ namespace BeitieSpliter
             }
             else
             {
-                MainPage.ImgAutoFitScrollView(BtImage, CurrentItem, ItemScrollViewer);
+                MainPage.ImgAutoFitScrollView(BtImage, ItemScrollViewer);
             }
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
             this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);

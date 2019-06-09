@@ -309,7 +309,7 @@
                     
 
                 </StackPanel>
-                
+
                 <StackPanel  Grid.Row="1" Grid.Column="1"  Margin="2" Orientation="Vertical" HorizontalAlignment="Center" 
                              VerticalAlignment="Bottom">
                     <AppBarButton Name="BtnZoomIn" Icon="ZoomIn" Label="放大"  Margin="2" Click="Clicked_Zoom"/>

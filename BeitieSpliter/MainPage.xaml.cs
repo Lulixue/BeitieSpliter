@@ -253,8 +253,9 @@ namespace BeitieSpliter
             CurrentPage.Width = ImageScrollViewer.ViewportWidth;
 
             StartNoBox.MaxWidth = StartNoBox.ActualWidth;
-            TieAlbum.MaxWidth = TieAlbum.ActualWidth;
+            TieAlbum.Width = TieAlbum.ActualWidth;
             PageText.MaxWidth = PageText.ActualWidth;
+
         }
 
         public bool InitDrawParameters()
@@ -456,7 +457,7 @@ namespace BeitieSpliter
             return name.Substring(0, index);
         }
 
-        public static void ImgAutoFitScrollView(BeitieImage img, CanvasControl ctrl, ScrollViewer scroll)
+        public static void ImgAutoFitScrollView(BeitieImage img, ScrollViewer scroll)
         {
             // 将图片适应屏幕大小
             float factor = (float)(scroll.ActualWidth / img.resolutionX);
@@ -464,17 +465,15 @@ namespace BeitieSpliter
             {
                 factor = 1F;
             }
-            var t = ctrl.TransformToVisual(scroll);
-            Point screenOrg = t.TransformPoint(new Point(0, 0));
 
-            scroll.ChangeView(screenOrg.X, screenOrg.Y, factor);
+            scroll.ChangeView(0, 0, factor);
         }
 
         public void InitAfterImageLoaded()
         {
             BtGrids = new BeitieGrids();
 
-            ImgAutoFitScrollView(CurrentBtImage, CurrentPage, ImageScrollViewer);
+            ImgAutoFitScrollView(CurrentBtImage, ImageScrollViewer);
             InitDrawParameters();
             ParsePageText();
             BtnMore.IsEnabled = true;
@@ -1985,9 +1984,16 @@ namespace BeitieSpliter
             
         }
 
-        private void SelectionChangedTextSizeGrade(object sender, SelectionChangedEventArgs e)
-        {
 
+        private void TextChangedTieAlbum(object sender, TextChangedEventArgs e)
+        {
+            ToolTip toolTip = new ToolTip
+            {
+                Content = TieAlbum.Text,
+                Placement = Windows.UI.Xaml.Controls.Primitives.PlacementMode.Bottom,
+                HorizontalOffset = 20
+            };
+            ToolTipService.SetToolTip(TieAlbum, toolTip);
         }
     }
 }
