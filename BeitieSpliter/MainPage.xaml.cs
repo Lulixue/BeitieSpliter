@@ -1391,6 +1391,7 @@ namespace BeitieSpliter
             FILETYPE_FILTERS.Add(".png");
             FILETYPE_FILTERS.Add(".bmp");
             FILETYPE_FILTERS.Add(".gif");
+            FILETYPE_FILTERS.Add(".tif");
 
         }
 
