@@ -35,7 +35,7 @@
     </Page.Resources>
     
     
-    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Padding="10,10,10,0" BorderBrush="DarkGray" BorderThickness="0" SizeChanged="OnSizeChanged">
+    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Padding="0,10,0,0" BorderBrush="DarkGray" BorderThickness="0" SizeChanged="OnSizeChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>
@@ -49,7 +49,7 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <RelativePanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,5,0">
+        <RelativePanel  Padding="10,0,0,0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,5,0">
             <StackPanel Name="ImportBtnPanel" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
                 <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
                 <Button x:Name="ImportBtDir" Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
@@ -68,10 +68,10 @@
             
         </RelativePanel>
 
-        <Button Grid.Row="0" Grid.Column="2"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
+        <Button Grid.Row="0" Grid.Column="2" Margin="0,0,10,0"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
 
 
-        <StackPanel Name="FastParaPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel Padding="10,0,0,0"   Name="FastParaPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock Name="ZiCountTitle" Text="总字数：" Visibility="Collapsed" Margin="1,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="ZiCountBox" Text="100" Visibility="Collapsed" InputScope="TelephoneNumber"
                         LostFocus="ZiCount_LostFocus"
@@ -115,7 +115,7 @@
             <Button x:Name="BtnMore" Content="高级" RelativePanel.RightOf="XingcaoModeCheck" Margin="10,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
         </RelativePanel>
 
-        <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="0,5,5,0"
+        <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="10,5,5,0"
                 Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" >
             <ScrollViewer x:Name="ImageScrollViewer" Margin="5" 
                           HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" 
@@ -127,21 +127,21 @@
             </ScrollViewer>
         </Border>
 
-        <RelativePanel Margin="3"  Grid.Row="2" Grid.Column="2" VerticalAlignment="Center">
+        <RelativePanel Margin="3"  Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" >
             <TextBox x:Name="TieAlbum"  FontSize="14" Header="碑帖名" TextChanged="TextChangedTieAlbum"
                      PlaceholderText="输入碑帖名称"  IsSpellCheckEnabled="False" HorizontalAlignment="Stretch" 
                      Text=""  />
-            <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,0,0"
+            <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,10,0"
                        IsDropDownOpen="True" Width="80" RelativePanel.AlignRightWithPanel="True" Header="总字数" />
         </RelativePanel>
-        <RelativePanel  Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="3">
+        <RelativePanel  Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="3,3,13,3">
             <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
             <TextBox x:Name="StartNoBox" RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0"  Text="1" RelativePanel.AlignRightWithPanel="True" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
         </RelativePanel>
         <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="2" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
-                  MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3,3,3,0"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
+                  MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3,3,13,0"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />
-        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,3,0" >
+        <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,0,0" >
             <Frame x:Name="ScenarioFrame" Margin="0,1,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
             <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
                 <Border x:Name="StatusBorder" Margin="0,0,0,0">
