@@ -1158,13 +1158,13 @@ namespace BeitieSpliter
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            Debug.WriteLine("OnNavigatedFrom() called");
+            Debug.WriteLine("OnNavigatedFrom() called"); 
             base.OnNavigatedFrom(e);
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            Debug.WriteLine("OnNavigatedFrom() called");
+            Debug.WriteLine("OnNavigatedFrom() called"); 
             base.OnNavigatingFrom(e);
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -1201,6 +1201,18 @@ namespace BeitieSpliter
             //BtImage = new BeitieImage(CurrentItem, BtGrids.ImageFile);
             BtImage = BtGrids.BtImageParent;
             ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.Maximized;
+
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame?.CanGoBack ?? false)
+            {
+                // If we have pages in our in-app backstack and have opted in to showing back, do so
+                SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+            }
+            else
+            {
+                // Remove the UI from the title bar if there are no pages in our in-app back stack
+                SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
+            }
         }
 
         void AdjustAddHandler(Button btn)
@@ -2367,14 +2379,28 @@ namespace BeitieSpliter
                         }
                         else
                         {
-                            await ApplicationViewSwitcher.SwitchAsync(ParentPage.PageViewId,
-                                     ApplicationView.GetForCurrentView().Id,
-                                    ApplicationViewSwitchingOptions.ConsolidateViews);
+                            if (Frame.CanGoBack)
+                            {
+                                Frame.GoBack();
+                            }
+                            else
+                            {
+                                await ApplicationViewSwitcher.SwitchAsync(ParentPage.PageViewId,
+                                         ApplicationView.GetForCurrentView().Id,
+                                        ApplicationViewSwitchingOptions.ConsolidateViews);
+                            }
                         }
                     }
                     else
                     {
-                       await ApplicationViewSwitcher.SwitchAsync(ParentPage.PageViewId);
+                        if (Frame.CanGoBack)
+                        {
+                            Frame.GoBack();
+                        }
+                        else
+                        {
+                            await ApplicationViewSwitcher.SwitchAsync(ParentPage.PageViewId);
+                        }
                     }
                     if (bContinue)
                     {
@@ -3479,8 +3505,11 @@ namespace BeitieSpliter
         bool RewardPageClosed = true;
         private async void ClickedRewardMe(object sender, RoutedEventArgs e)
         {
-            //this.Frame.Navigate(typeof(RewardMePage));
-            //return;
+            if (!Common.MULTI_WINDOW_MODE)
+            {
+                this.Frame.Navigate(typeof(RewardMePage));
+                return;
+            }
 
             var views = CoreApplication.Views;
             if (views.Count > 1)

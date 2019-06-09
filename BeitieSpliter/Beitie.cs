@@ -46,6 +46,7 @@ namespace BeitieSpliter
         public static readonly int UNICODE_CHS_START = 0x4E00;
         public static readonly int UNICODE_CHS_END = 0x9FBB;
         public static readonly int AUTOSLIDE_OFFSET = 10;
+        public static readonly bool MULTI_WINDOW_MODE = true;
 
 
         public static List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();

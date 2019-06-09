@@ -8,9 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     RequestedTheme="Dark"
-    Unloaded="Page_OnUnloaded" 
-    Name="BtSpliterParentWindows"
+    Unloaded="Page_OnUnloaded"  
     Loaded="Page_Loaded"
+    NavigationCacheMode="Enabled"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
 
     <Page.Resources>
@@ -117,7 +117,8 @@
 
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="0,5,5,0"
                 Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" >
-            <ScrollViewer x:Name="ImageScrollViewer" Margin="5"  HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" 
+            <ScrollViewer x:Name="ImageScrollViewer" Margin="5" 
+                          HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" 
                     ZoomMode="Enabled">
 
                 <canvas:CanvasControl Draw="CurrentPage_OnDraw" 

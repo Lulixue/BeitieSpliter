@@ -10,7 +10,7 @@
     RequestedTheme="Dark"
     Loaded="SettingsPage_Loaded"
     Unloaded="SettingsPage_Unloaded"
-    NavigationCacheMode="Required"
+    NavigationCacheMode="Enabled"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" LostFocus="SettingPage_LostFocus">
 
     <Page.Resources>

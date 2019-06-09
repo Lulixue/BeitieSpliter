@@ -786,9 +786,7 @@ namespace BeitieSpliter
 
         private void Page_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine(String.Format("Page_OnUnloaded called"));
-            CurrentPage.RemoveFromVisualTree();
-            CurrentPage = null;
+            Debug.WriteLine(String.Format("Page_OnUnloaded called")); 
         }
 
         void UpdateColumnCount()
@@ -1770,8 +1768,16 @@ namespace BeitieSpliter
             //    TestOpenCV();
             //    return;
             //}
+
+            if (!Common.MULTI_WINDOW_MODE)
+            {
+                this.Frame.Navigate(typeof(GridsConfig), this);
+                return;
+
+            }
             Debug.WriteLine("ID: {0}, shown: {1}, closed: {2}", SettingPageViewID,
                 SettingPageShown, SettingPageClosed);
+
             var views = CoreApplication.Views;
             if (views.Count > 1)
             {
@@ -1900,6 +1906,13 @@ namespace BeitieSpliter
         public int PageViewId = 0;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            // 返回
+            if (CurrentBtImage != null)
+            {
+                InitAfterImageLoaded();
+                return;
+            }
+
             InitControls();
             UpdateParseStatus();
             
@@ -1924,7 +1937,11 @@ namespace BeitieSpliter
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Debug.WriteLine("OnNavigatedFrom()");
+            Debug.WriteLine("OnNavigatedTo()");
+            if (e.NavigationMode == NavigationMode.Back)
+            { 
+                return;
+            }
             base.OnNavigatedTo(e);
         }
         private void ConsolidatedMainView(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
