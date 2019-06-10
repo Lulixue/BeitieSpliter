@@ -10,8 +10,8 @@
     RequestedTheme="Dark"
     Unloaded="Page_OnUnloaded"  
     Loaded="Page_Loaded"
-    NavigationCacheMode="Enabled"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+    NavigationCacheMode="Required"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" CanBeScrollAnchor="True" >
 
     <Page.Resources>
         <Style x:Key="LeftFriendly" TargetType="TextBlock">

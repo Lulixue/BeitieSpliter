@@ -16,6 +16,7 @@ using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace BeitieSpliter
 {
@@ -46,8 +47,18 @@ namespace BeitieSpliter
         public static readonly int UNICODE_CHS_START = 0x4E00;
         public static readonly int UNICODE_CHS_END = 0x9FBB;
         public static readonly int AUTOSLIDE_OFFSET = 10;
-        public static readonly bool MULTI_WINDOW_MODE = true;
+        public static readonly bool MULTI_WINDOW_MODE = false;
 
+        public enum NavigationTransitionType
+        {
+            Default,
+            Entrance,     
+            DrillIn,
+            Suppress,
+            Common,
+            Continuum,
+            Slide,
+        }
 
         public static List<ColorBoxItem> LightColorItems = new List<ColorBoxItem>();
         public static List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
@@ -69,6 +80,28 @@ namespace BeitieSpliter
             DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Navy, "海军蓝色"));
+        }
+
+        public static NavigationTransitionInfo GetNavTransInfo(NavigationTransitionType type)
+        {
+            switch (type)
+            {
+                case NavigationTransitionType.DrillIn:
+                    return new DrillInNavigationTransitionInfo();
+                case NavigationTransitionType.Suppress:
+                    return new SuppressNavigationTransitionInfo();
+                case NavigationTransitionType.Entrance:
+                    return new EntranceNavigationTransitionInfo();
+                case NavigationTransitionType.Common:
+                    return new CommonNavigationTransitionInfo();
+                case NavigationTransitionType.Continuum:
+                    return new ContinuumNavigationTransitionInfo();
+                case NavigationTransitionType.Slide:
+                    return new SlideNavigationTransitionInfo();
+                case NavigationTransitionType.Default:
+                default:
+                    return null;
+            }
         }
 
         public static bool CharIsChineseChar(char ch)

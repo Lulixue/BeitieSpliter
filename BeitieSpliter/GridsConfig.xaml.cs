@@ -34,6 +34,7 @@ using Microsoft.Graphics.Canvas.Brushes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.UI.Xaml.Media.Animation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -1175,6 +1176,7 @@ namespace BeitieSpliter
             // 备份上一次的数据
             LastBtGrids.Columns = BtGrids.Columns;
             LastBtGrids.Rows = BtGrids.Rows;
+            LastBtGrids.ElementRects.Clear();
             foreach (BeitieGridRect bgr in BtGrids.ElementRects)
             {
                 LastBtGrids.ElementRects.Add(new BeitieGridRect(bgr.rc));
@@ -3478,7 +3480,11 @@ namespace BeitieSpliter
             }
             else if (sender == PenLineTypeCombo)
             {
-                LineType = (PenLineType)PenLineTypeCombo.SelectedIndex;
+                int selected = PenLineTypeCombo.SelectedIndex;
+                if (selected >= 0)
+                {
+                    LineType = (PenLineType)selected;
+                }
             }
             Refresh(CtrlMessageType.RedrawRequest);
         }
@@ -3507,7 +3513,7 @@ namespace BeitieSpliter
         {
             if (!Common.MULTI_WINDOW_MODE)
             {
-                this.Frame.Navigate(typeof(RewardMePage));
+                this.Frame.Navigate(typeof(RewardMePage), null, Common.GetNavTransInfo(Common.NavigationTransitionType.DrillIn));
                 return;
             }
 

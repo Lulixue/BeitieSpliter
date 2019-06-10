@@ -34,6 +34,7 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Windows.ApplicationModel;
 using Windows.UI.Xaml.Navigation;
 using System.IO;
+using Windows.UI.Xaml.Media.Animation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -469,6 +470,11 @@ namespace BeitieSpliter
             scroll.ChangeView(0, 0, factor);
         }
 
+        public void InitAfterBack()
+        {
+            CurrentPage.Height = CurrentBtImage.resolutionY;
+            CurrentPage.Width = CurrentBtImage.resolutionX;
+        }
         public void InitAfterImageLoaded()
         {
             BtGrids = new BeitieGrids();
@@ -1772,7 +1778,9 @@ namespace BeitieSpliter
 
             if (!Common.MULTI_WINDOW_MODE)
             {
-                this.Frame.Navigate(typeof(GridsConfig), this);
+                this.Frame.Background = new SolidColorBrush(Colors.Black);
+                // 淡入淡出效果
+                this.Frame.Navigate(typeof(GridsConfig), this, Common.GetNavTransInfo(Common.NavigationTransitionType.DrillIn));
                 return;
 
             }
@@ -1910,7 +1918,7 @@ namespace BeitieSpliter
             // 返回
             if (CurrentBtImage != null)
             {
-                InitAfterImageLoaded();
+                InitAfterBack();
                 return;
             }
 
