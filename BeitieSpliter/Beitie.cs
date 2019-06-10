@@ -33,7 +33,7 @@ namespace BeitieSpliter
 
     public sealed class GlobalSettings
     {
-        public static bool MultiWindowMode = false;
+        public static bool MultiWindowMode = true;
     }
 
     public sealed class Common

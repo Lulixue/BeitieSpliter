@@ -123,6 +123,7 @@ namespace BeitieSpliter
         static bool SingleFocusMode = false;
         static bool ShowSizeMode = false;
         static bool NoOpacityMode = false;
+        static bool HideScrollBar = false;
         static PenLineType LineType = PenLineType.Dash;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
@@ -1287,7 +1288,10 @@ namespace BeitieSpliter
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
             this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);
             ParentPage.SetConfigPage(this);
-            Common.SetWindowSize();
+            if (GlobalSettings.MultiWindowMode)
+            {
+                Common.SetWindowSize();
+            }
         }
 
 
@@ -3551,5 +3555,48 @@ namespace BeitieSpliter
             RewardPageClosed = true; 
         }
 
+        private void ClickHorizontalScroll(object sender, RoutedEventArgs e)
+        {
+            double offsetX = ItemScrollViewer.HorizontalOffset;
+            double offsetY = ItemScrollViewer.VerticalOffset;
+
+            double offsetStep = CurrentItem.Width / 20.0;
+
+            if (offsetStep < 10)
+            {
+                offsetStep = 10;
+            }
+
+            if (sender == LeftScrollBtn)
+            {
+                offsetX -= offsetStep;
+            }
+            else
+            {
+                offsetX += offsetStep;
+            }
+
+            ItemScrollViewer.ChangeView(offsetX, offsetY, null);
+
+        }
+        private void HideViewerScrollBar(bool bHide)
+        {
+            if (bHide)
+            {
+                ItemScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                ItemScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            }
+            else
+            {
+                ItemScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                ItemScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            }
+        }
+
+        private void ClickedhideScrollBar(object sender, RoutedEventArgs e)
+        {
+            HideScrollBar = ChkHideScrollBar.IsChecked ?? false;
+            HideViewerScrollBar(HideScrollBar);
+        }
     }
 }

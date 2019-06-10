@@ -174,97 +174,98 @@
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
                         </StackPanel>
-                        
+
                         <StackPanel Margin="0,20,0,0" Orientation="Vertical">
-                        <TextBlock Text="元素" 
+                            <TextBlock Text="元素" 
                                    VerticalAlignment="Center" Margin="0,0,0,0" Style="{StaticResource HeaderTextStyle}" />
 
-                        <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Name="HangNoTitle" Text="行号：" 
+                            <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Name="HangNoTitle" Text="行号：" 
                                    VerticalAlignment="Center" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
-                            <ComboBox  x:Name="RowNumber" Margin="0,0,10,0"  SelectionChanged="RowNumber_SelectionChanged"  
+                                <ComboBox  x:Name="RowNumber" Margin="0,0,10,0"  SelectionChanged="RowNumber_SelectionChanged"  
                            VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                            IsDropDownOpen="True"  Width="70"/>
-                            <TextBlock  Text="列号：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                            <ComboBox  x:Name="ColumnNumber" Margin="0,0,0,0" SelectionChanged="ColumnNumber_SelectionChanged"  
+                                <TextBlock  Text="列号：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <ComboBox  x:Name="ColumnNumber" Margin="0,0,0,0" SelectionChanged="ColumnNumber_SelectionChanged"  
                                 VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                                 IsDropDownOpen="True" Width="70" />
-                        </StackPanel>
-                        <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock  Text="元素：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                            <ComboBox  x:Name="CurrentElements"  Margin="0,0,0,0" SelectionChanged="CurrentElements_SelectionChanged"  
+                            </StackPanel>
+                            <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock  Text="元素：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <ComboBox  x:Name="CurrentElements"  Margin="0,0,0,0" SelectionChanged="CurrentElements_SelectionChanged"  
                                     VerticalAlignment="Center" SelectionChangedTrigger="Committed"
                                     IsDropDownOpen="True" Width="100" />
+                            </StackPanel>
+
+                            <RelativePanel  Margin="20,10,0,0"  VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Button Name="BtnResetElement"  Margin="0,0,0,0" Content="重置元素" FontSize="18" Click="ResetElement_Clicked"/>
+                                <Button Name="BtnResetAllElements" RelativePanel.RightOf="BtnResetElement" Margin="10,0,0,0" Content="重置所有" FontSize="18" Click="ResetElement_Clicked"/>
+                            </RelativePanel>
                         </StackPanel>
 
-                        <RelativePanel  Margin="20,10,0,0"  VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Button Name="BtnResetElement"  Margin="0,0,0,0" Content="重置元素" FontSize="18" Click="ResetElement_Clicked"/>
-                            <Button Name="BtnResetAllElements" RelativePanel.RightOf="BtnResetElement" Margin="10,0,0,0" Content="重置所有" FontSize="18" Click="ResetElement_Clicked"/>
-                        </RelativePanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,20,0,0" Orientation="Vertical" >
-                        <TextBlock Text="调整" 
+                        <StackPanel Margin="0,20,0,0" Orientation="Vertical" >
+                            <TextBlock Text="调整" 
                                    VerticalAlignment="Center" Margin="0,0,0,0" Style="{StaticResource HeaderTextStyle}" />
 
 
-                        <StackPanel  Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock  Text="旋转：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                            <Button  Margin="0,0,5,0"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
-                            <TextBox Name="AngleTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="AngleTextBox_LostFocus" InputScope="Number" />
-                            <Button  Margin="5,0"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
-                        </StackPanel>
+                            <StackPanel  Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock  Text="旋转：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <Button  Margin="0,0,5,0"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
+                                <TextBox Name="AngleTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="AngleTextBox_LostFocus" InputScope="Number" />
+                                <Button  Margin="5,0"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
+                            </StackPanel>
 
-                        <StackPanel  Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock  Text="步进：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" VerticalAlignment="Center" />
-                            <TextBox Name="ChangeStepTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="ChangeStepTextBox_LostFocus" InputScope="Number" />
-                        </StackPanel>
+                            <StackPanel  Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock  Text="步进：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" VerticalAlignment="Center" />
+                                <TextBox Name="ChangeStepTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="ChangeStepTextBox_LostFocus" InputScope="Number" />
+                            </StackPanel>
 
 
-                        <StackPanel  Margin="20,10,0,0" Orientation="Vertical" VerticalAlignment="Center">
-                            <ToggleSwitch Margin="0,2,0,2" Name="AdjustGridsSwitch" Visibility="Collapsed" Width="120"  OffContent="设置文字" 
+                            <StackPanel  Margin="20,10,0,0" Orientation="Vertical" VerticalAlignment="Center">
+                                <ToggleSwitch Margin="0,2,0,2" Name="AdjustGridsSwitch" Visibility="Collapsed" Width="120"  OffContent="设置文字" 
                                           OnContent="调整网格" Toggled="AdjustGrids_Toggled" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkShowSize" Content="显示尺寸" IsChecked="True" Click="ClickedShowSize" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkNoOpacity" Content="护眼模式" IsChecked="True" Click="ClickedNoOpacity" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkSingleFocus" Content="单字专注" IsChecked="True" Click="ClickedSingleFocus" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
-                            <CheckBox Margin="0,2,0,2" Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
-                        </StackPanel>
+                                <CheckBox Margin="0,2,0,2" Name="ChkShowSize" Content="显示尺寸" IsChecked="True" Click="ClickedShowSize" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkNoOpacity" Content="护眼模式" IsChecked="True" Click="ClickedNoOpacity" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkSingleFocus" Content="单字专注" IsChecked="True" Click="ClickedSingleFocus" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkHideScrollBar" Content="隐藏滚动条" IsChecked="False" Click="ClickedhideScrollBar" />
+                            </StackPanel>
 
                             <Grid Margin="20,10,20,20" HorizontalAlignment="Center">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="2*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="2*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0"  Grid.ColumnSpan="3" >
-                                <Button Margin="2"  x:Name="BtnTopMinus" Content="^" HorizontalAlignment="Stretch"  />
-                                <Button Margin="2"  x:Name="BtnTopAdd" Content="∨" HorizontalAlignment="Stretch" />
-                            </StackPanel>
+                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0"  Grid.ColumnSpan="3" >
+                                    <Button Margin="2"  x:Name="BtnTopMinus" Content="^" HorizontalAlignment="Stretch"  />
+                                    <Button Margin="2"  x:Name="BtnTopAdd" Content="∨" HorizontalAlignment="Stretch" />
+                                </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="1"  Grid.Column="0">
-                                <Button Margin="2" x:Name="BtnLeftMinus" Content="&lt;" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
-                                <Button Margin="2" x:Name="BtnLeftAdd" Content=">"  HorizontalAlignment="Left" VerticalAlignment="Stretch" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1"  Grid.Column="2">
-                                <Button Margin="2" x:Name="BtnRightMinus" Content="&lt;"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
-                                <Button Margin="2" x:Name="BtnRightAdd" Content=">"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
-                            </StackPanel>
-                            <StackPanel  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical">
-                                <Button Margin="2"  x:Name="BtnBottomMinus" Content="^"  HorizontalAlignment="Stretch" />
-                                <Button Margin="2"  x:Name="BtnBottomAdd" Content="∨" HorizontalAlignment="Stretch" />
-                            </StackPanel>
-                            <TextBox Name="AdjustOpInfoBox" IsReadOnly="True" Margin="2" Grid.Row="1" Grid.Column="1" ></TextBox>
-                        </Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="1"  Grid.Column="0">
+                                    <Button Margin="2" x:Name="BtnLeftMinus" Content="&lt;" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                    <Button Margin="2" x:Name="BtnLeftAdd" Content=">"  HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1"  Grid.Column="2">
+                                    <Button Margin="2" x:Name="BtnRightMinus" Content="&lt;"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
+                                    <Button Margin="2" x:Name="BtnRightAdd" Content=">"  HorizontalAlignment="Right" VerticalAlignment="Stretch" />
+                                </StackPanel>
+                                <StackPanel  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical">
+                                    <Button Margin="2"  x:Name="BtnBottomMinus" Content="^"  HorizontalAlignment="Stretch" />
+                                    <Button Margin="2"  x:Name="BtnBottomAdd" Content="∨" HorizontalAlignment="Stretch" />
+                                </StackPanel>
+                                <TextBox Name="AdjustOpInfoBox" IsReadOnly="True" Margin="2" Grid.Row="1" Grid.Column="1" ></TextBox>
+                            </Grid>
                         </StackPanel>
                         <StackPanel Margin="0,10,0,10" HorizontalAlignment="Center">
                             <Button Name="RewardMe" Click="ClickedRewardMe" Background="OrangeRed" Content="赞赏开发者" />
@@ -303,19 +304,33 @@
                             <Button Name="BtnRightElement" Content="右一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
                             <Button Name="BtnBottomElement" Content="下一字" Margin="2"  Background="Green" Click="ElementMove_Clicked"/>
                         </StackPanel>
-                        
+
                     </StackPanel>
 
-                    
+
 
                 </StackPanel>
 
                 <StackPanel  Grid.Row="1" Grid.Column="1"  Margin="2" Orientation="Vertical" HorizontalAlignment="Center" 
                              VerticalAlignment="Bottom">
-                    <AppBarButton Name="BtnZoomIn" Icon="ZoomIn" Label="放大"  Margin="2" Click="Clicked_Zoom"/>
-                    <AppBarButton Name="BtnZoomOut" Icon="ZoomOut" Label="缩小" Margin="2" Click="Clicked_Zoom" />
+
+                    <AppBarButton Name="BtnZoomIn" Icon="ZoomIn" Label="放大" HorizontalAlignment="Center"  Margin="2" Click="Clicked_Zoom"/>
+                    <AppBarButton Name="BtnZoomOut" Icon="ZoomOut" Label="缩小" HorizontalAlignment="Center"   Margin="2" Click="Clicked_Zoom" />
+
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Button Name="LeftScrollBtn" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Right" Click="ClickHorizontalScroll"  >
+                            <Button.Content>
+                                <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="16" Glyph="&#xE76B;"/>
+                            </Button.Content>
+                        </Button>
+                        <Button Name="RightScrollBtn" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Left" Click="ClickHorizontalScroll" >
+                            <Button.Content>
+                                <FontIcon  FontFamily="Segoe MDL2 Assets" FontSize="16" Glyph="&#xE76C;"/>
+                            </Button.Content>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
-                
+
                 <Border x:Name="ItemBorder" Grid.Row="1" Grid.Column="0"  Margin="5,2,0,0"
                                     BorderBrush="Gray" BorderThickness="1" >
                     <ScrollViewer x:Name="ItemScrollViewer"  Margin="5" 
@@ -362,10 +377,10 @@
             <TextBlock Name="OpNotfText" Foreground="YellowGreen" Text="000000" FontSize="20"  IsColorFontEnabled="True" />
         </StackPanel>
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="0,10,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-            
+
             <Button x:Name="BtnSaveAll" Content="保存全部" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
             <Button x:Name="BtnSaveCurrent" Margin="10,0,0,0" Content="保存当前" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-            
+
         </StackPanel>
     </Grid>
 </Page>
