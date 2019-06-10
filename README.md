@@ -1,5 +1,5 @@
 # Beitie Spliter 碑帖分割器
-Split Shufa Beitie Images to single chinese characters
+Split Shufa Beitie Images to single chinese characters <br/>
 分割碑帖图片为单字
 
 # Development Environment 开发环境
@@ -11,9 +11,9 @@ Split Shufa Beitie Images to single chinese characters
 初始发布
 
 #### V1.1 2019.6.10
-1.优化界面布局，小分辨率的机器不影响正常使用
-2.增加赞黲赏页面
-3.增加元素选中自定位
-4.增加左右滚动功能
-5.增加多窗口/单窗口切换功能
-6.其他BUG修复和优化
+1.优化界面布局，小分辨率的机器不影响正常使用<br>
+2.增加赞赏页面<br/>
+3.增加元素选中自定位<br/>
+4.增加左右滚动功能<br/>
+5.增加多窗口/单窗口切换功能<br/>
+6.其他BUG修复和优化<br/>
