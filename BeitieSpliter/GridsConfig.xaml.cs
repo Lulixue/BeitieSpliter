@@ -2179,7 +2179,7 @@ namespace BeitieSpliter
         {
             string info = "";
             int selectedElemIndex = CurrentElements.SelectedIndex;
-            info += string.Format("当前修改元素: {0}个, ", BtGrids.XingcaoMode ?
+            info += string.Format("当前可修改元素: {0}个, ", BtGrids.XingcaoMode ?
                 GetXingCaoElementCount() : DrawLineElements.Count );
             info += string.Format("当前选中元素：{0}, ", BtGrids.GetElementString(selectedElemIndex));
             info += string.Format("当前元素区域尺寸： {0:0}*{1:0}, ", ToAdjustRect.Width, ToAdjustRect.Height);
@@ -3511,7 +3511,7 @@ namespace BeitieSpliter
         bool RewardPageClosed = true;
         private async void ClickedRewardMe(object sender, RoutedEventArgs e)
         {
-            if (!Common.MULTI_WINDOW_MODE)
+            if (!GlobalSettings.MultiWindowMode)
             {
                 this.Frame.Navigate(typeof(RewardMePage), null, Common.GetNavTransInfo(Common.NavigationTransitionType.DrillIn));
                 return;

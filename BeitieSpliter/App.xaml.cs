@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -31,6 +32,28 @@ namespace BeitieSpliter
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            this.EnteredBackground += OnEnteredBackground;
+            RetriveSettings();
+        }
+
+        private void OnEnteredBackground(object sender, EnteredBackgroundEventArgs e)
+        {
+            StoreSettings();
+        }
+
+        public void RetriveSettings()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            object obj = localSettings.Values[Common.SETTING_MULTI_WINDOW];
+            if (obj != null)
+            {
+                GlobalSettings.MultiWindowMode = (bool)obj;
+            }
+        }
+        public void StoreSettings()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values[Common.SETTING_MULTI_WINDOW] = GlobalSettings.MultiWindowMode;
         }
 
         /// <summary>

@@ -35,6 +35,7 @@ using Windows.ApplicationModel;
 using Windows.UI.Xaml.Navigation;
 using System.IO;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Controls.Primitives;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -129,11 +130,16 @@ namespace BeitieSpliter
 
         public MainPage()
         {
-            Common.SetWindowSize();
+            if (GlobalSettings.MultiWindowMode)
+            {
+                Common.SetWindowSize();
+            }
             this.InitializeComponent();
             InitMaps();
+            
             Common.Init();
         }
+
         private void ColumnIllegalHandler(IUICommand command)
         {
 
@@ -255,6 +261,8 @@ namespace BeitieSpliter
 
             StartNoBox.MaxWidth = StartNoBox.ActualWidth;
             TieAlbum.Width = TieAlbum.ActualWidth;
+            ColumnCount.MinWidth = ColumnCount.ActualWidth;
+            RowCount.MinWidth = RowCount.ActualWidth;
             PageText.MaxWidth = PageText.ActualWidth;
 
         }
@@ -1658,6 +1666,7 @@ namespace BeitieSpliter
                 XingcaoModeCheck.IsEnabled = bEnable;
                 ImportBtFile.IsEnabled = bEnable;
                 ImportBtDir.IsEnabled = bEnable;
+                MoreOptionBtn.IsEnabled = bEnable;
                 if (XingcaoMode)
                 {
                     ZiCountBox.IsEnabled = bEnable;
@@ -1776,7 +1785,7 @@ namespace BeitieSpliter
             //    return;
             //}
 
-            if (!Common.MULTI_WINDOW_MODE)
+            if (!GlobalSettings.MultiWindowMode)
             {
                 this.Frame.Background = new SolidColorBrush(Colors.Black);
                 // 淡入淡出效果
@@ -2020,6 +2029,32 @@ namespace BeitieSpliter
                 HorizontalOffset = 20
             };
             ToolTipService.SetToolTip(TieAlbum, toolTip);
+        }
+
+        private void ClickedMoreOptions(object sender, RoutedEventArgs e)
+        {
+            Style menuStyle = new Style()
+            {
+                TargetType = typeof(MenuFlyoutPresenter)
+            };
+            menuStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Colors.Black)));
+
+            menuStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Colors.LightGray)));
+            menuStyle.Setters.Add(new Setter(BorderThicknessProperty, 1));
+            MenuFlyout myFlyout = new MenuFlyout();
+
+            ToggleMenuFlyoutItem multiElem = new ToggleMenuFlyoutItem { Text = "多窗口" };
+            multiElem.IsChecked = GlobalSettings.MultiWindowMode;
+            multiElem.Click += ClickedMultiWindow;
+            myFlyout.MenuFlyoutPresenterStyle = menuStyle;
+            myFlyout.Items.Add(multiElem);
+
+            myFlyout.ShowAt(MoreOptionBtn, new Point(0, MoreOptionBtn.ActualHeight));
+        }
+
+        private void ClickedMultiWindow(object sender, RoutedEventArgs e)
+        {
+            GlobalSettings.MultiWindowMode = !GlobalSettings.MultiWindowMode;
         }
     }
 }
