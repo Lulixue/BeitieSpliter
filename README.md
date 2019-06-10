@@ -1,6 +1,19 @@
-# BeitieSpliter
+# Beitie Spliter 碑帖分割器
 Split Shufa Beitie Images to single chinese characters
+分割碑帖图片为单字
 
-# Development Environment
-* Windows 10 1809 64bit
-* VS2017
+# Development Environment 开发环境
+* Windows 10 64bit
+* VS2019
+
+# Release 发布版本
+#### V1.0 2019.5.13
+初始发布
+
+#### V1.1 2019.6.10
+1.优化界面布局，小分辨率的机器不影响正常使用
+2.增加赞黲赏页面
+3.增加元素选中自定位
+4.增加左右滚动功能
+5.增加多窗口/单窗口切换功能
+6.其他BUG修复和优化
