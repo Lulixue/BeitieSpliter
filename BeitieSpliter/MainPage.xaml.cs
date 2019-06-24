@@ -93,8 +93,7 @@ namespace BeitieSpliter
 
 
     public sealed partial class MainPage : Page, INotifyPropertyChanged
-    {
-        private Color BKGD_COLOR = Colors.White;   //画布背景色
+    { 
         BeitieImage CurrentBtImage;
         public BeitieGrids BtGrids = new BeitieGrids();
         int ColumnNumber = -1;
@@ -434,6 +433,7 @@ namespace BeitieSpliter
                 DictBtFiles.Clear();
                 int i = 0;
                 int baseNo = 1;
+                int pageSize = (ColumnNumber * RowNumber);
                 foreach (StorageFile file in BtFolderFileList)
                 {
                     if (!FileIsInFilterTypes(file))
@@ -443,7 +443,7 @@ namespace BeitieSpliter
                     
                     FolderFileCombo.Items.Add(string.Format("[{0}/{1}]{2}", i+1, BtFolderFileList.Count, file.Name));
                     DictBtFiles.Add(i++, new BeitieAlbumItem(file, baseNo));
-                    baseNo += (ColumnNumber * RowNumber);
+                    baseNo += pageSize;
                 }
                 StartFolderFiles();
                 SetDirFilePath("文件夹: " + BtFolder.Path);
@@ -586,10 +586,8 @@ namespace BeitieSpliter
             InitAfterImageLoaded();
 
             StartNoBox.Text = string.Format("{0}", no);
-
-
-            
         }
+
         private int FilePickerID = 1;
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
@@ -1281,7 +1279,10 @@ namespace BeitieSpliter
                         ElementIndexes.Add(i);
                     }
                 }
-               
+                if (ElementIndexes.Count > 0)
+                {
+                    UpdateBeitieAlbumNo(StartNo, ElementIndexes.Count);
+                }
             }
             if (ElementIndexes.Count == 0)
             {
@@ -1456,9 +1457,7 @@ namespace BeitieSpliter
         {
             try
             {
-                int curZiNo = int.Parse(StartNoBox.Text);
-                UpdateBeitieAlbumNo(curZiNo);
-                RefreshPage();
+                int.Parse(StartNoBox.Text);
             }
             catch (OverflowException)
             {
@@ -1466,42 +1465,42 @@ namespace BeitieSpliter
                 StartNoBox.Text = "1";
             }
         }
-        void UpdateBeitieAlbumNo(int curZiNO)
+        void UpdateBeitieAlbumNo(int pageZiNo, int pageZiCount)
         {
-            KeyValuePair<int, BeitieAlbumItem> prev;
             int selectedIndex = FolderFileCombo.SelectedIndex;
-            foreach (KeyValuePair<int, BeitieAlbumItem> kv in DictBtFiles)
+            int columns = GetColumnCount();
+            int rows = GetRowCount();
+            int pageSize = rows * columns;
+
+            var currentFile = DictBtFiles.ElementAt(selectedIndex);
+            currentFile.Value.no = pageZiNo;
+            currentFile.Value.NumberedCount = pageZiCount;
+
+            int endIndex = DictBtFiles.Count-1;
+            if (XingcaoMode)
             {
-                if (kv.Key < selectedIndex)
-                {
-                    //
-                }
-                else if (kv.Key == selectedIndex)
-                {
-                    kv.Value.no = curZiNO;
-                }
-                else if (prev.Value != null)
-                {
-                    kv.Value.no = prev.Value.NumberedCount + prev.Value.no;
-                }
-                prev = kv;
+                endIndex = selectedIndex + 1;
             }
-        }
-        void UpdateBeitieAlbumItemNo(int curMaxZiNo)
-        {
-            KeyValuePair<int, BeitieAlbumItem> prev;
-            foreach (KeyValuePair<int, BeitieAlbumItem> kv in DictBtFiles)
+
+            int ziNo = pageZiNo + pageZiCount;
+            
+            for (int i = selectedIndex+1; i <= endIndex; i++)
             {
-                if (kv.Key == FolderFileCombo.SelectedIndex)
+                var previous = DictBtFiles.ElementAt(i-1);
+                var current = DictBtFiles.ElementAt(i);
+
+                current.Value.no = previous.Value.no + previous.Value.NumberedCount;
+                if (current.Value.NumberedCount == 0)
                 {
-                    kv.Value.NumberedCount = curMaxZiNo;
+                    current.Value.NumberedCount = pageSize;
                 }
-                if (prev.Value != null)
+                else if (current.Value.NumberedCount > pageSize)
                 {
-                    kv.Value.no = prev.Value.NumberedCount + prev.Value.no;
-                }
-                prev = kv;
+                    current.Value.NumberedCount = pageSize;
+                } 
+                 
             }
+
         }
 
         private void ParsePageText()
@@ -1539,11 +1538,12 @@ namespace BeitieSpliter
                     {
                         string name = new string(single, 1);
                         name += OthersNo++;
-                        BtGrids.AddElement(i, new BeitieElement(BeitieElement.BeitieElementType.Quezi,
-                            name, ZiNo++)
+                        BtGrids.AddElement(BtGrids.Elements.Count, 
+                            new BeitieElement(BeitieElement.BeitieElementType.Quezi,
+                            name, BtGrids.Elements.Count)
                         {
                             text = name
-                        });
+                        }); 
                     }
                     else if (single == '{')
                     {
@@ -1575,7 +1575,7 @@ namespace BeitieSpliter
                             type = BeitieElement.BeitieElementType.Other;
                             no = ++OthersNo;
                         }
-                        BeitieElement newBe = new BeitieElement(type, name, BtGrids.OnlyZiNo ? -1 : ZiNo++)
+                        BeitieElement newBe = new BeitieElement(type, name, BtGrids.OnlyZiNo ? -1 : BtGrids.Elements.Count)
                         {
                             text = sb.ToString()
                         };
@@ -1583,7 +1583,7 @@ namespace BeitieSpliter
                         {
                             newBe.AddSuffix(no);
                         }
-                        BtGrids.AddElement(ZiNo, newBe);
+                        BtGrids.AddElement(BtGrids.Elements.Count, newBe);
                         sb.Clear();
                     }
                     else if (specialTypeDetected)
@@ -1593,7 +1593,8 @@ namespace BeitieSpliter
                     else if (Common.CharIsChineseChar(single))
                     {
                         string content = new string(single, 1);
-                        BtGrids.AddElement(ZiNo, new BeitieElement(BeitieElement.BeitieElementType.Zi, content, ZiNo++)
+                        BtGrids.AddElement(BtGrids.Elements.Count, 
+                            new BeitieElement(BeitieElement.BeitieElementType.Zi, content, BtGrids.Elements.Count)
                             { text = content});
                     }
                 }
@@ -1607,16 +1608,14 @@ namespace BeitieSpliter
                     int sizeDelta = BtGrids.ElementCount - BtGrids.Elements.Count;
                     if (sizeDelta > 0)
                     {
-                        int count = BtGrids.Elements.Count;
-                        for (int i = 1; i < sizeDelta; i++)
+                        for (int i = 0; i < sizeDelta; i++)
                         {
-                            BtGrids.AddElement(count + i, new BeitieElement(BeitieElement.BeitieElementType.Zi,
-                                                "", ZiNo++));
+                            BtGrids.AddElement(BtGrids.Elements.Count, new BeitieElement(BeitieElement.BeitieElementType.Zi,
+                                                "", BtGrids.Elements.Count));
                         }
                     }
                 }
             }
-            UpdateBeitieAlbumItemNo(ZiNo);
             UpdateParseStatus();
         }
 

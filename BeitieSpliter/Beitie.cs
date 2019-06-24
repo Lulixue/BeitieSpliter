@@ -284,7 +284,6 @@ namespace BeitieSpliter
         {
             file = f;
             no = n;
-            NumberedCount = n;
         }
 
         public StorageFile file = null;
@@ -327,6 +326,20 @@ namespace BeitieSpliter
         public Dictionary<int, BeitieGridRect> XingcaoElements = new Dictionary<int, BeitieGridRect>();
         public bool IsImageRotated() { return angle != 0; }
         public double ExtraSize = 5;
+
+        public int GetZiCount()
+        {
+            int ziCount = 0;
+            foreach (var elem in Elements)
+            {
+                if ((elem.Value.type == BeitieElement.BeitieElementType.Zi) ||
+                    (elem.Value.type == BeitieElement.BeitieElementType.Quezi))
+                {
+                    ziCount++;
+                }
+            }
+            return ziCount;
+        }
 
         public string GetElementString(int index)
         {

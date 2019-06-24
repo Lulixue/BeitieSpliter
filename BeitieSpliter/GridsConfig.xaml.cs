@@ -1156,6 +1156,8 @@ namespace BeitieSpliter
             ChkHideGrid.IsChecked = HideGridChecked;
             ChkShowSize.IsChecked = ShowSizeMode;
             ChkNoOpacity.IsChecked = NoOpacityMode;
+            ChkHideScrollBar.IsChecked = HideScrollBar;
+            HideViewerScrollBar(HideScrollBar);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
