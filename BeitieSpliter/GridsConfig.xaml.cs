@@ -1722,13 +1722,15 @@ namespace BeitieSpliter
             if ((rcZoomed.Bottom > screenRb.Y) ||
                 (rcZoomed.Y < screenLt.Y))
             {
-                deltaY = Common.AUTOSLIDE_OFFSET;
+                deltaY = (int)(elementRc.Height * 0.2);// Common.AUTOSLIDE_OFFSET;
+                deltaY = (deltaY < Common.AUTOSLIDE_OFFSET) ? Common.AUTOSLIDE_OFFSET : deltaY;
                 needScroll = true;
             }
             if ((rcZoomed.Right > screenRb.X) ||
                 (rcZoomed.X < screenLt.X))
             {
-                deltaX = Common.AUTOSLIDE_OFFSET;
+                deltaX = (int)(elementRc.Width * 0.2);//Common.AUTOSLIDE_OFFSET;
+                deltaX = (deltaX < Common.AUTOSLIDE_OFFSET) ? Common.AUTOSLIDE_OFFSET : deltaX;
                 needScroll = true;
             }
             if (!needScroll)
