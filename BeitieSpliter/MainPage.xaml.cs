@@ -36,6 +36,7 @@ using Windows.UI.Xaml.Navigation;
 using System.IO;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Controls.Primitives;
+using Windows.ApplicationModel.Resources;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -264,7 +265,9 @@ namespace BeitieSpliter
             RowCount.MinWidth = RowCount.ActualWidth;
             PageText.MaxWidth = PageText.ActualWidth;
 
+            //Reload("reload");
         }
+
 
         public bool InitDrawParameters()
         {
@@ -1949,16 +1952,51 @@ namespace BeitieSpliter
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             Debug.WriteLine("OnNavigatedFrom()");
+            if (e.Parameter.ToString().Equals("reload"))
+            {
+                Frame rootFrame = Window.Current.Content as Frame;
+                if (rootFrame == null)
+                    return;
+                if (rootFrame.CanGoBack)
+                {
+                    rootFrame.GoBack();
+                }
+                rootFrame.BackStack.Clear();
+                return;
+            }
             base.OnNavigatedFrom(e);
         }
+        //like this
+        private void Reload(object param = null)
+        {
+            //var type = Frame.CurrentSourcePageType;
+            //Frame.Navigate(type, param);
+            //Frame.BackStack.Remove(Frame.BackStack.Last());
 
+            var frame = Window.Current.Content as Frame;
+
+            frame.Navigate(Frame.CurrentSourcePageType, param);
+        }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             Debug.WriteLine("OnNavigatedTo()");
-            if (e.NavigationMode == NavigationMode.Back)
-            { 
+            if (e.Parameter.ToString().Equals("reload"))
+            {
+                Frame rootFrame = Window.Current.Content as Frame;
+                if (rootFrame == null)
+                    return;
+                if (rootFrame.CanGoBack)
+                {
+                    rootFrame.GoBack();
+                }
+                rootFrame.BackStack.Clear();
                 return;
             }
+            //if (e.NavigationMode == NavigationMode.Back)
+            //{ 
+            //    return;
+            //}
+            
             base.OnNavigatedTo(e);
         }
         private void ConsolidatedMainView(ApplicationView sender, ApplicationViewConsolidatedEventArgs args)
@@ -2040,16 +2078,30 @@ namespace BeitieSpliter
 
             menuStyle.Setters.Add(new Setter(BorderBrushProperty, new SolidColorBrush(Colors.LightGray)));
             menuStyle.Setters.Add(new Setter(BorderThicknessProperty, 1));
-            MenuFlyout myFlyout = new MenuFlyout();
+            MenuFlyout myFlyout = new MenuFlyout(); 
 
+            
+            ToggleMenuFlyoutItem chtElem = new ToggleMenuFlyoutItem { Text = "繁體中文" };
             ToggleMenuFlyoutItem multiElem = new ToggleMenuFlyoutItem { Text = "多窗口" };
             multiElem.IsChecked = GlobalSettings.MultiWindowMode;
             multiElem.Click += ClickedMultiWindow;
+
+            chtElem.IsChecked = GlobalSettings.TranditionalChineseMode;
+            chtElem.Click += ClickedTrandChinese;
             myFlyout.MenuFlyoutPresenterStyle = menuStyle;
+            myFlyout.Items.Add(chtElem);
+            myFlyout.Items.Add(new MenuFlyoutSeparator());
             myFlyout.Items.Add(multiElem);
 
-            myFlyout.ShowAt(MoreOptionBtn, new Point(0, MoreOptionBtn.ActualHeight));
+            myFlyout.ShowAt(MoreOptionBtn, new Point(0, MoreOptionBtn.ActualHeight)); 
         }
+
+        private void ClickedTrandChinese(object sender, RoutedEventArgs e)
+        {
+            GlobalSettings.TranditionalChineseMode = !GlobalSettings.TranditionalChineseMode;
+            ImportBtFile.Content = LanguageHelper.GetString("ImportBtFile/Content", GlobalSettings.TranditionalChineseMode);
+        }
+
 
         private void ClickedMultiWindow(object sender, RoutedEventArgs e)
         {

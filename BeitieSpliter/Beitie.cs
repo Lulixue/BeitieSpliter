@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources.Core;
 using Windows.Foundation;
 using Windows.Graphics.Display;
 using Windows.Storage;
@@ -33,8 +34,44 @@ namespace BeitieSpliter
 
     public sealed class GlobalSettings
     {
+        public static readonly string SETTING_MULTI_WINDOW = "MultiWindowMode";
+        public static readonly string SETTING_TRANDITIONAL_HAN = "TranditionalHan";
         public static bool MultiWindowMode = true;
+        public static bool TranditionalChineseMode = false;
     }
+
+    public sealed class LanguageHelper
+    {
+        private static readonly ResourceContext ResContextHanS;
+        private static readonly ResourceContext ResContextHanT;
+        private static readonly ResourceMap ResMap;
+
+        static LanguageHelper()
+        {
+            ResContextHanS = new ResourceContext();
+            ResContextHanS.QualifierValues["Language"] = "zh-CN";
+
+            ResContextHanT = new ResourceContext();
+            ResContextHanT.QualifierValues["Language"] = "zh-TW";
+            ResMap = ResourceManager.Current.MainResourceMap.GetSubtree("Resources");
+
+        }
+
+        public static string GetString(string name, bool hant, string defValue = null)
+        {
+            string ret;
+            if (hant)
+            {
+                ret = ResMap.GetValue(name, ResContextHanT)?.ValueAsString ?? defValue;
+            }
+            else
+            {
+                ret = ResMap.GetValue(name, ResContextHanS)?.ValueAsString ?? defValue;
+            }
+            return ret;
+        }
+    }
+
 
     public sealed class Common
     {
@@ -51,7 +88,6 @@ namespace BeitieSpliter
         public static readonly int UNICODE_CHS_START = 0x4E00;
         public static readonly int UNICODE_CHS_END = 0x9FBB;
         public static readonly int AUTOSLIDE_OFFSET = 10;
-        public static readonly string SETTING_MULTI_WINDOW = "MultiWindowMode";
 
         public enum NavigationTransitionType
         {

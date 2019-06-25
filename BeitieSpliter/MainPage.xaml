@@ -12,6 +12,7 @@
     Unloaded="Page_OnUnloaded"  
     Loaded="Page_Loaded"
     NavigationCacheMode="Required"
+    FontFamily="微软雅黑"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
 
     <Page.Resources>
@@ -52,8 +53,8 @@
         </Grid.ColumnDefinitions>
         <RelativePanel  Padding="10,0,0,0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,5,0">
             <StackPanel Name="ImportBtnPanel" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,0,20,0">
-                <Button x:Name="ImportBtFile"  Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
-                <Button x:Name="ImportBtDir" Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
+                <Button x:Name="ImportBtFile" x:Uid="ImportBtFile" Width="200" Height="50" Margin="0,0,20,0" Content="导入碑帖图片" FontSize="18" Click="OnImportBeitieFile"/>
+                <Button x:Name="ImportBtDir" x:Uid="ImportBtDir"  Width="230" Height="50" Content="导入碑帖文件夹" FontSize="18" Click="OnImportBeitieDir"/>
             </StackPanel>
             <RelativePanel RelativePanel.RightOf="ImportBtnPanel" RelativePanel.AlignVerticalCenterWithPanel="True" Name="ImageSlidePanel" Visibility="Collapsed" >
                 <Button Margin="0,2,5,2" x:Name="BtnPreviousImg" Click="OnImageSlide"  Content="&lt;" HorizontalAlignment="Right" VerticalAlignment="Stretch" />

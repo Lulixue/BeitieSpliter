@@ -30,10 +30,11 @@ namespace BeitieSpliter
         /// </summary>
         public App()
         {
+            RetriveSettings();
+            //Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "zh-hant"; 
             this.InitializeComponent();
             this.Suspending += OnSuspending;
             this.EnteredBackground += OnEnteredBackground;
-            RetriveSettings();
         }
 
         private void OnEnteredBackground(object sender, EnteredBackgroundEventArgs e)
@@ -44,16 +45,19 @@ namespace BeitieSpliter
         public void RetriveSettings()
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            object obj = localSettings.Values[Common.SETTING_MULTI_WINDOW];
-            if (obj != null)
-            {
-                GlobalSettings.MultiWindowMode = (bool)obj;
-            }
+            object multiWin = localSettings.Values[GlobalSettings.SETTING_MULTI_WINDOW];
+            object hanT = localSettings.Values[GlobalSettings.SETTING_TRANDITIONAL_HAN]; 
+
+            GlobalSettings.MultiWindowMode = (multiWin != null) ? 
+                                                (bool)multiWin : GlobalSettings.MultiWindowMode;
+            GlobalSettings.TranditionalChineseMode = (hanT != null) ? 
+                                                        (bool)hanT : GlobalSettings.TranditionalChineseMode;
         }
         public void StoreSettings()
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.Values[Common.SETTING_MULTI_WINDOW] = GlobalSettings.MultiWindowMode;
+            localSettings.Values[GlobalSettings.SETTING_MULTI_WINDOW] = GlobalSettings.MultiWindowMode;
+            localSettings.Values[GlobalSettings.SETTING_TRANDITIONAL_HAN] = GlobalSettings.TranditionalChineseMode;
         }
 
         /// <summary>

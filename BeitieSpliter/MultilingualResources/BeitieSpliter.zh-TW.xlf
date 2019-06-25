@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="zh-CN" target-language="zh-TW" original="BEITIESPLITER/STRINGS/ZH-CN/RESOURCES.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="BEITIESPLITER/STRINGS/ZH-CN/RESOURCES.RESW" datatype="resx">
+        <trans-unit id="ImportBtFile.Content" translate="yes" xml:space="preserve">
+          <source>导入碑帖图片</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">導入碑帖圖片</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>
