@@ -3053,25 +3053,32 @@ namespace BeitieSpliter
             resetElem.Click += ElementMenuResetElement_Click;
             saveElem.Click += ElementMenuSaveElement_Click;
 
+            MenuFlyoutItem setAsYz = new MenuFlyoutItem { Text = /*"设为印章元素"*/GetPlainString(StringItemType.SetAsYin) };
+            MenuFlyoutItem setAsZi = new MenuFlyoutItem { Text = /*"设为字元素"*/GetPlainString(StringItemType.SetAsZi) };
+            MenuFlyoutItem setAsQuezi = new MenuFlyoutItem { Text = /*"设为阙字元素"*/GetPlainString(StringItemType.SetAsQuezi) };
+            setAsYz.Click += ElementMenuSetAs_Click;
+            setAsZi.Click += ElementMenuSetAs_Click;
+            setAsQuezi.Click += ElementMenuSetAs_Click;
+
             if (!BtGrids.XingcaoMode)
             {
                 int selectedElemIndex = CurrentElements.SelectedIndex + 1;
                 MenuFlyoutItem setAsKb = new MenuFlyoutItem { Text = /*"设为空白元素"*/GetPlainString(StringItemType.SetAsKongbai) };
-                MenuFlyoutItem setAsYz = new MenuFlyoutItem { Text = /*"设为印章元素"*/GetPlainString(StringItemType.SetAsYin) };
-                MenuFlyoutItem setAsZi = new MenuFlyoutItem { Text = /*"设为字元素"*/GetPlainString(StringItemType.SetAsZi) };
-                MenuFlyoutItem setAsQuezi = new MenuFlyoutItem { Text = /*"设为阙字元素"*/GetPlainString(StringItemType.SetAsQuezi) };
-                MenuFlyoutItem AdjustElem = new MenuFlyoutItem { Text = /*"调整元素"*/GetPlainString(StringItemType.AdjustElement) + selectedElemIndex };
+               MenuFlyoutItem AdjustElem = new MenuFlyoutItem { Text = /*"调整元素"*/GetPlainString(StringItemType.AdjustElement) + selectedElemIndex };
                 AdjustElem.Click += ElementMenuAdjusttElement_Click;
                 setAsKb.Click += ElementMenuSetAs_Click;
-                setAsYz.Click += ElementMenuSetAs_Click;
-                setAsZi.Click += ElementMenuSetAs_Click;
-                setAsQuezi.Click += ElementMenuSetAs_Click;
                 myFlyout.Items.Add(AdjustElem);
                 myFlyout.Items.Add(setAsKb);
                 myFlyout.Items.Add(setAsYz);
                 myFlyout.Items.Add(setAsQuezi);
                 myFlyout.Items.Add(setAsZi);
 
+            }
+            else
+            {
+                myFlyout.Items.Add(setAsYz);
+                myFlyout.Items.Add(setAsQuezi);
+                myFlyout.Items.Add(setAsZi);
             }
             myFlyout.Items.Add(resetElem);
             myFlyout.Items.Add(saveElem);
@@ -3493,9 +3500,7 @@ namespace BeitieSpliter
             {
                 factor -= Common.ZOOM_FACTOR_SCALE;
             }
-#pragma warning disable CS0618 // Type or member is obsolete
-            ItemScrollViewer.ZoomToFactor(factor);
-#pragma warning restore CS0618 // Type or member is obsolete
+            ItemScrollViewer.ChangeView(null, null, factor);
         }
 
         private void ClickedToggleMenu(object sender, RoutedEventArgs e)

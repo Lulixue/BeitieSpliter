@@ -520,6 +520,32 @@ namespace BeitieSpliter
             }
             return ziCount;
         }
+        public int GetNumberedCount()
+        {
+            int count = 0;
+            if (XingcaoMode)
+            {
+                foreach (var elem in XingcaoElements)
+                {
+                    if (Elements[elem.Key].NeedAddNo())
+                    {
+                        count++;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var elem in Elements)
+                {
+                    if (elem.Value.NeedAddNo())
+                    {
+                        count++;
+                    }
+                }
+            }
+            return count;
+
+        }
 
         public string GetElementString(int index)
         {

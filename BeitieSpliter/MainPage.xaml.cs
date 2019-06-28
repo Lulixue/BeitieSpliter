@@ -1263,6 +1263,7 @@ namespace BeitieSpliter
             // 生成全部
             if (ElementIndexes == null)
             {
+                int noCount = BtGrids.GetNumberedCount();
                 ElementIndexes = new HashSet<int>();
                 if (BtGrids.XingcaoMode)
                 {
@@ -1274,16 +1275,16 @@ namespace BeitieSpliter
                 else
                 {
                     for (int i = 0; i < BtGrids.ElementCount; i++)
-                    {
+                    { 
                         ElementIndexes.Add(i);
                     }
                 }
                 // 全部生成的时候才计算编号
-                if (ElementIndexes.Count > 0)
+                if (noCount > 0)
                 {
                     if (FolderFileCombo.Items.Count > 1)
-                    {
-                        UpdateBeitieAlbumNo(StartNo, ElementIndexes.Count);
+                    {  
+                        UpdateBeitieAlbumNo(StartNo, noCount);
                     }
                 }
             }
