@@ -1243,6 +1243,36 @@ namespace BeitieSpliter
         {
             ParentPage.SetConfigPage(null);
         }
+
+        private void UpdateChineseLanguage()
+        {
+            bool hant = GlobalSettings.TranditionalChineseMode;
+            AdjustTitle.Text = LanguageHelper.GetConfigString("AdjustTitle/Text", hant);
+            BtnSaveCurrent.Content = LanguageHelper.GetConfigString("BtnSaveCurrent/Content", hant);
+            BtnZoomOut.Label = LanguageHelper.GetConfigString("BtnZoomOut/Label", hant);
+            ColumnNumberTitle.Text = LanguageHelper.GetConfigString("ColumnNumberTitle/Text", hant);
+            GridTitle.Text = LanguageHelper.GetConfigString("GridTitle/Text", hant);
+            HangNoTitle.Text = LanguageHelper.GetConfigString("HangNoTitle/Text", hant);
+            OpObjectTitle.Text = LanguageHelper.GetConfigString("OpObjectTitle/Text", hant);
+            OpSingleElement.Content = LanguageHelper.GetConfigString("OpSingleElement/Content", hant);
+            OpWholePage.Content = LanguageHelper.GetConfigString("OpWholePage/Content", hant);
+            PenColorTitle.Text = LanguageHelper.GetConfigString("PenColorTitle/Text", hant);
+            PenStyleTitle.Text = LanguageHelper.GetConfigString("PenStyleTitle/Text", hant);
+            PenWidthTitle.Text = LanguageHelper.GetConfigString("PenWidthTitle/Text", hant);
+            RotateTitle.Text = LanguageHelper.GetConfigString("RotateTitle/Text", hant);
+            StepTitle.Text = LanguageHelper.GetConfigString("StepTitle/Text", hant);
+            ChkShowSize.Content = LanguageHelper.GetConfigString("ChkShowSize/Content", hant);
+            ChkNoOpacity.Content = LanguageHelper.GetConfigString("ChkNoOpacity/Content", hant);
+            ChkSingleFocus.Content = LanguageHelper.GetConfigString("ChkSingleFocus/Content", hant);
+            ChkAvgRow.Content = LanguageHelper.GetConfigString("ChkAvgRow/Content", hant);
+            ChkAvgCol.Content = LanguageHelper.GetConfigString("ChkAvgCol/Content", hant);
+            ChkFixedWidth.Content = LanguageHelper.GetConfigString("ChkFixedWidth/Content", hant);
+            ChkFixedHeight.Content = LanguageHelper.GetConfigString("ChkFixedHeight/Content", hant);
+            ChkHideGrid.Content = LanguageHelper.GetConfigString("ChkHideGrid/Content", hant);
+            ChkHideScrollBar.Content = LanguageHelper.GetConfigString("ChkHideScrollBar/Content", hant);
+            RewardMe.Content = LanguageHelper.GetConfigString("RewardMe/Content", hant);
+        }
+
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("SettingsPage_Loaded() called");
@@ -1294,6 +1324,7 @@ namespace BeitieSpliter
             {
                 Common.SetWindowSize();
             }
+            UpdateChineseLanguage();
         }
 
 

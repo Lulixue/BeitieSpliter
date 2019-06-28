@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AdjustTitle.Text" xml:space="preserve">
+    <value>調整</value>
+  </data>
+  <data name="BtnSaveCurrent.Content" xml:space="preserve">
+    <value>保存當前</value>
+  </data>
+  <data name="BtnZoomOut.Label" xml:space="preserve">
+    <value>縮小</value>
+  </data>
+  <data name="ColumnNumberTitle.Text" xml:space="preserve">
+    <value>列號：</value>
+  </data>
+  <data name="GridTitle.Text" xml:space="preserve">
+    <value>網格</value>
+  </data>
+  <data name="HangNoTitle.Text" xml:space="preserve">
+    <value>行號：</value>
+  </data>
+  <data name="OpObjectTitle.Text" xml:space="preserve">
+    <value>操作對象</value>
+  </data>
+  <data name="OpSingleElement.Content" xml:space="preserve">
+    <value>單字</value>
+  </data>
+  <data name="OpWholePage.Content" xml:space="preserve">
+    <value>整頁</value>
+  </data>
+  <data name="PenColorTitle.Text" xml:space="preserve">
+    <value>顏色：</value>
+  </data>
+  <data name="PenStyleTitle.Text" xml:space="preserve">
+    <value>類型：</value>
+  </data>
+  <data name="PenWidthTitle.Text" xml:space="preserve">
+    <value>寬度：</value>
+  </data>
+  <data name="RotateTitle.Text" xml:space="preserve">
+    <value>旋轉：</value>
+  </data>
+  <data name="StepTitle.Text" xml:space="preserve">
+    <value>步進：</value>
+  </data>
+  <data name="ChkShowSize.Content" xml:space="preserve">
+    <value>顯示尺寸</value>
+  </data>
+  <data name="ChkNoOpacity.Content" xml:space="preserve">
+    <value>護眼模式</value>
+  </data>
+  <data name="ChkSingleFocus.Content" xml:space="preserve">
+    <value>單字專注</value>
+  </data>
+  <data name="ChkAvgRow.Content" xml:space="preserve">
+    <value>平均分佈行</value>
+  </data>
+  <data name="ChkAvgCol.Content" xml:space="preserve">
+    <value>平均分佈列</value>
+  </data>
+  <data name="ChkFixedWidth.Content" xml:space="preserve">
+    <value>元素固定寬度</value>
+  </data>
+  <data name="ChkFixedHeight.Content" xml:space="preserve">
+    <value>元素固定高度</value>
+  </data>
+  <data name="ChkHideGrid.Content" xml:space="preserve">
+    <value>隱藏網格綫</value>
+  </data>
+  <data name="ChkHideScrollBar.Content" xml:space="preserve">
+    <value>隱藏滚動條</value>
+  </data>
+  <data name="RewardMe.Content" xml:space="preserve">
+    <value>讚賞開發者</value>
+  </data>
+  <data name="AlipayTitle.Text" xml:space="preserve">
+    <value>支付寶</value>
+  </data>
+  <data name="ThankTitle.Text" xml:space="preserve">
+    <value>感謝使用軟件，掃描下方二維碼讚賞開發者，謝謝!</value>
+  </data>
+</root>

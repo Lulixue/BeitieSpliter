@@ -12,7 +12,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BtnMore.Content" xml:space="preserve">
+    <value>進階</value>
+  </data>
+  <data name="ColumnCountTitle.Text" xml:space="preserve">
+    <value>列數：</value>
+  </data>
+  <data name="GridColorTitle.Text" xml:space="preserve">
+    <value>網格顏色：</value>
+  </data>
+  <data name="GridWidthTitle.Text" xml:space="preserve">
+    <value>網格寬度：</value>
+  </data>
+  <data name="ImportBtDir.Content" xml:space="preserve">
+    <value>導入碑帖文件夾</value>
+  </data>
   <data name="ImportBtFile.Content" xml:space="preserve">
     <value>導入碑帖圖片</value>
+  </data>
+  <data name="MarginTitle.Text" xml:space="preserve">
+    <value>裁邊：</value>
+  </data>
+  <data name="MarginToolTip.Content" xml:space="preserve">
+    <value>左側、頂部、右側、底部</value>
+  </data>
+  <data name="NoNameSwitch.OffContent" xml:space="preserve">
+    <value>只字編號</value>
+  </data>
+  <data name="NoNameSwitch.OnContent" xml:space="preserve">
+    <value>所有編號</value>
+  </data>
+  <data name="RowCountTitle.Text" xml:space="preserve">
+    <value>行數：</value>
+  </data>
+  <data name="SaveSplitImgs.Content" xml:space="preserve">
+    <value>保存碑帖圖片</value>
+  </data>
+  <data name="TextSizeGrade.Header" xml:space="preserve">
+    <value>總字數</value>
+  </data>
+  <data name="ZiCountTitle.Text" xml:space="preserve">
+    <value>字數：</value>
+  </data>
+  <data name="PageText.PlaceholderText" xml:space="preserve">
+    <value>在這裡輸入釋文;\r\n特殊元素:\r\n 闕字用"{缺}/□"\r\n 印章用"{印:}"\r\n 空白用"{}"\r\n 其他用"{XX}"</value>
   </data>
 </root>

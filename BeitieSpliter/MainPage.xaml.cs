@@ -37,6 +37,7 @@ using System.IO;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.ApplicationModel.Resources;
+using static BeitieSpliter.LanguageHelper;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -264,8 +265,7 @@ namespace BeitieSpliter
             ColumnCount.MinWidth = ColumnCount.ActualWidth;
             RowCount.MinWidth = RowCount.ActualWidth;
             PageText.MaxWidth = PageText.ActualWidth;
-
-            //Reload("reload");
+            
         }
 
 
@@ -736,17 +736,13 @@ namespace BeitieSpliter
         private void CanvasDrawHelpInfo(CanvasDrawingSession draw, Color color)
         {
 
-            string appVersion = string.Format("软件版本：{0}.{1}.{2}.{3}",
+            string appVersion = string.Format(/*"软件版本：{0}.{1}.{2}.{3}"*/GetPlainString(StringItemType.SoftwareVersion),
                                 Package.Current.Id.Version.Major,
                                 Package.Current.Id.Version.Minor,
                                 Package.Current.Id.Version.Build,
                                 Package.Current.Id.Version.Revision);
-            string help = "\r\n\r\nCtrl+鼠标滚轮进行放大缩小\r\n\r\n" +
-                "作者：卢立雪\r\n" +
-                "微信：13612977027\r\n" +
-                "邮箱：jackreagan@163.com\r\n\r\n" +
-                appVersion + 
-                "\r\n感谢使用，欢迎反馈软件问题！";
+            string help =  GetPlainString(StringItemType.SplashInfoFirstPart) + 
+                appVersion +  GetPlainString(StringItemType.SplashInfoSecondPart);
 
             Rect rc = new Rect()
             {
@@ -767,6 +763,11 @@ namespace BeitieSpliter
             draw.DrawText(help, rc, color, fmt);
         }
 
+        private string GetPlainString(StringItemType type)
+        {
+            return LanguageHelper.GetPlainString(type);
+        }
+
         private void CurrentPage_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
         {
             Debug.WriteLine(String.Format("CurrentPage_OnDraw called"));
@@ -777,20 +778,20 @@ namespace BeitieSpliter
             if (CurrentBtImage == null)
             {
                 //draw.DrawText(, new Vector2(100, 100), Colors.Black);
-                CanvasDrawText(draw, "请选择书法碑帖图片!", Colors.Black);
+                CanvasDrawText(draw, /*"请选择书法碑帖图片!"*/GetPlainString(StringItemType.PleaseChooseBeitie) + "!", Colors.Black);
                 CanvasDrawHelpInfo(draw, Colors.White);
                 return;
             }
             if (!IsParametersValid())
             {
                 draw.Clear(Colors.Black);
-                CanvasDrawText(draw, "参数错误，请更改参数后重试!", Colors.Red);
+                CanvasDrawText(draw, /*"参数错误，请更改参数后重试!"*/GetPlainString(StringItemType.InvalidParam), Colors.Red);
                 return;
             }
             if (CurrentBtImage.cvsBmp == null)
             {
                 draw.Clear(Colors.Black);
-                CanvasDrawText(draw, "图片正在加载中...", Colors.Blue);
+                CanvasDrawText(draw, /*"图片正在加载中..."*/GetPlainString(StringItemType.ImageLoading), Colors.Blue);
                 RefreshPage();
                 return;
             }
@@ -1330,7 +1331,7 @@ namespace BeitieSpliter
 
                 if (!BtGrids.GetElementRoi(index, ref roi))
                 {
-                    SaveNotfInfo += "保存图片" + filename + "出现错误!";
+                    SaveNotfInfo += string.Format("保存图片{0}出现错误!", filename);
                     SaveErrType = SaveErrorType.ParaError;
                     continue;
                 }
@@ -1923,6 +1924,29 @@ namespace BeitieSpliter
                 peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
             }
         }
+
+        private void UpdateChineseLanguage()
+        {
+            bool hant = GlobalSettings.TranditionalChineseMode;
+
+            BtnMore.Content = LanguageHelper.GetString("BtnMore/Content", hant);
+            ColumnCountTitle.Text = LanguageHelper.GetString("ColumnCountTitle/Text", hant);
+            GridColorTitle.Text = LanguageHelper.GetString("GridColorTitle/Text", hant);
+            GridWidthTitle.Text = LanguageHelper.GetString("GridWidthTitle/Text", hant);
+            ImportBtDir.Content = LanguageHelper.GetString("ImportBtDir/Content", hant);
+            ImportBtFile.Content = LanguageHelper.GetString("ImportBtFile/Content", hant);
+            MarginTitle.Text = LanguageHelper.GetString("MarginTitle/Text", hant);
+            MarginToolTip.Content = LanguageHelper.GetString("MarginToolTip/Content", hant);
+            NoNameSwitch.OffContent = LanguageHelper.GetString("NoNameSwitch/OffContent", hant);
+            NoNameSwitch.OnContent = LanguageHelper.GetString("NoNameSwitch/OnContent", hant);
+            PageText.PlaceholderText = LanguageHelper.GetString("PageText/PlaceholderText", hant);
+            RowCountTitle.Text = LanguageHelper.GetString("RowCountTitle/Text", hant);
+            SaveSplitImgs.Content = LanguageHelper.GetString("SaveSplitImgs/Content", hant);
+            TextSizeGrade.Header = LanguageHelper.GetString("TextSizeGrade/Header", hant);
+            ZiCountTitle.Text = LanguageHelper.GetString("ZiCountTitle/Text", hant);
+
+        }
+
         public int PageViewId = 0;
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
@@ -1947,6 +1971,7 @@ namespace BeitieSpliter
             var CurrentView = ApplicationView.GetForCurrentView();
             ApplicationView.TerminateAppOnFinalViewClose = false;
             CurrentView.Consolidated += ConsolidatedMainView;
+            UpdateChineseLanguage();
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -2099,7 +2124,7 @@ namespace BeitieSpliter
         private void ClickedTrandChinese(object sender, RoutedEventArgs e)
         {
             GlobalSettings.TranditionalChineseMode = !GlobalSettings.TranditionalChineseMode;
-            ImportBtFile.Content = LanguageHelper.GetString("ImportBtFile/Content", GlobalSettings.TranditionalChineseMode);
+            UpdateChineseLanguage();
         }
 
 

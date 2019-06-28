@@ -32,6 +32,13 @@ namespace BeitieSpliter
             
         }
 
+        void UpdateChineseLanguage()
+        {
+            bool hant = GlobalSettings.TranditionalChineseMode;
+            AlipayTitle.Text = LanguageHelper.GetConfigString("AlipayTitle/Text", hant);
+            ThankTitle.Text = LanguageHelper.GetConfigString("ThankTitle/Text", hant); 
+        }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             Frame rootFrame = Window.Current.Content as Frame;

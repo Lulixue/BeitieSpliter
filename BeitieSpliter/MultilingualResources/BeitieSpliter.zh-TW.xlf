@@ -6,9 +6,343 @@
     </header>
     <body>
       <group id="BEITIESPLITER/STRINGS/ZH-CN/RESOURCES.RESW" datatype="resx">
+        <trans-unit id="BtnMore.Content" translate="yes" xml:space="preserve">
+          <source>高级</source>
+          <target state="needs-review-translation" state-qualifier="exact-match">進階</target>
+        </trans-unit>
+        <trans-unit id="ColumnCountTitle.Text" translate="yes" xml:space="preserve">
+          <source>列数：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">列數：</target>
+        </trans-unit>
+        <trans-unit id="GridColorTitle.Text" translate="yes" xml:space="preserve">
+          <source>网格颜色：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">網格顏色：</target>
+        </trans-unit>
+        <trans-unit id="GridWidthTitle.Text" translate="yes" xml:space="preserve">
+          <source>网格宽度：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">網格寬度：</target>
+        </trans-unit>
+        <trans-unit id="ImportBtDir.Content" translate="yes" xml:space="preserve">
+          <source>导入碑帖文件夹</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">導入碑帖文件夾</target>
+        </trans-unit>
         <trans-unit id="ImportBtFile.Content" translate="yes" xml:space="preserve">
           <source>导入碑帖图片</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">導入碑帖圖片</target>
+        </trans-unit>
+        <trans-unit id="MarginTitle.Text" translate="yes" xml:space="preserve">
+          <source>裁边：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">裁邊：</target>
+        </trans-unit>
+        <trans-unit id="MarginToolTip.Content" translate="yes" xml:space="preserve">
+          <source>左侧、顶部、右侧、底部</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">左側、頂部、右側、底部</target>
+        </trans-unit>
+        <trans-unit id="NoNameSwitch.OffContent" translate="yes" xml:space="preserve">
+          <source>只字编号</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">只字編號</target>
+        </trans-unit>
+        <trans-unit id="NoNameSwitch.OnContent" translate="yes" xml:space="preserve">
+          <source>所有编号</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">所有編號</target>
+        </trans-unit>
+        <trans-unit id="RowCountTitle.Text" translate="yes" xml:space="preserve">
+          <source>行数：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">行數：</target>
+        </trans-unit>
+        <trans-unit id="SaveSplitImgs.Content" translate="yes" xml:space="preserve">
+          <source>保存碑帖图片</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">保存碑帖圖片</target>
+        </trans-unit>
+        <trans-unit id="TextSizeGrade.Header" translate="yes" xml:space="preserve">
+          <source>总字数</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">總字數</target>
+        </trans-unit>
+        <trans-unit id="ZiCountTitle.Text" translate="yes" xml:space="preserve">
+          <source>字数：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">字數：</target>
+        </trans-unit>
+        <trans-unit id="PageText.PlaceholderText" translate="yes" xml:space="preserve">
+          <source>在这里输入释文;\r\n特殊元素:\r\n 阙字用"{缺}/□"\r\n 印章用"{印:}"\r\n 空白用"{}"\r\n 其他用"{XX}"</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">在這裡輸入釋文;\r\n特殊元素:\r\n 闕字用"{缺}/□"\r\n 印章用"{印:}"\r\n 空白用"{}"\r\n 其他用"{XX}"</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="zh-CN" target-language="zh-TW" original="BEITIESPLITER/STRINGS/ZH-CN/CONFIG.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="BEITIESPLITER/STRINGS/ZH-CN/CONFIG.RESW" datatype="resx">
+        <trans-unit id="AdjustTitle.Text" translate="yes" xml:space="preserve">
+          <source>调整</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">調整</target>
+        </trans-unit>
+        <trans-unit id="BtnSaveCurrent.Content" translate="yes" xml:space="preserve">
+          <source>保存当前</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">保存當前</target>
+        </trans-unit>
+        <trans-unit id="BtnZoomOut.Label" translate="yes" xml:space="preserve">
+          <source>缩小</source>
+          <target state="needs-review-translation" state-qualifier="exact-match">縮小</target>
+        </trans-unit>
+        <trans-unit id="ColumnNumberTitle.Text" translate="yes" xml:space="preserve">
+          <source>列号：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">列號：</target>
+        </trans-unit>
+        <trans-unit id="GridTitle.Text" translate="yes" xml:space="preserve">
+          <source>网格</source>
+          <target state="needs-review-translation" state-qualifier="exact-match">網格</target>
+        </trans-unit>
+        <trans-unit id="HangNoTitle.Text" translate="yes" xml:space="preserve">
+          <source>行号：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">行號：</target>
+        </trans-unit>
+        <trans-unit id="OpObjectTitle.Text" translate="yes" xml:space="preserve">
+          <source>操作对象</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">操作對象</target>
+        </trans-unit>
+        <trans-unit id="OpSingleElement.Content" translate="yes" xml:space="preserve">
+          <source>单字</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">單字</target>
+        </trans-unit>
+        <trans-unit id="OpWholePage.Content" translate="yes" xml:space="preserve">
+          <source>整页</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">整頁</target>
+        </trans-unit>
+        <trans-unit id="PenColorTitle.Text" translate="yes" xml:space="preserve">
+          <source>颜色：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">顏色：</target>
+        </trans-unit>
+        <trans-unit id="PenStyleTitle.Text" translate="yes" xml:space="preserve">
+          <source>类型：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">類型：</target>
+        </trans-unit>
+        <trans-unit id="PenWidthTitle.Text" translate="yes" xml:space="preserve">
+          <source>宽度：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">寬度：</target>
+        </trans-unit>
+        <trans-unit id="RotateTitle.Text" translate="yes" xml:space="preserve">
+          <source>旋转：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">旋轉：</target>
+        </trans-unit>
+        <trans-unit id="StepTitle.Text" translate="yes" xml:space="preserve">
+          <source>步进：</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">步進：</target>
+        </trans-unit>
+        <trans-unit id="ChkShowSize.Content" translate="yes" xml:space="preserve">
+          <source>显示尺寸</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">顯示尺寸</target>
+        </trans-unit>
+        <trans-unit id="ChkNoOpacity.Content" translate="yes" xml:space="preserve">
+          <source>护眼模式</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">護眼模式</target>
+        </trans-unit>
+        <trans-unit id="ChkSingleFocus.Content" translate="yes" xml:space="preserve">
+          <source>单字专注</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">單字專注</target>
+        </trans-unit>
+        <trans-unit id="ChkAvgRow.Content" translate="yes" xml:space="preserve">
+          <source>平均分布行</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">平均分佈行</target>
+        </trans-unit>
+        <trans-unit id="ChkAvgCol.Content" translate="yes" xml:space="preserve">
+          <source>平均分布列</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">平均分佈列</target>
+        </trans-unit>
+        <trans-unit id="ChkFixedWidth.Content" translate="yes" xml:space="preserve">
+          <source>元素固定宽度</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">元素固定寬度</target>
+        </trans-unit>
+        <trans-unit id="ChkFixedHeight.Content" translate="yes" xml:space="preserve">
+          <source>元素固定高度</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">元素固定高度</target>
+        </trans-unit>
+        <trans-unit id="ChkHideGrid.Content" translate="yes" xml:space="preserve">
+          <source>隐藏网格线</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">隱藏網格綫</target>
+        </trans-unit>
+        <trans-unit id="ChkHideScrollBar.Content" translate="yes" xml:space="preserve">
+          <source>隐藏滚动条</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">隱藏滚動條</target>
+        </trans-unit>
+        <trans-unit id="RewardMe.Content" translate="yes" xml:space="preserve">
+          <source>赞赏开发者</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">讚賞開發者</target>
+        </trans-unit>
+        <trans-unit id="AlipayTitle.Text" translate="yes" xml:space="preserve">
+          <source>支付宝</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">支付寶</target>
+        </trans-unit>
+        <trans-unit id="ThankTitle.Text" translate="yes" xml:space="preserve">
+          <source>感谢使用软件，扫描下方二维码赞赏开发者，谢谢!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">感謝使用軟件，掃描下方二維碼讚賞開發者，謝謝!</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="zh-CN" target-language="zh-TW" original="BEITIESPLITER/STRINGS/ZH-CN/PLAINSTRINGS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="BEITIESPLITER/STRINGS/ZH-CN/PLAINSTRINGS.RESW" datatype="resx">
+        <trans-unit id="EnterText" translate="yes" xml:space="preserve">
+          <source>输入释文</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">輸入釋文</target>
+        </trans-unit>
+        <trans-unit id="PromptNoText" translate="yes" xml:space="preserve">
+          <source>你还没有输入释文，是否生成图片？</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">你還沒有輸入釋文，是否生成圖片？</target>
+        </trans-unit>
+        <trans-unit id="ContinueGenerate" translate="yes" xml:space="preserve">
+          <source>继续生成 </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">繼續生成 </target>
+        </trans-unit>
+        <trans-unit id="CloseDialog" translate="yes" xml:space="preserve">
+          <source>关闭当前窗口</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">關閉當前窗口</target>
+        </trans-unit>
+        <trans-unit id="CloseDialogToMain" translate="yes" xml:space="preserve">
+          <source>输入释文需要关闭本窗口，转到主界面输入，是否转到主界面输入？</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">輸入釋文需要關閉本窗口，轉到主界面輸入，是否轉到主界面輸入？</target>
+        </trans-unit>
+        <trans-unit id="DirectlyGenerate" translate="yes" xml:space="preserve">
+          <source>直接生成</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">直接生成</target>
+        </trans-unit>
+        <trans-unit id="OK" translate="yes" xml:space="preserve">
+          <source>好的</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">好的</target>
+        </trans-unit>
+        <trans-unit id="Green" translate="yes" xml:space="preserve">
+          <source>绿色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">綠色</target>
+        </trans-unit>
+        <trans-unit id="White" translate="yes" xml:space="preserve">
+          <source>白色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">白色</target>
+        </trans-unit>
+        <trans-unit id="Orange" translate="yes" xml:space="preserve">
+          <source>橙色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">橙色</target>
+        </trans-unit>
+        <trans-unit id="Gray" translate="yes" xml:space="preserve">
+          <source>灰色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">灰色</target>
+        </trans-unit>
+        <trans-unit id="Yellow" translate="yes" xml:space="preserve">
+          <source>黄色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">黃色</target>
+        </trans-unit>
+        <trans-unit id="Blue" translate="yes" xml:space="preserve">
+          <source>蓝色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">青色</target>
+        </trans-unit>
+        <trans-unit id="Red" translate="yes" xml:space="preserve">
+          <source>红色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">紅色</target>
+        </trans-unit>
+        <trans-unit id="Black" translate="yes" xml:space="preserve">
+          <source>黑色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">深色</target>
+        </trans-unit>
+        <trans-unit id="Purple" translate="yes" xml:space="preserve">
+          <source>紫色</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">紫色</target>
+        </trans-unit>
+        <trans-unit id="Close" translate="yes" xml:space="preserve">
+          <source>关闭</source>
+          <target state="needs-review-translation" state-qualifier="exact-match">關閉</target>
+        </trans-unit>
+        <trans-unit id="Quezi" translate="yes" xml:space="preserve">
+          <source>阙字</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">闕字</target>
+        </trans-unit>
+        <trans-unit id="ImageSize" translate="yes" xml:space="preserve">
+          <source>图片尺寸</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片尺寸</target>
+        </trans-unit>
+        <trans-unit id="CurrentBeitie" translate="yes" xml:space="preserve">
+          <source>当前碑帖</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前碑帖</target>
+        </trans-unit>
+        <trans-unit id="StartSingleNo" translate="yes" xml:space="preserve">
+          <source>起始单字编号</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">起始單字編號</target>
+        </trans-unit>
+        <trans-unit id="PleaseChooseBeitie" translate="yes" xml:space="preserve">
+          <source>请选择书法碑帖图片</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">請選擇書法碑帖圖片</target>
+        </trans-unit>
+        <trans-unit id="NotfAfterSaveFmt" translate="yes" xml:space="preserve">
+          <source>单字分割图片({0}张)已保存到文件夹{1}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">單字分割圖片({0}張)已保存到文件夾{1}</target>
+        </trans-unit>
+        <trans-unit id="SaveErrorFmt" translate="yes" xml:space="preserve">
+          <source>保存图片{0}出现错误!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">保存圖片{0}出現錯誤!</target>
+        </trans-unit>
+        <trans-unit id="NoElemSelected" translate="yes" xml:space="preserve">
+          <source>未选择元素进行保存!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">未選擇元素進行保存!</target>
+        </trans-unit>
+        <trans-unit id="BeginSaving" translate="yes" xml:space="preserve">
+          <source>开始保存分割单字图片...</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">開始保存分割單字圖片...</target>
+        </trans-unit>
+        <trans-unit id="InvalidWidth" translate="yes" xml:space="preserve">
+          <source>无效宽度: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">無效寬度: </target>
+        </trans-unit>
+        <trans-unit id="InvalidParam" translate="yes" xml:space="preserve">
+          <source>参数错误，请更改参数后重试!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">參數錯誤，請更改參數後重試!</target>
+        </trans-unit>
+        <trans-unit id="ImageLoading" translate="yes" xml:space="preserve">
+          <source>图片正在加载中...</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片正在載入中...</target>
+        </trans-unit>
+        <trans-unit id="SoftwareVersion" translate="yes" xml:space="preserve">
+          <source>软件版本：{0}.{1}.{2}.{3}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">軟件版本：{0}. {1}. {2}. {3}</target>
+        </trans-unit>
+        <trans-unit id="ConfigNotifyInfoFmt" translate="yes" xml:space="preserve">
+          <source>当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前圖片: {0:0}*{1:0}, 元素個數: {2}, 行列數：{3}*{4}, 修改步進: {5:F1}</target>
+        </trans-unit>
+        <trans-unit id="AdjustElementFmt" translate="yes" xml:space="preserve">
+          <source>当前调整{0}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前調整{0}</target>
+        </trans-unit>
+        <trans-unit id="AdjustColumnFmt" translate="yes" xml:space="preserve">
+          <source>当前调整第{0}列，选中{1}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前調整第{0}列，選中{1}</target>
+        </trans-unit>
+        <trans-unit id="AdjustRowFmt" translate="yes" xml:space="preserve">
+          <source>当前调整第{0}行，选中{1}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前調整第{0}行，選中{1}</target>
+        </trans-unit>
+        <trans-unit id="AdjustWholeFmt" translate="yes" xml:space="preserve">
+          <source>当前调整整页，选中{0}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前調整整頁，選中{0}</target>
+        </trans-unit>
+        <trans-unit id="NotfToCaptureByMouseFmt" translate="yes" xml:space="preserve">
+          <source>请用鼠标截取{0}所在的区域</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">請用鼠標截取{0}所在的區域</target>
+        </trans-unit>
+        <trans-unit id="NotfAdjustCurrentElementFmt" translate="yes" xml:space="preserve">
+          <source>当前选择调整{0}</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前選擇調整{0}</target>
+        </trans-unit>
+        <trans-unit id="SplashInfoFirstPart" translate="yes" xml:space="preserve">
+          <source>\r\n\r\nCtrl+鼠标滚轮进行放大缩小\r\n\r\n作者：卢立雪\r\n微信：13612977027\r\n邮箱：jackreagan@163.com\r\n\r\n</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">\r\n\r\nCtrl+鼠標滾輪進行放大縮小\r\n\r\n作者：盧立雪\r\n微信：13612977027\r\n郵箱：jackreagan@163.com\r\n\r\n</target>
+        </trans-unit>
+        <trans-unit id="SplashInfoSecondPart" translate="yes" xml:space="preserve">
+          <source>\r\n感谢使用，欢迎反馈软件问题！</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">\r\n感謝使用，歡迎反饋軟件問題！</target>
         </trans-unit>
       </group>
     </body>

@@ -152,6 +152,10 @@
     </AppxManifest>
     <None Include="BeitieSpliter_StoreKey.pfx" />
     <None Include="BeitieSpliter_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\zh-TW\PlainStrings.resw" />
+    <PRIResource Include="Strings\zh-CN\PlainStrings.resw" />
+    <PRIResource Include="Strings\zh-TW\Config.resw" />
+    <PRIResource Include="Strings\zh-CN\Config.resw" />
     <PRIResource Include="Strings\zh-TW\Resources.resw" />
     <PRIResource Include="Strings\zh-CN\Resources.resw" />
   </ItemGroup>
@@ -202,7 +206,6 @@
       <Version>1.6.2</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <XliffResource Include="MultilingualResources\BeitieSpliter.zh-TW.xlf" />
   </ItemGroup>

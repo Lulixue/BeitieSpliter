@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -30,12 +31,14 @@ namespace BeitieSpliter
         /// </summary>
         public App()
         {
+            Debug.WriteLine("首语言: " + Common.GetSystemLanguage());
             RetriveSettings();
             //Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "zh-hant"; 
             this.InitializeComponent();
             this.Suspending += OnSuspending;
             this.EnteredBackground += OnEnteredBackground;
         }
+
 
         private void OnEnteredBackground(object sender, EnteredBackgroundEventArgs e)
         {
@@ -50,8 +53,17 @@ namespace BeitieSpliter
 
             GlobalSettings.MultiWindowMode = (multiWin != null) ? 
                                                 (bool)multiWin : GlobalSettings.MultiWindowMode;
-            GlobalSettings.TranditionalChineseMode = (hanT != null) ? 
-                                                        (bool)hanT : GlobalSettings.TranditionalChineseMode;
+            bool bHanT = (hanT != null) ? (bool)hanT : GlobalSettings.TranditionalChineseMode;
+
+            if ((hanT == null) && Common.SystemLanguageIsHanT())
+            {
+                GlobalSettings.TranditionalChineseMode = true;
+            }
+            else
+            {
+                GlobalSettings.TranditionalChineseMode = bHanT;
+            }
+
         }
         public void StoreSettings()
         {

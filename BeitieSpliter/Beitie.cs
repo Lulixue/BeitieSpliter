@@ -45,6 +45,56 @@ namespace BeitieSpliter
         private static readonly ResourceContext ResContextHanS;
         private static readonly ResourceContext ResContextHanT;
         private static readonly ResourceMap ResMap;
+        private static readonly ResourceMap ConfigResMap;
+        private static readonly ResourceMap PlainStringsResMap;
+
+        public enum StringItemType
+        {
+            EnterText,          // 输入释文
+            PromptNoText,       // 你还没有输入释文, 是否生成图片?
+            ContinueGenerate,   // 继续生成 
+            CloseDialog,        // 关闭当前窗口
+            CloseDialogToMain,  // 输入释文需要关闭本窗口，转到主界面输入，是否转到主界面输入？
+            DirectlyGenerate,   // 直接生成
+            OK,                 // 好的 
+
+            Green,      // 绿色
+            White,      // 白色
+            Orange,     // 橙色
+            Gray,       // 灰色
+            Yellow,     // 黄色
+
+            Blue,       // 蓝色
+            Red,        // 红色
+            Black,      // 黑色
+            Purple,		// 紫色
+
+            Close,      // 关闭
+            Quezi,      // 阙字
+            ImageSize,  // 图片尺寸
+            CurrentBeitie,  // 当前碑帖
+            StartSingleNo,  // 起始单字编号
+            PleaseChooseBeitie, // 请选择书法碑帖图片
+            NotfAfterSaveFmt,      // 单字分割图片({0}张)已保存到文件夹{1}
+            SaveErrorFmt,       // 保存图片{0}出现错误!
+            NoElemSelected,     // 未选择元素进行保存!
+            BeginSaving,        // 开始保存分割单字图片...
+            InvalidWidth,       // 无效宽度: 
+            InvalidParam,       // 参数错误，请更改参数后重试!
+            ImageLoading,       // 图片正在加载中...
+            SoftwareVersion,      // 软件版本：{0}.{1}.{2}.{3}
+            ConfigNotifyInfoFmt,         // 当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}
+            AdjustElementFmt,       // 当前调整{0}
+            AdjustColumnFmt,        // 当前调整第{0}列，选中{1}
+            AdjustRowFmt,           // 当前调整第{0}行，选中{1}
+            AdjustWholeFmt,         // 当前调整整页，选中{0}
+            NotfToCaptureByMouseFmt,    // 请用鼠标截取{0}所在的区域
+            NotfAdjustCurrentElementFmt,      // 当前选择调整{0}
+            SplashInfoFirstPart,    // \r\n\r\nCtrl+鼠标滚轮进行放大缩小\r\n\r\n作者：卢立雪\r\n微信：13612977027\r\n邮箱：jackreagan@163.com\r\n\r\n
+            SplashInfoSecondPart,   // \r\n感谢使用，欢迎反馈软件问题！
+        }
+
+
 
         static LanguageHelper()
         {
@@ -54,7 +104,44 @@ namespace BeitieSpliter
             ResContextHanT = new ResourceContext();
             ResContextHanT.QualifierValues["Language"] = "zh-TW";
             ResMap = ResourceManager.Current.MainResourceMap.GetSubtree("Resources");
+            ConfigResMap = ResourceManager.Current.MainResourceMap.GetSubtree("Config");
 
+            PlainStringsResMap = ResourceManager.Current.MainResourceMap.GetSubtree("PlainStrings");
+        }
+
+        public static string GetPlainString(StringItemType type)
+        {
+            return GetPlainString(type, GlobalSettings.TranditionalChineseMode);
+        }
+
+        public static string GetPlainString(StringItemType type, bool hant, string defValue = "")
+        {
+            string ret;
+            if (hant)
+            {
+                ret = PlainStringsResMap.GetValue(type.ToString(), ResContextHanT)?.ValueAsString ?? defValue;
+            }
+            else
+            {
+                ret = PlainStringsResMap.GetValue(type.ToString(), ResContextHanS)?.ValueAsString ?? defValue;
+            }
+
+            return ret?.Replace("\\r\\n", "\r\n") ?? null;
+        }
+
+        public static string GetConfigString(string name, bool hant, string defValue = null)
+        {
+            string ret;
+            if (hant)
+            {
+                ret = ConfigResMap.GetValue(name, ResContextHanT)?.ValueAsString ?? defValue;
+            }
+            else
+            {
+                ret = ConfigResMap.GetValue(name, ResContextHanS)?.ValueAsString ?? defValue;
+            }
+
+            return ret?.Replace("\\r\\n", "\r\n") ?? null;
         }
 
         public static string GetString(string name, bool hant, string defValue = null)
@@ -68,7 +155,8 @@ namespace BeitieSpliter
             {
                 ret = ResMap.GetValue(name, ResContextHanS)?.ValueAsString ?? defValue;
             }
-            return ret;
+
+            return ret?.Replace("\\r\\n", "\r\n") ?? null;
         }
     }
 
@@ -89,6 +177,7 @@ namespace BeitieSpliter
         public static readonly int UNICODE_CHS_END = 0x9FBB;
         public static readonly int AUTOSLIDE_OFFSET = 10;
 
+
         public enum NavigationTransitionType
         {
             Default,
@@ -104,6 +193,7 @@ namespace BeitieSpliter
         public static List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
 
         public static readonly string[] TEXT_SIZE_GRADES = { "10+", "100+", "1000+", "10000+" };
+        public static readonly string[] HANT_LANGUAGE_CODES = { "zh-hk", "zh-mo", "zh-tw" };
         public static void Init()
         {
             // 添加颜色
@@ -118,8 +208,32 @@ namespace BeitieSpliter
             DarkColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Navy, "海军蓝色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色")); 
+        }
+
+        // 系统语言是繁体
+        public static bool SystemLanguageIsHanT()
+        {
+            var topUserLanguage = Windows.System.UserProfile.GlobalizationPreferences.Languages[0];
+
+            topUserLanguage = topUserLanguage.ToLower();
+            foreach (var item in HANT_LANGUAGE_CODES)
+            {
+                if (item.Equals(topUserLanguage, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static string GetSystemLanguage()
+        {
+            var topUserLanguage = Windows.System.UserProfile.GlobalizationPreferences.Languages[0];
+            var language = new Windows.Globalization.Language(topUserLanguage);
+            var displayName = language.DisplayName;
+
+            return displayName;
         }
 
         public static NavigationTransitionInfo GetNavTransInfo(NavigationTransitionType type)

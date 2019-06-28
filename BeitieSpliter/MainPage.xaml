@@ -70,41 +70,41 @@
             
         </RelativePanel>
 
-        <Button Grid.Row="0" Grid.Column="2" Margin="0,0,10,0"  x:Name="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
+        <Button Grid.Row="0" Grid.Column="2" Margin="0,0,10,0"  x:Name="SaveSplitImgs" x:Uid="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
 
 
         <StackPanel Padding="10,0,0,0"   Name="FastParaPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Name="ZiCountTitle" Text="总字数：" Visibility="Collapsed" Margin="1,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock Name="ZiCountTitle" Text="字数：" x:Uid="ZiCountTitle" Visibility="Collapsed" Margin="1,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="ZiCountBox" Text="100" Visibility="Collapsed" InputScope="TelephoneNumber"
                         LostFocus="ZiCount_LostFocus"
                         Width="70" FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0"/>
-            <TextBlock  Name="RowCountTitle" Text="行数：" Margin="1,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock  Name="RowCountTitle" Text="行数：" x:Uid="RowCountTitle" Margin="1,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
                         LostFocus="RowCount_LostFocus"
                         IsDropDownOpen="True" IsEditable="True" Width="70"/>
-            <TextBlock  Text="列数：" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock x:Name="ColumnCountTitle" Text="列数：" x:Uid="ColumnCountTitle" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="ColumnCount"  Margin="0,3,0,0" SelectionChanged="ColumnCount_SelectionChanged"  
                         LostFocus="ColumnCount_LostFocus"
                         IsDropDownOpen="True" IsEditable="True" Width="70" />
-            <TextBlock Name="MarginTitle" Text="裁边：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock Name="MarginTitle"  x:Uid="MarginTitle" Text="裁边：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1"   
                         LostFocus="PageMargin_LostFocus" 
                         FontSize="14" VerticalAlignment="Center" Margin="0,3,5,0">
                 <ToolTipService.ToolTip>
-                    <ToolTip Content="左侧，顶部，右侧，底部"
+                    <ToolTip Name="MarginToolTip" x:Uid="MarginToolTip" Content="左侧，顶部，右侧，底部"
                      Placement="Bottom"
                      HorizontalOffset="20"/>
                 </ToolTipService.ToolTip>
             </TextBox>
 
-            <TextBlock  Text="网格颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock  Name="GridColorTitle" x:Uid="GridColorTitle"  Text="网格颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
 
             <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
                         SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,3,0,0" 
                         SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
                         SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
                          />
-            <TextBlock  Text="网格宽度：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
+            <TextBlock  Name="GridWidthTitle" x:Uid="GridWidthTitle"  Text="网格宽度：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="PenWidthCombo" Margin="0,3,0,0"  SelectionChanged="PenWidth_SelectionChanged"  
                         LostFocus="PenWidth_LostFocus"
                         IsDropDownOpen="True" IsEditable="True" />
@@ -127,7 +127,7 @@
 
         <RelativePanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0" >
             <CheckBox Name="XingcaoModeCheck" Click="XincaoModeCheck_Clicked" Content="行草模式" Margin="15,0,0,0" FontSize="16" MinWidth="100"/>
-            <Button x:Name="BtnMore" Content="高级" RelativePanel.RightOf="XingcaoModeCheck" Margin="10,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
+            <Button x:Name="BtnMore" x:Uid="BtnMore" Content="高级" RelativePanel.RightOf="XingcaoModeCheck" Margin="10,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
         </RelativePanel>
 
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="10,5,5,0"
@@ -146,14 +146,14 @@
             <TextBox x:Name="TieAlbum"  FontSize="14" Header="碑帖名" TextChanged="TextChangedTieAlbum"
                      PlaceholderText="输入碑帖名称"  IsSpellCheckEnabled="False" HorizontalAlignment="Stretch" 
                      Text=""  />
-            <ComboBox  x:Name="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,10,0"
+            <ComboBox  x:Name="TextSizeGrade" x:Uid="TextSizeGrade" RelativePanel.RightOf="TieAlbum" Margin="10,0,10,0"
                        IsDropDownOpen="True" Width="80" RelativePanel.AlignRightWithPanel="True" Header="总字数" />
         </RelativePanel>
         <RelativePanel  Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="3,3,13,3">
-            <ToggleSwitch Width="110" Name="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
+            <ToggleSwitch Width="110" Name="NoNameSwitch" x:Uid="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
             <TextBox x:Name="StartNoBox" RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0"  Text="1" RelativePanel.AlignRightWithPanel="True" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
         </RelativePanel>
-        <TextBox x:Name="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="2" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
+        <TextBox x:Name="PageText" x:Uid="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" Grid.Row="4" FontSize="18" Grid.Column="2" LostFocus="PageText_LostFocus" AcceptsReturn="True" 
                   MaxWidth="200"  Text="" VerticalAlignment="Stretch" Margin="3,3,13,0"  TextWrapping="Wrap" IsSpellCheckEnabled="False"
                  />
         <RelativePanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,0,0" >

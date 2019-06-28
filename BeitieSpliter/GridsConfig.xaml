@@ -147,11 +147,11 @@
                 <ScrollViewer>
                     <StackPanel Margin="10,0,0,0" Orientation="Vertical">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="网格" 
+                            <TextBlock Name="GridTitle" Text="网格" x:Uid="GridTitle"
                                    VerticalAlignment="Center" Margin="0,5,0,0" Style="{StaticResource HeaderTextStyle}" />
 
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock  Text="颜色：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <TextBlock x:Name="PenColorTitle" x:Uid="PenColorTitle"  Text="颜色：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
                                             SelectedValuePath="Value" DisplayMemberPath="Text"
                                            Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
@@ -161,14 +161,14 @@
 
 
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock  Text="宽度：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <TextBlock x:Name="PenWidthTitle" x:Uid="PenWidthTitle" Text="宽度：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="PenWidthCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
                                            LostFocus="LostFocusPen" 
                                     VerticalAlignment="Center" SelectionChangedTrigger="Committed" IsEditable="True"
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock  Text="类型：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <TextBlock x:Name="PenStyleTitle" x:Uid="PenStyleTitle" Text="类型：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="PenLineTypeCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
                                     VerticalAlignment="Center" 
                                     IsDropDownOpen="True" Width="100" />
@@ -180,12 +180,12 @@
                                    VerticalAlignment="Center" Margin="0,0,0,0" Style="{StaticResource HeaderTextStyle}" />
 
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Name="HangNoTitle" Text="行号：" 
+                                <TextBlock Name="HangNoTitle" x:Uid="HangNoTitle" Text="行号：" 
                                    VerticalAlignment="Center" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="RowNumber" Margin="0,0,10,0"  SelectionChanged="RowNumber_SelectionChanged"  
                            VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                            IsDropDownOpen="True"  Width="70"/>
-                                <TextBlock  Text="列号：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <TextBlock x:Name="ColumnNumberTitle" x:Uid="ColumnNumberTitle" Text="列号：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="ColumnNumber" Margin="0,0,0,0" SelectionChanged="ColumnNumber_SelectionChanged"  
                                 VerticalAlignment="Center"  SelectionChangedTrigger="Committed"
                                 IsDropDownOpen="True" Width="70" />
@@ -204,19 +204,19 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,20,0,0" Orientation="Vertical" >
-                            <TextBlock Text="调整" 
+                            <TextBlock Text="调整" Name="AdjustTitle" x:Uid="AdjustTitle"
                                    VerticalAlignment="Center" Margin="0,0,0,0" Style="{StaticResource HeaderTextStyle}" />
 
 
                             <StackPanel  Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock  Text="旋转：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <TextBlock Name="RotateTitle" x:Uid="RotateTitle" Text="旋转：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <Button  Margin="0,0,5,0"  FontSize="20" Name="BtnRotateLeft" Click="Rotate_Clicked" Content="↺" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
                                 <TextBox Name="AngleTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="AngleTextBox_LostFocus" InputScope="Number" />
                                 <Button  Margin="5,0"  FontSize="20" Name="BtnRotateRight" Click="Rotate_Clicked" Content="↻" VerticalAlignment="center" HorizontalAlignment="Stretch"  />
                             </StackPanel>
 
                             <StackPanel  Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock  Text="步进：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" VerticalAlignment="Center" />
+                                <TextBlock Name="StepTitle" x:Uid="StepTitle" Text="步进：" Margin="0,0,0,0" Style="{StaticResource LeftFriendly}" VerticalAlignment="Center" />
                                 <TextBox Name="ChangeStepTxtBox" Text="0" VerticalAlignment="Center" TextAlignment="Center" LostFocus="ChangeStepTextBox_LostFocus" InputScope="Number" />
                             </StackPanel>
 
@@ -224,15 +224,15 @@
                             <StackPanel  Margin="20,10,0,0" Orientation="Vertical" VerticalAlignment="Center">
                                 <ToggleSwitch Margin="0,2,0,2" Name="AdjustGridsSwitch" Visibility="Collapsed" Width="120"  OffContent="设置文字" 
                                           OnContent="调整网格" Toggled="AdjustGrids_Toggled" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkShowSize" Content="显示尺寸" IsChecked="True" Click="ClickedShowSize" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkNoOpacity" Content="护眼模式" IsChecked="True" Click="ClickedNoOpacity" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkSingleFocus" Content="单字专注" IsChecked="True" Click="ClickedSingleFocus" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
-                                <CheckBox Margin="0,2,0,2" Name="ChkHideScrollBar" Content="隐藏滚动条" IsChecked="False" Click="ClickedhideScrollBar" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkShowSize" x:Uid="ChkShowSize" Content="显示尺寸" IsChecked="True" Click="ClickedShowSize" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkNoOpacity" x:Uid="ChkNoOpacity" Content="护眼模式" IsChecked="True" Click="ClickedNoOpacity" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkSingleFocus" x:Uid="ChkSingleFocus" Content="单字专注" IsChecked="True" Click="ClickedSingleFocus" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkAvgRow" x:Uid="ChkAvgRow" Content="平均分布行" IsChecked="True" Click="AverageCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkAvgCol" x:Uid="ChkAvgCol" Content="平均分布列" IsChecked="True" Click="AverageCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkFixedWidth" x:Uid="ChkFixedWidth" Content="元素固定宽度" IsChecked="False" Click="FixedCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkFixedHeight" x:Uid="ChkFixedHeight" Content="元素固定高度" IsChecked="False" Click="FixedCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkHideGrid" x:Uid="ChkHideGrid" Content="隐藏网格线"  Visibility="Collapsed"  IsChecked="False" Click="GridCheck_Clicked" />
+                                <CheckBox Margin="0,2,0,2" Name="ChkHideScrollBar" x:Uid="ChkHideScrollBar" Content="隐藏滚动条" IsChecked="False" Click="ClickedhideScrollBar" />
                             </StackPanel>
 
                             <Grid Margin="20,10,20,20" HorizontalAlignment="Center">
@@ -268,7 +268,7 @@
                             </Grid>
                         </StackPanel>
                         <StackPanel Margin="0,10,0,10" HorizontalAlignment="Center">
-                            <Button Name="RewardMe" Click="ClickedRewardMe" Background="OrangeRed" Content="赞赏开发者" />
+                            <Button Name="RewardMe" x:Uid="RewardMe" Click="ClickedRewardMe" Background="OrangeRed" Content="赞赏开发者" />
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -286,13 +286,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Margin="5,10,5,5">
-                    <TextBlock  Name="OpObjectTitle" Text="操作对象" Margin="5,0,0,0" FontSize="20" Style="{StaticResource LeftFriendly}" />
+                    <TextBlock  Name="OpObjectTitle" x:Uid="OpObjectTitle" Text="操作对象" Margin="5,0,0,0" FontSize="20" Style="{StaticResource LeftFriendly}" />
 
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0">
-                        <RadioButton x:Name="OpWholePage" Margin="0,10,0,0" Content="整页"  MinWidth="80" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16"  IsChecked="True"/>
-                        <RadioButton x:Name="OpSingleElement" Content="单字" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
-                        <RadioButton x:Name="OpSingleColumn" Content="整列" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
-                        <RadioButton x:Name="OpSingleRow" Content="整行" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+                        <RadioButton x:Name="OpWholePage" x:Uid="OpWholePage"  Margin="0,10,0,0" Content="整页"  MinWidth="80" Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16"  IsChecked="True"/>
+                        <RadioButton x:Name="OpSingleElement"  x:Uid="OpSingleElement"   Content="单字" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+                        <RadioButton x:Name="OpSingleColumn"    Content="整列" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
+                        <RadioButton x:Name="OpSingleRow"  Content="整行" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
                     </StackPanel>
                     <StackPanel Margin="0,50,0,50"></StackPanel>
                     <StackPanel  Margin="2" Orientation="Vertical" VerticalAlignment="Bottom">
@@ -315,7 +315,7 @@
                              VerticalAlignment="Bottom">
 
                     <AppBarButton Name="BtnZoomIn" Icon="ZoomIn" Label="放大" HorizontalAlignment="Center"  Margin="2" Click="Clicked_Zoom"/>
-                    <AppBarButton Name="BtnZoomOut" Icon="ZoomOut" Label="缩小" HorizontalAlignment="Center"   Margin="2" Click="Clicked_Zoom" />
+                    <AppBarButton Name="BtnZoomOut" Icon="ZoomOut" x:Uid="BtnZoomOut" Label="缩小" HorizontalAlignment="Center"   Margin="2" Click="Clicked_Zoom" />
 
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <Button Name="LeftScrollBtn" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Right" Click="ClickHorizontalScroll"  >
@@ -379,7 +379,7 @@
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="0,10,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom">
 
             <Button x:Name="BtnSaveAll" Content="保存全部" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-            <Button x:Name="BtnSaveCurrent" Margin="10,0,0,0" Content="保存当前" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+            <Button x:Name="BtnSaveCurrent" Margin="10,0,0,0" Content="保存当前" x:Uid="BtnSaveCurrent" FontSize="20" Click="BtnSave_Clicked" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
 
         </StackPanel>
     </Grid>

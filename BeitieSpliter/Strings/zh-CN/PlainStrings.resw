@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>	
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+     <data name="EnterText" xml:space="preserve"> <value>输入释文</value> </data>
+              <data name="PromptNoText" xml:space="preserve"> <value>你还没有输入释文，是否生成图片？</value> </data>
+              <data name="ContinueGenerate" xml:space="preserve"> <value>继续生成 </value> </data>
+              <data name="CloseDialog" xml:space="preserve"> <value>关闭当前窗口</value> </data>
+              <data name="CloseDialogToMain" xml:space="preserve"> <value>输入释文需要关闭本窗口，转到主界面输入，是否转到主界面输入？</value> </data>
+              <data name="DirectlyGenerate" xml:space="preserve"> <value>直接生成</value> </data>
+              <data name="OK" xml:space="preserve"> <value>好的</value> </data>
+
+              <data name="Green" xml:space="preserve"> <value>绿色</value> </data>
+              <data name="White" xml:space="preserve"> <value>白色</value> </data>
+              <data name="Orange" xml:space="preserve"> <value>橙色</value> </data>
+              <data name="Gray" xml:space="preserve"> <value>灰色</value> </data>
+              <data name="Yellow" xml:space="preserve"> <value>黄色</value> </data>
+
+              <data name="Blue" xml:space="preserve"> <value>蓝色</value> </data>
+              <data name="Red" xml:space="preserve"> <value>红色</value> </data>
+              <data name="Black" xml:space="preserve"> <value>黑色</value> </data>
+              <data name="Purple" xml:space="preserve"> <value>紫色</value> </data>
+
+              <data name="Close" xml:space="preserve"> <value>关闭</value> </data>
+              <data name="Quezi" xml:space="preserve"> <value>阙字</value> </data>
+              <data name="ImageSize" xml:space="preserve"> <value>图片尺寸</value> </data>
+              <data name="CurrentBeitie" xml:space="preserve"> <value>当前碑帖</value> </data>
+              <data name="StartSingleNo" xml:space="preserve"> <value>起始单字编号</value> </data>
+              <data name="PleaseChooseBeitie" xml:space="preserve"> <value>请选择书法碑帖图片</value> </data>
+              <data name="NotfAfterSaveFmt" xml:space="preserve"> <value>单字分割图片({0}张)已保存到文件夹{1}</value> </data>
+              <data name="SaveErrorFmt" xml:space="preserve"> <value>保存图片{0}出现错误!</value> </data>
+              <data name="NoElemSelected" xml:space="preserve"> <value>未选择元素进行保存!</value> </data>
+              <data name="BeginSaving" xml:space="preserve"> <value>开始保存分割单字图片...</value> </data>
+              <data name="InvalidWidth" xml:space="preserve"> <value>无效宽度: </value> </data>
+              <data name="InvalidParam" xml:space="preserve"> <value>参数错误，请更改参数后重试!</value> </data>
+              <data name="ImageLoading" xml:space="preserve"> <value>图片正在加载中...</value> </data>
+              <data name="SoftwareVersion" xml:space="preserve"> <value>软件版本：{0}.{1}.{2}.{3}</value> </data>
+              <data name="ConfigNotifyInfoFmt" xml:space="preserve"> <value>当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}</value> </data>
+              <data name="AdjustElementFmt" xml:space="preserve"> <value>当前调整{0}</value> </data>
+              <data name="AdjustColumnFmt" xml:space="preserve"> <value>当前调整第{0}列，选中{1}</value> </data>
+              <data name="AdjustRowFmt" xml:space="preserve"> <value>当前调整第{0}行，选中{1}</value> </data>
+              <data name="AdjustWholeFmt" xml:space="preserve"> <value>当前调整整页，选中{0}</value> </data>
+              <data name="NotfToCaptureByMouseFmt" xml:space="preserve"> <value>请用鼠标截取{0}所在的区域</value> </data>
+              <data name="NotfAdjustCurrentElementFmt" xml:space="preserve"> <value>当前选择调整{0}</value> </data>
+              <data name="SplashInfoFirstPart" xml:space="preserve"> <value>\r\n\r\nCtrl+鼠标滚轮进行放大缩小\r\n\r\n作者：卢立雪\r\n微信：13612977027\r\n邮箱：jackreagan@163.com\r\n\r\n</value> </data>
+              <data name="SplashInfoSecondPart" xml:space="preserve"> <value>\r\n感谢使用，欢迎反馈软件问题！</value> </data>
+</root>

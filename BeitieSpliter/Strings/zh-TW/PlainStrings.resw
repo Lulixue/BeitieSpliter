@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="EnterText" xml:space="preserve">
+    <value>輸入釋文</value>
+  </data>
+  <data name="PromptNoText" xml:space="preserve">
+    <value>你還沒有輸入釋文，是否生成圖片？</value>
+  </data>
+  <data name="ContinueGenerate" xml:space="preserve">
+    <value>繼續生成 </value>
+  </data>
+  <data name="CloseDialog" xml:space="preserve">
+    <value>關閉當前窗口</value>
+  </data>
+  <data name="CloseDialogToMain" xml:space="preserve">
+    <value>輸入釋文需要關閉本窗口，轉到主界面輸入，是否轉到主界面輸入？</value>
+  </data>
+  <data name="DirectlyGenerate" xml:space="preserve">
+    <value>直接生成</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>好的</value>
+  </data>
+  <data name="Green" xml:space="preserve">
+    <value>綠色</value>
+  </data>
+  <data name="White" xml:space="preserve">
+    <value>白色</value>
+  </data>
+  <data name="Orange" xml:space="preserve">
+    <value>橙色</value>
+  </data>
+  <data name="Gray" xml:space="preserve">
+    <value>灰色</value>
+  </data>
+  <data name="Yellow" xml:space="preserve">
+    <value>黃色</value>
+  </data>
+  <data name="Blue" xml:space="preserve">
+    <value>青色</value>
+  </data>
+  <data name="Red" xml:space="preserve">
+    <value>紅色</value>
+  </data>
+  <data name="Black" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="Purple" xml:space="preserve">
+    <value>紫色</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Quezi" xml:space="preserve">
+    <value>闕字</value>
+  </data>
+  <data name="ImageSize" xml:space="preserve">
+    <value>圖片尺寸</value>
+  </data>
+  <data name="CurrentBeitie" xml:space="preserve">
+    <value>當前碑帖</value>
+  </data>
+  <data name="StartSingleNo" xml:space="preserve">
+    <value>起始單字編號</value>
+  </data>
+  <data name="PleaseChooseBeitie" xml:space="preserve">
+    <value>請選擇書法碑帖圖片</value>
+  </data>
+  <data name="NotfAfterSaveFmt" xml:space="preserve">
+    <value>單字分割圖片({0}張)已保存到文件夾{1}</value>
+  </data>
+  <data name="SaveErrorFmt" xml:space="preserve">
+    <value>保存圖片{0}出現錯誤!</value>
+  </data>
+  <data name="NoElemSelected" xml:space="preserve">
+    <value>未選擇元素進行保存!</value>
+  </data>
+  <data name="BeginSaving" xml:space="preserve">
+    <value>開始保存分割單字圖片...</value>
+  </data>
+  <data name="InvalidWidth" xml:space="preserve">
+    <value>無效寬度: </value>
+  </data>
+  <data name="InvalidParam" xml:space="preserve">
+    <value>參數錯誤，請更改參數後重試!</value>
+  </data>
+  <data name="ImageLoading" xml:space="preserve">
+    <value>圖片正在載入中...</value>
+  </data>
+  <data name="SoftwareVersion" xml:space="preserve">
+    <value>軟件版本：{0}. {1}. {2}. {3}</value>
+  </data>
+  <data name="ConfigNotifyInfoFmt" xml:space="preserve">
+    <value>當前圖片: {0:0}*{1:0}, 元素個數: {2}, 行列數：{3}*{4}, 修改步進: {5:F1}</value>
+  </data>
+  <data name="AdjustElementFmt" xml:space="preserve">
+    <value>當前調整{0}</value>
+  </data>
+  <data name="AdjustColumnFmt" xml:space="preserve">
+    <value>當前調整第{0}列，選中{1}</value>
+  </data>
+  <data name="AdjustRowFmt" xml:space="preserve">
+    <value>當前調整第{0}行，選中{1}</value>
+  </data>
+  <data name="AdjustWholeFmt" xml:space="preserve">
+    <value>當前調整整頁，選中{0}</value>
+  </data>
+  <data name="NotfToCaptureByMouseFmt" xml:space="preserve">
+    <value>請用鼠標截取{0}所在的區域</value>
+  </data>
+  <data name="NotfAdjustCurrentElementFmt" xml:space="preserve">
+    <value>當前選擇調整{0}</value>
+  </data>
+  <data name="SplashInfoFirstPart" xml:space="preserve">
+    <value>\r\n\r\nCtrl+鼠標滾輪進行放大縮小\r\n\r\n作者：盧立雪\r\n微信：13612977027\r\n郵箱：jackreagan@163.com\r\n\r\n</value>
+  </data>
+  <data name="SplashInfoSecondPart" xml:space="preserve">
+    <value>\r\n感謝使用，歡迎反饋軟件問題！</value>
+  </data>
+</root>
