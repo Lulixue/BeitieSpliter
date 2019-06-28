@@ -427,7 +427,7 @@ namespace BeitieSpliter
 
                 if (BtFolderFileList.Count < 1)
                 {
-                    Common.ShowMessageDlg("所选文件夹下找不到碑帖图片！", null);
+                    Common.ShowMessageDlg(/*"所选文件夹下找不到碑帖图片！"*/GetPlainString(StringItemType.PictureNotFound), null);
                     return;
                 }
 
@@ -449,7 +449,7 @@ namespace BeitieSpliter
                     baseNo += pageSize;
                 }
                 StartFolderFiles();
-                SetDirFilePath("文件夹: " + BtFolder.Path);
+                SetDirFilePath(/*"文件夹: "*/GetPlainString(StringItemType.Folder) + BtFolder.Path);
                 TieAlbum.Text = BtFolder.Name;
             }
             else
@@ -500,7 +500,7 @@ namespace BeitieSpliter
         }
         public void BeitieImageInvalid()
         {
-            Common.ShowMessageDlg("文件损坏或文件不支持!", null);
+            Common.ShowMessageDlg(/*"文件损坏或不支持!"*/GetPlainString(StringItemType.FileBroken), null);
             CurrentBtImage = null;
             BtGrids = null;
         }
@@ -575,7 +575,7 @@ namespace BeitieSpliter
             CurrentBtImage = btimg;
             if (!CurrentBtImage.FileSupported)
             {
-                Common.ShowMessageDlg("文件损坏或不支持!", null);
+                Common.ShowMessageDlg(/*"文件损坏或不支持!"*/GetPlainString(StringItemType.FileBroken), null);
                 CurrentBtImage = null;
                 BtGrids = null;
                 RemoveFileItem(file);
@@ -618,7 +618,7 @@ namespace BeitieSpliter
 
                 StartFolderFiles();
                 
-                SetDirFilePath("图片: " + file.Path);
+                SetDirFilePath(/*"图片: " */GetPlainString(StringItemType.Picture) + file.Path);
                 TieAlbum.Text = GetFileTitle(file);
             }
             else
@@ -778,7 +778,7 @@ namespace BeitieSpliter
             if (CurrentBtImage == null)
             {
                 //draw.DrawText(, new Vector2(100, 100), Colors.Black);
-                CanvasDrawText(draw, /*"请选择书法碑帖图片!"*/GetPlainString(StringItemType.PleaseChooseBeitie) + "!", Colors.Black);
+                CanvasDrawText(draw, /*"请选择书法碑帖图片!"*/GetPlainString(StringItemType.PleaseChooseBeitie), Colors.Black);
                 CanvasDrawHelpInfo(draw, Colors.White);
                 return;
             }
@@ -1260,7 +1260,7 @@ namespace BeitieSpliter
             {
                 album = GetTimeStamp();
             }
-
+            // 生成全部
             if (ElementIndexes == null)
             {
                 ElementIndexes = new HashSet<int>();
@@ -1278,9 +1278,13 @@ namespace BeitieSpliter
                         ElementIndexes.Add(i);
                     }
                 }
+                // 全部生成的时候才计算编号
                 if (ElementIndexes.Count > 0)
                 {
-                    UpdateBeitieAlbumNo(StartNo, ElementIndexes.Count);
+                    if (FolderFileCombo.Items.Count > 1)
+                    {
+                        UpdateBeitieAlbumNo(StartNo, ElementIndexes.Count);
+                    }
                 }
             }
             if (ElementIndexes.Count == 0)
@@ -1478,21 +1482,20 @@ namespace BeitieSpliter
             currentFile.Value.no = pageZiNo;
             currentFile.Value.NumberedCount = pageZiCount;
 
-            int endIndex = DictBtFiles.Count-1;
-            if (XingcaoMode)
-            {
-                endIndex = selectedIndex + 1;
-            }
+            int endIndex = DictBtFiles.Count-1; 
 
-            int ziNo = pageZiNo + pageZiCount;
-            
             for (int i = selectedIndex+1; i <= endIndex; i++)
             {
                 var previous = DictBtFiles.ElementAt(i-1);
                 var current = DictBtFiles.ElementAt(i);
 
                 current.Value.no = previous.Value.no + previous.Value.NumberedCount;
-                if (current.Value.NumberedCount == 0)
+                // 行草状态下只计算下一个的编号
+                if (XingcaoMode)
+                {
+                    break;
+                }
+                else if (current.Value.NumberedCount == 0)
                 {
                     current.Value.NumberedCount = pageSize;
                 }

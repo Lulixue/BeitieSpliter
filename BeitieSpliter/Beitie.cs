@@ -63,12 +63,16 @@ namespace BeitieSpliter
             White,      // 白色
             Orange,     // 橙色
             Gray,       // 灰色
-            Yellow,     // 黄色
-
+            Yellow,     // 黄色 
             Blue,       // 蓝色
             Red,        // 红色
             Black,      // 黑色
             Purple,		// 紫色
+
+            TopMost,    // 已经到了最上边了!
+            LeftMost,   // 已经到了最左边了!
+            RightMost,  // 已经到了最右边了!
+            BottomMost, // 已经到了最下边了!
 
             Close,      // 关闭
             Quezi,      // 阙字
@@ -109,6 +113,10 @@ namespace BeitieSpliter
             DashedLine,         // 虚线
             DottedLine,         // 点线
             SolidLine,          // 实线
+            Picture,            // 图片: 
+            Folder,             //  文件夹: 
+            PictureNotFound,    // 所选文件夹下找不到碑帖图片！
+            FileBroken,         // 文件损坏或文件不支持!
         }
 
 

@@ -282,6 +282,15 @@ namespace BeitieSpliter
             }
         }
 
+        void ShowOverflowError(StringItemType type)
+        {
+            string info = GetPlainString(type);
+
+            Common.ShowMessageDlg(info, null);
+            NotifyUser(info, NotifyType.ErrorMessage);
+        }
+
+
         bool IsChangeNoteOverflow()
         {
             Point pntLt, pntRb;
@@ -293,30 +302,26 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
 
             if (pntLt.X < 0)
-            {
-                Common.ShowMessageDlg("已经到了最右边了!", null);
-                NotifyUser("已经到了最右边了!", NotifyType.ErrorMessage);
+            { 
+                ShowOverflowError(StringItemType.LeftMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
             else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
-            {
-                Common.ShowMessageDlg("已经到了最左边了!", null);
-                NotifyUser("已经到了最左边了!", NotifyType.ErrorMessage);
+            { 
+                ShowOverflowError(StringItemType.RightMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
             else if (pntLt.Y < 0)
-            {
-                Common.ShowMessageDlg("已经到了最上边了!", null);
-                NotifyUser("已经到了最上边了!", NotifyType.ErrorMessage);
+            { 
+                ShowOverflowError(StringItemType.TopMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
             else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
-            {
-                Common.ShowMessageDlg("已经到了最下边了!", null);
-                NotifyUser("已经到了最下边了!", NotifyType.ErrorMessage);
+            { 
+                ShowOverflowError(StringItemType.BottomMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
@@ -418,26 +423,22 @@ namespace BeitieSpliter
         {
             if (pntLt.X < 0)
             {
-                Common.ShowMessageDlg("已经到了最右边了!", null);
-                NotifyUser("已经到了最右边了!", NotifyType.ErrorMessage);
+                ShowOverflowError(StringItemType.LeftMost);
                 return false;
             }
             else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
             {
-                Common.ShowMessageDlg("已经到了最左边了!", null);
-                NotifyUser("已经到了最左边了!", NotifyType.ErrorMessage);
+                ShowOverflowError(StringItemType.RightMost);
                 return false;
             }
             else if (pntLt.Y < 0)
             {
-                Common.ShowMessageDlg("已经到了最上边了!", null);
-                NotifyUser("已经到了最上边了!", NotifyType.ErrorMessage);
+                ShowOverflowError(StringItemType.TopMost);
                 return false;
             }
             else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
             {
-                Common.ShowMessageDlg("已经到了最下边了!", null);
-                NotifyUser("已经到了最下边了!", NotifyType.ErrorMessage);
+                ShowOverflowError(StringItemType.BottomMost);
                 return false;
             }
             return true;

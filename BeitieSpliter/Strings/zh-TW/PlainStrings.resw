@@ -49,7 +49,7 @@
     <value>黃色</value>
   </data>
   <data name="Blue" xml:space="preserve">
-    <value>青色</value>
+    <value>藍色</value>
   </data>
   <data name="Red" xml:space="preserve">
     <value>紅色</value>
@@ -70,7 +70,7 @@
     <value>起始單字編號</value>
   </data>
   <data name="PleaseChooseBeitie" xml:space="preserve">
-    <value>請選擇書法碑帖圖片</value>
+    <value>請選擇書法碑帖圖片！</value>
   </data>
   <data name="NotfAfterSaveFmt" xml:space="preserve">
     <value>單字分割圖片({0}張)已保存到文件夾{1}</value>
@@ -172,12 +172,36 @@
     <value>設為字元素</value>
   </data>
   <data name="DashedLine" xml:space="preserve">
-    <value>點線</value>
+    <value>虚綫</value>
   </data>
   <data name="DottedLine" xml:space="preserve">
-    <value>點線</value>
+    <value>點綫</value>
   </data>
   <data name="SolidLine" xml:space="preserve">
-    <value>連續</value>
+    <value>實綫</value>
+  </data>
+  <data name="Picture" xml:space="preserve">
+    <value>圖片: </value>
+  </data>
+  <data name="Folder" xml:space="preserve">
+    <value>文件夾: </value>
+  </data>
+  <data name="PictureNotFound" xml:space="preserve">
+    <value>所選文件夾下找不到碑帖圖片！</value>
+  </data>
+  <data name="FileBroken" xml:space="preserve">
+    <value>文件損壞或不支持!</value>
+  </data>
+  <data name="TopMost" xml:space="preserve">
+    <value>已經到了最上邊了!</value>
+  </data>
+  <data name="LeftMost" xml:space="preserve">
+    <value>已經到了最左邊了!</value>
+  </data>
+  <data name="RightMost" xml:space="preserve">
+    <value>已經到了最右邊了!</value>
+  </data>
+  <data name="BottomMost" xml:space="preserve">
+    <value>已經到了最下邊了!</value>
   </data>
 </root>

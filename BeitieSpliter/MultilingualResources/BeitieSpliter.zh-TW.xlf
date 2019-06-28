@@ -52,7 +52,8 @@
         </trans-unit>
         <trans-unit id="SaveSplitImgs.Content" translate="yes" xml:space="preserve">
           <source>保存碑帖图片</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">保存碑帖圖片</target>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">保存分割圖片</target>
+          
         </trans-unit>
         <trans-unit id="TextSizeGrade.Header" translate="yes" xml:space="preserve">
           <source>总字数</source>
@@ -238,7 +239,7 @@
         </trans-unit>
         <trans-unit id="Blue" translate="yes" xml:space="preserve">
           <source>蓝色</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">青色</target>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">藍色</target>
         </trans-unit>
         <trans-unit id="Red" translate="yes" xml:space="preserve">
           <source>红色</source>
@@ -266,8 +267,8 @@
         </trans-unit>
         <trans-unit id="PleaseChooseBeitie" translate="yes" xml:space="preserve">
           <source>请选择书法碑帖图片！</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">請選擇書法碑帖圖片</target>
-          <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">請選擇書法碑帖圖片！</target>
+          
         </trans-unit>
         <trans-unit id="NotfAfterSaveFmt" translate="yes" xml:space="preserve">
           <source>单字分割图片({0}张)已保存到文件夹{1}</source>
@@ -403,15 +404,47 @@
         </trans-unit>
         <trans-unit id="DashedLine" translate="yes" xml:space="preserve">
           <source>虚线</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">點線</target>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">虚綫</target>
         </trans-unit>
         <trans-unit id="DottedLine" translate="yes" xml:space="preserve">
           <source>点线</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">點線</target>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">點綫</target>
         </trans-unit>
         <trans-unit id="SolidLine" translate="yes" xml:space="preserve">
           <source>实线</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">連續</target>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">實綫</target>
+        </trans-unit>
+        <trans-unit id="Picture" translate="yes" xml:space="preserve">
+          <source>图片: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片: </target>
+        </trans-unit>
+        <trans-unit id="Folder" translate="yes" xml:space="preserve">
+          <source>文件夹: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">文件夾: </target>
+        </trans-unit>
+        <trans-unit id="PictureNotFound" translate="yes" xml:space="preserve">
+          <source>所选文件夹下找不到碑帖图片！</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">所選文件夾下找不到碑帖圖片！</target>
+        </trans-unit>
+        <trans-unit id="FileBroken" translate="yes" xml:space="preserve">
+          <source>文件损坏或不支持!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">文件損壞或不支持!</target>
+        </trans-unit>
+        <trans-unit id="TopMost" translate="yes" xml:space="preserve">
+          <source>已经到了最上边了!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">已經到了最上邊了!</target>
+        </trans-unit>
+        <trans-unit id="LeftMost" translate="yes" xml:space="preserve">
+          <source>已经到了最左边了!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">已經到了最左邊了!</target>
+        </trans-unit>
+        <trans-unit id="RightMost" translate="yes" xml:space="preserve">
+          <source>已经到了最右边了!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">已經到了最右邊了!</target>
+        </trans-unit>
+        <trans-unit id="BottomMost" translate="yes" xml:space="preserve">
+          <source>已经到了最下边了!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">已經到了最下邊了!</target>
         </trans-unit>
       </group>
     </body>

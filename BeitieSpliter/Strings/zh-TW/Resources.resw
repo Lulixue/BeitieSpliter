@@ -46,7 +46,7 @@
     <value>行數：</value>
   </data>
   <data name="SaveSplitImgs.Content" xml:space="preserve">
-    <value>保存碑帖圖片</value>
+    <value>保存分割圖片</value>
   </data>
   <data name="TextSizeGrade.Header" xml:space="preserve">
     <value>總字數</value>
