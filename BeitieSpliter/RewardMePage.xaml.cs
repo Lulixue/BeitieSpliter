@@ -56,7 +56,7 @@ namespace BeitieSpliter
 
         private void LoadedRewardMePage(object sender, RoutedEventArgs e)
         {
-          
+            UpdateChineseLanguage();
             //CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
         }
     }

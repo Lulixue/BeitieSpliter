@@ -260,21 +260,14 @@
           <source>阙字</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">闕字</target>
         </trans-unit>
-        <trans-unit id="ImageSize" translate="yes" xml:space="preserve">
-          <source>图片尺寸</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片尺寸</target>
-        </trans-unit>
-        <trans-unit id="CurrentBeitie" translate="yes" xml:space="preserve">
-          <source>当前碑帖</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前碑帖</target>
-        </trans-unit>
         <trans-unit id="StartSingleNo" translate="yes" xml:space="preserve">
           <source>起始单字编号</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">起始單字編號</target>
         </trans-unit>
         <trans-unit id="PleaseChooseBeitie" translate="yes" xml:space="preserve">
-          <source>请选择书法碑帖图片</source>
+          <source>请选择书法碑帖图片！</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">請選擇書法碑帖圖片</target>
+          <note from="MultilingualUpdate" annotates="source" priority="2">Please verify the translation’s accuracy as the source string was updated after it was translated.</note>
         </trans-unit>
         <trans-unit id="NotfAfterSaveFmt" translate="yes" xml:space="preserve">
           <source>单字分割图片({0}张)已保存到文件夹{1}</source>
@@ -302,7 +295,7 @@
         </trans-unit>
         <trans-unit id="ImageLoading" translate="yes" xml:space="preserve">
           <source>图片正在加载中...</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片正在載入中...</target>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片正在加載中...</target>
         </trans-unit>
         <trans-unit id="SoftwareVersion" translate="yes" xml:space="preserve">
           <source>软件版本：{0}.{1}.{2}.{3}</source>
@@ -343,6 +336,82 @@
         <trans-unit id="SplashInfoSecondPart" translate="yes" xml:space="preserve">
           <source>\r\n感谢使用，欢迎反馈软件问题！</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">\r\n感謝使用，歡迎反饋軟件問題！</target>
+        </trans-unit>
+        <trans-unit id="ImageSizeFmt" translate="yes" xml:space="preserve">
+          <source>图片尺寸: {0:0}*{1:0},</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">圖片尺寸: {0:0}*{1:0},</target>
+        </trans-unit>
+        <trans-unit id="CurrentBeitieStartNoFmt" translate="yes" xml:space="preserve">
+          <source>当前碑帖: {0}, 起始单字编号: {1}({2}),</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前碑帖: {0}, 起始單字編號: {1}({2}),</target>
+        </trans-unit>
+        <trans-unit id="StartNoErrorFmt" translate="yes" xml:space="preserve">
+          <source>编号({0})超出范围, 请重新输入!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">編號({0})超出範圍, 請重新輸入!</target>
+        </trans-unit>
+        <trans-unit id="AdjustBase" translate="yes" xml:space="preserve">
+          <source>选取蓝本</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">選取藍本</target>
+        </trans-unit>
+        <trans-unit id="AdjustElement" translate="yes" xml:space="preserve">
+          <source>调整元素</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">調整元素</target>
+        </trans-unit>
+        <trans-unit id="AdjustObject" translate="yes" xml:space="preserve">
+          <source>操作对象</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">操作對象</target>
+        </trans-unit>
+        <trans-unit id="CurrentElemChangedFmt" translate="yes" xml:space="preserve">
+          <source>当前元素区域改变量: {0:0},{1:0},{2:0},{3:0}, </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前元素區域改變數: {0:0},{1:0},{2:0},{3:0}, </target>
+        </trans-unit>
+        <trans-unit id="CurrentElemRectSizeFmt" translate="yes" xml:space="preserve">
+          <source>当前元素区域尺寸： {0:0}*{1:0}, </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前元素區域尺寸： {0:0}*{1:0}, </target>
+        </trans-unit>
+        <trans-unit id="CurrentReviseElemFmt" translate="yes" xml:space="preserve">
+          <source>当前可修改元素: {0}个, </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前可修改元素: {0}個, </target>
+        </trans-unit>
+        <trans-unit id="CurrentSelectElemFmt" translate="yes" xml:space="preserve">
+          <source>当前选中元素：{0}, </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">當前選中元素：{0}, </target>
+        </trans-unit>
+        <trans-unit id="DefineElemRectFirst" translate="yes" xml:space="preserve">
+          <source>请先定义当前元素矩形!</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">請先定義當前元素矩形!</target>
+        </trans-unit>
+        <trans-unit id="ParamError" translate="yes" xml:space="preserve">
+          <source>参数错误！</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">參數錯誤！</target>
+        </trans-unit>
+        <trans-unit id="SetAsKongbai" translate="yes" xml:space="preserve">
+          <source>设为空白元素</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">設為空白元素</target>
+        </trans-unit>
+        <trans-unit id="SetAsQuezi" translate="yes" xml:space="preserve">
+          <source>设为阙字元素</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">設為闕字元素</target>
+        </trans-unit>
+        <trans-unit id="SetAsYin" translate="yes" xml:space="preserve">
+          <source>设为印章元素</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">設為印章元素</target>
+        </trans-unit>
+        <trans-unit id="SetAsZi" translate="yes" xml:space="preserve">
+          <source>设为字元素</source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">設為字元素</target>
+        </trans-unit>
+        <trans-unit id="DashedLine" translate="yes" xml:space="preserve">
+          <source>虚线</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">點線</target>
+        </trans-unit>
+        <trans-unit id="DottedLine" translate="yes" xml:space="preserve">
+          <source>点线</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">點線</target>
+        </trans-unit>
+        <trans-unit id="SolidLine" translate="yes" xml:space="preserve">
+          <source>实线</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">連續</target>
         </trans-unit>
       </group>
     </body>

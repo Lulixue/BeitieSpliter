@@ -66,12 +66,6 @@
   <data name="Quezi" xml:space="preserve">
     <value>闕字</value>
   </data>
-  <data name="ImageSize" xml:space="preserve">
-    <value>圖片尺寸</value>
-  </data>
-  <data name="CurrentBeitie" xml:space="preserve">
-    <value>當前碑帖</value>
-  </data>
   <data name="StartSingleNo" xml:space="preserve">
     <value>起始單字編號</value>
   </data>
@@ -97,7 +91,7 @@
     <value>參數錯誤，請更改參數後重試!</value>
   </data>
   <data name="ImageLoading" xml:space="preserve">
-    <value>圖片正在載入中...</value>
+    <value>圖片正在加載中...</value>
   </data>
   <data name="SoftwareVersion" xml:space="preserve">
     <value>軟件版本：{0}. {1}. {2}. {3}</value>
@@ -128,5 +122,62 @@
   </data>
   <data name="SplashInfoSecondPart" xml:space="preserve">
     <value>\r\n感謝使用，歡迎反饋軟件問題！</value>
+  </data>
+  <data name="ImageSizeFmt" xml:space="preserve">
+    <value>圖片尺寸: {0:0}*{1:0},</value>
+  </data>
+  <data name="CurrentBeitieStartNoFmt" xml:space="preserve">
+    <value>當前碑帖: {0}, 起始單字編號: {1}({2}),</value>
+  </data>
+  <data name="StartNoErrorFmt" xml:space="preserve">
+    <value>編號({0})超出範圍, 請重新輸入!</value>
+  </data>
+  <data name="AdjustBase" xml:space="preserve">
+    <value>選取藍本</value>
+  </data>
+  <data name="AdjustElement" xml:space="preserve">
+    <value>調整元素</value>
+  </data>
+  <data name="AdjustObject" xml:space="preserve">
+    <value>操作對象</value>
+  </data>
+  <data name="CurrentElemChangedFmt" xml:space="preserve">
+    <value>當前元素區域改變數: {0:0},{1:0},{2:0},{3:0}, </value>
+  </data>
+  <data name="CurrentElemRectSizeFmt" xml:space="preserve">
+    <value>當前元素區域尺寸： {0:0}*{1:0}, </value>
+  </data>
+  <data name="CurrentReviseElemFmt" xml:space="preserve">
+    <value>當前可修改元素: {0}個, </value>
+  </data>
+  <data name="CurrentSelectElemFmt" xml:space="preserve">
+    <value>當前選中元素：{0}, </value>
+  </data>
+  <data name="DefineElemRectFirst" xml:space="preserve">
+    <value>請先定義當前元素矩形!</value>
+  </data>
+  <data name="ParamError" xml:space="preserve">
+    <value>參數錯誤！</value>
+  </data>
+  <data name="SetAsKongbai" xml:space="preserve">
+    <value>設為空白元素</value>
+  </data>
+  <data name="SetAsQuezi" xml:space="preserve">
+    <value>設為闕字元素</value>
+  </data>
+  <data name="SetAsYin" xml:space="preserve">
+    <value>設為印章元素</value>
+  </data>
+  <data name="SetAsZi" xml:space="preserve">
+    <value>設為字元素</value>
+  </data>
+  <data name="DashedLine" xml:space="preserve">
+    <value>點線</value>
+  </data>
+  <data name="DottedLine" xml:space="preserve">
+    <value>點線</value>
+  </data>
+  <data name="SolidLine" xml:space="preserve">
+    <value>連續</value>
   </data>
 </root>

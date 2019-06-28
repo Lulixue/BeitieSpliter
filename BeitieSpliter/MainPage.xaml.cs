@@ -938,23 +938,17 @@ namespace BeitieSpliter
             CurrentPage.Invalidate();
         }
 
-        private void PenWidth_LostFocus(object sender, RoutedEventArgs e)
+        private void PenWidth_LostFocus(object obj, RoutedEventArgs e)
         {
-            var combo = (ComboBox)sender;
-
-            if (combo?.Text == "")
-            {
-                return;
-            }
-
-            if (Regex.IsMatch(combo.Text, "^[\\d]+\\.?[\\d]?$") && combo.Text != "")
+            try
             {
                 BtGrids.PenWidth = float.Parse(PenWidthCombo.Text);
             }
-            else
+            catch
             {
+                Common.ShowMessageDlg(/*"无效宽度: "*/GetPlainString(StringItemType.InvalidWidth) + PenWidthCombo.Text, null);
                 BtGrids.PenWidth = 2;
-                Common.ShowMessageDlg("无效宽度: " + combo.Text, null);
+                PenWidthCombo.Text = "2";
             }
             CurrentPage.Invalidate();
         }
@@ -1203,15 +1197,16 @@ namespace BeitieSpliter
                 CurrentBtImage.PageTextConfirmed = true;
             }
             InitWait();
-            NotifyUser("开始保存分割单字图片...", NotifyType.StatusMessage);
+            NotifyUser(/*"开始保存分割单字图片..."*/GetPlainString(StringItemType.BeginSaving), NotifyType.StatusMessage);
             await SaveSplitImagesProc(para);
             WaitForSaving();
             SaveErrorType type = SaveErrType;
             
             if (type == SaveErrorType.NoSelectedItem)
             {
-                NotifyUser("未选择元素进行保存!", NotifyType.ErrorMessage);
-                Common.ShowMessageDlg("未选择元素进行保存!", null);
+                string notfInfo = GetPlainString(StringItemType.NoElemSelected);
+                NotifyUser(/*"未选择元素进行保存!"*/notfInfo, NotifyType.ErrorMessage);
+                Common.ShowMessageDlg(/*"未选择元素进行保存!"*/notfInfo, null);
             }
             else if (type == SaveErrorType.ParaError)
             {
@@ -1331,7 +1326,7 @@ namespace BeitieSpliter
 
                 if (!BtGrids.GetElementRoi(index, ref roi))
                 {
-                    SaveNotfInfo += string.Format("保存图片{0}出现错误!", filename);
+                    SaveNotfInfo += string.Format(/*"保存图片{0}出现错误!"*/GetPlainString(StringItemType.SaveErrorFmt), filename);
                     SaveErrType = SaveErrorType.ParaError;
                     continue;
                 }
@@ -1350,7 +1345,7 @@ namespace BeitieSpliter
             if (SaveErrType == SaveErrorType.Success)
             {
                 StorageFolder folder = await GetSaveFolder(album);
-                SaveNotfInfo = string.Format("单字分割图片({0}张)已保存到文件夹{1}",
+                SaveNotfInfo = string.Format(/*"单字分割图片({0}张)已保存到文件夹{1}"*/GetPlainString(StringItemType.NotfAfterSaveFmt),
                     saveCount, folder.Path);
             }
 
@@ -1361,7 +1356,7 @@ namespace BeitieSpliter
         {
             if (CurrentBtImage == null)
             {
-                Common.ShowMessageDlg("请选择书法碑帖图片!", null);
+                Common.ShowMessageDlg(/*"请选择书法碑帖图片!"*/GetPlainString(StringItemType.PleaseChooseBeitie), null);
                 return;
             }
             SaveSplitImages(null);
@@ -1446,13 +1441,13 @@ namespace BeitieSpliter
             string info = "";
             if (CurrentBtImage != null)
             {
-                info += string.Format("图片尺寸: {0:0}*{1:0}, ", CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
+                info += string.Format(/*"图片尺寸: {0:0}*{1:0}, "*/GetPlainString(StringItemType.ImageSizeFmt), CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
             }
-            info += string.Format("当前碑帖: {0}, 起始单字编号: {1}({2}), ", TieAlbum.Text, StartNoBox.Text,
+            info += string.Format(/*"当前碑帖: {0}, 起始单字编号: {1}({2}), "*/GetPlainString(StringItemType.CurrentBeitieStartNoFmt), TieAlbum.Text, StartNoBox.Text,
                 NoNameSwitch.IsOn ? NoNameSwitch.OnContent : NoNameSwitch.OffContent);
-            info += string.Format("字: {0}, 阙字({5}): {1}, 印章({6}): {2}, 空白({7}): {3}, 其他({8}): {4}",
+            info += string.Format("字: {0}, {9}({5}): {1}, 印章({6}): {2}, 空白({7}): {3}, 其他({8}): {4}",
                 CharCount, LostCharCount, SealCount, SpaceCount, OtherCount,
-                "{缺}/□", "{印:}", "{}", "{XX}");
+                "{缺}/□", "{印:}", "{}", "{XX}", GetPlainString(StringItemType.Quezi));
 
             NotifyUser(info, NotifyType.StatusMessage);
         }
@@ -1465,7 +1460,10 @@ namespace BeitieSpliter
             }
             catch (OverflowException)
             {
-                Common.ShowMessageDlg("编号(" + StartNoBox.Text + ")超出范围, 请重新输入!", null);
+                Common.ShowMessageDlg(
+                    string.Format(/*"编号({0})超出范围, 请重新输入!"*/GetPlainString(StringItemType.StartNoErrorFmt),
+                                        StartNoBox.Text), 
+                    null);
                 StartNoBox.Text = "1";
             }
         }

@@ -18,6 +18,7 @@ using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
+using static BeitieSpliter.LanguageHelper;
 
 namespace BeitieSpliter
 {
@@ -71,9 +72,9 @@ namespace BeitieSpliter
 
             Close,      // 关闭
             Quezi,      // 阙字
-            ImageSize,  // 图片尺寸
-            CurrentBeitie,  // 当前碑帖
-            StartSingleNo,  // 起始单字编号
+            StartNoErrorFmt,       // 编号({0})超出范围, 请重新输入!
+            ImageSizeFmt,       // 图片尺寸: {0:0}*{1:0}, 
+            CurrentBeitieStartNoFmt,  // 当前碑帖: {0}, 起始单字编号: {1}({2}),   
             PleaseChooseBeitie, // 请选择书法碑帖图片
             NotfAfterSaveFmt,      // 单字分割图片({0}张)已保存到文件夹{1}
             SaveErrorFmt,       // 保存图片{0}出现错误!
@@ -92,6 +93,22 @@ namespace BeitieSpliter
             NotfAdjustCurrentElementFmt,      // 当前选择调整{0}
             SplashInfoFirstPart,    // \r\n\r\nCtrl+鼠标滚轮进行放大缩小\r\n\r\n作者：卢立雪\r\n微信：13612977027\r\n邮箱：jackreagan@163.com\r\n\r\n
             SplashInfoSecondPart,   // \r\n感谢使用，欢迎反馈软件问题！
+            AdjustBase,             // 选取蓝本
+            AdjustObject,           // 操作对象
+            DefineElemRectFirst,    // 请先定义当前元素矩形!
+            AdjustElement,          // 调整元素
+            SetAsKongbai,           // 设为空白元素
+            SetAsQuezi,             // 设为阙字元素
+            SetAsYin,               // 设为印章元素
+            SetAsZi,                // 设为字元素
+            CurrentReviseElemFmt,   // 当前可修改元素: {0}个, 
+            CurrentSelectElemFmt,   // 当前选中元素：{0}, 
+            CurrentElemRectSizeFmt, // 当前元素区域尺寸： {0:0}*{1:0}, 
+            CurrentElemChangedFmt,  // 当前元素区域改变量: {0:0},{1:0},{2:0},{3:0}, 
+            ParamError,         // 参数错误!
+            DashedLine,         // 虚线
+            DottedLine,         // 点线
+            SolidLine,          // 实线
         }
 
 
@@ -198,15 +215,15 @@ namespace BeitieSpliter
         {
             // 添加颜色
             LightColorItems.Clear();
-            LightColorItems.Add(new ColorBoxItem(Colors.Green, "绿色"));
+            LightColorItems.Add(new ColorBoxItem(Colors.Green, /*"绿色"*/GetPlainString(StringItemType.Green)));
             LightColorItems.Add(new ColorBoxItem(Colors.White, "白色"));
             LightColorItems.Add(new ColorBoxItem(Colors.Orange, "橙色"));
             LightColorItems.Add(new ColorBoxItem(Colors.Gray, "灰色"));
             LightColorItems.Add(new ColorBoxItem(Colors.Yellow, "黄色"));
 
             DarkColorItems.Clear();
-            DarkColorItems.Add(new ColorBoxItem(Colors.Blue, "蓝色"));
-            DarkColorItems.Add(new ColorBoxItem(Colors.Red, "红色"));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Blue, /*"蓝色"*/GetPlainString(StringItemType.Blue)));
+            DarkColorItems.Add(new ColorBoxItem(Colors.Red, /*"红色"*/GetPlainString(StringItemType.Red)));
             DarkColorItems.Add(new ColorBoxItem(Colors.Black, "黑色"));
             DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色")); 
         }
@@ -302,14 +319,19 @@ namespace BeitieSpliter
             AutoResetEvent h = new AutoResetEvent(false);
             h.WaitOne(msTime);
         }
+
+        private static string GetPlainString(StringItemType type)
+        {
+            return LanguageHelper.GetPlainString(type);
+        }
         public static async Task<bool> ShowNotifyPageTextDlg()
         {
             ContentDialog locationPromptDialog = new ContentDialog
             {
-                Title = "输入释文",
-                Content = "你还没有输入释文, 是否生成图片?",
-                CloseButtonText = "继续生成",
-                PrimaryButtonText = "输入释文",
+                Title = /*"输入释文"*/GetPlainString(StringItemType.EnterText),
+                Content = /*"你还没有输入释文, 是否生成图片?"*/GetPlainString(StringItemType.PromptNoText),
+                CloseButtonText = /*"继续生成"*/GetPlainString(StringItemType.ContinueGenerate),
+                PrimaryButtonText = /*"输入释文"*/GetPlainString(StringItemType.EnterText),
             };
 
             ContentDialogResult result = await locationPromptDialog.ShowAsync();
@@ -319,10 +341,10 @@ namespace BeitieSpliter
         {
             ContentDialog locationPromptDialog = new ContentDialog
             {
-                Title = "关闭当前窗口",
-                Content = "输入释文需要关闭本窗口，转到主界面输入，是否转到主界面输入？",
-                CloseButtonText = "直接生成",
-                PrimaryButtonText = "好的",
+                Title = /*"关闭当前窗口"*/GetPlainString(StringItemType.CloseDialog),
+                Content = /*"输入释文需要关闭本窗口，转到主界面输入，是否转到主界面输入？"*/GetPlainString(StringItemType.CloseDialogToMain),
+                CloseButtonText = /*"直接生成"*/GetPlainString(StringItemType.DirectlyGenerate),
+                PrimaryButtonText = /*"好的"*/GetPlainString(StringItemType.OK),
             };
 
             ContentDialogResult result = await locationPromptDialog.ShowAsync();
@@ -335,7 +357,7 @@ namespace BeitieSpliter
 
             // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
             messageDialog.Commands.Add(new UICommand(
-                    "关闭", handler));
+                    /*"关闭"*/GetPlainString(StringItemType.Close), handler));
 
             // Set the command that will be invoked by default
             messageDialog.DefaultCommandIndex = 0;
@@ -385,7 +407,7 @@ namespace BeitieSpliter
                 case BeitieElementType.Zi:
                     return "字";
                 case BeitieElementType.Quezi:
-                    return "阙字";
+                    return /*"阙字"*/GetPlainString(StringItemType.Quezi);
             }
             return "";
         }

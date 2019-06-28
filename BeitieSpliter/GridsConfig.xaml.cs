@@ -35,6 +35,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Windows.UI.Xaml.Media.Animation;
+using static BeitieSpliter.LanguageHelper;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -174,11 +175,11 @@ namespace BeitieSpliter
             switch (type)
             {
                 case PenLineType.Dash:
-                    return "虚线";
+                    return /*"虚线"*/GetPlainString(StringItemType.DashedLine);
                 case PenLineType.Dot:
-                    return "点线";
+                    return /*"点线"*/GetPlainString(StringItemType.DottedLine);
                 case PenLineType.Line:
-                    return "实线";
+                    return /*"实线"*/GetPlainString(StringItemType.SolidLine);
             }
             return "未知";
         }
@@ -1273,6 +1274,11 @@ namespace BeitieSpliter
             RewardMe.Content = LanguageHelper.GetConfigString("RewardMe/Content", hant);
         }
 
+        private string GetPlainString(StringItemType type)
+        {
+            return LanguageHelper.GetPlainString(type);
+        }
+
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("SettingsPage_Loaded() called");
@@ -1291,7 +1297,7 @@ namespace BeitieSpliter
             AdjustAddHandler(BtnBottomMinus);
             AdjustAddHandler(BtnRightMinus);
             AdjustAddHandler(BtnRightAdd);
-            NotifyUser(string.Format("当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}",
+            NotifyUser(string.Format(/*"当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}"*/GetPlainString(StringItemType.ConfigNotifyInfoFmt),
                 BtImage.resolutionX, BtImage.resolutionY, BtGrids.ElementRects.Count, BtGrids.Rows, BtGrids.Columns, ChangeStep),
                 NotifyType.StatusMessage);
 
@@ -1307,7 +1313,7 @@ namespace BeitieSpliter
                 ChkAvgCol.Visibility = Visibility.Collapsed;
                 ChkAvgRow.Visibility = Visibility.Collapsed;
                 ChkSingleFocus.Visibility = Visibility.Collapsed;
-                OpObjectTitle.Text = "选取蓝本";
+                OpObjectTitle.Text = /*"选取蓝本"*/GetPlainString(StringItemType.AdjustBase);
 
                 AdjustGridsSwitch.Visibility = Visibility.Visible;
                 ChkHideGrid.Visibility = Visibility.Visible;
@@ -1440,17 +1446,17 @@ namespace BeitieSpliter
             switch (OpType)
             {
                 case OperationType.SingleColumn:
-                    notfInfo = string.Format("当前调整第{0}列，选中{1}", selCol, elemstr);
+                    notfInfo = string.Format(/*"当前调整第{0}列，选中{1}"*/GetPlainString(StringItemType.AdjustColumnFmt), selCol, elemstr);
                     break;
                 case OperationType.SingleRow:
-                    notfInfo = string.Format("当前调整第{0}行，选中{1}", selRow, elemstr);
+                    notfInfo = string.Format(/*"当前调整第{0}行，选中{1}"*/GetPlainString(StringItemType.AdjustRowFmt), selRow, elemstr);
                     break;
                 case OperationType.WholePage:
-                    notfInfo = string.Format("当前调整整页，选中{0}", elemstr);
+                    notfInfo = string.Format(/*"当前调整整页，选中{0}"*/GetPlainString(StringItemType.AdjustWholeFmt), elemstr);
                     break;
                 case OperationType.SingleElement:
                 default:
-                    notfInfo = string.Format("当前调整{0}", elemstr);
+                    notfInfo = string.Format(/*"当前调整{0}"*/GetPlainString(StringItemType.AdjustElementFmt), elemstr);
                     break;
 
             }
@@ -1462,12 +1468,12 @@ namespace BeitieSpliter
             string notfInfo;
             if (currentElemIndex < 0)
             {
-                notfInfo = string.Format("请用鼠标截取{0}所在的区域",
+                notfInfo = string.Format(/*"请用鼠标截取{0}所在的区域"*/GetPlainString(StringItemType.NotfToCaptureByMouseFmt),
                                             BtGrids.GetElementString(CurrentElements.SelectedIndex));
             }
             else
             {
-                notfInfo = string.Format("当前选择调整{0}", BtGrids.GetElementString(currentElemIndex));
+                notfInfo = string.Format(/*"当前选择调整{0}"*/GetPlainString(StringItemType.NotfAdjustCurrentElementFmt), BtGrids.GetElementString(currentElemIndex));
             }
 
             OpNotfText.Text = notfInfo;
@@ -1505,12 +1511,13 @@ namespace BeitieSpliter
             string notfInfo;
             if (currentElemIndex < 0)
             {
-                notfInfo = string.Format("请用鼠标截取{0}所在的区域", 
+                notfInfo = string.Format(/*"请用鼠标截取{0}所在的区域"*/GetPlainString(StringItemType.NotfToCaptureByMouseFmt), 
                                             BtGrids.GetElementString(CurrentElements.SelectedIndex));
             }
             else
             {
-                notfInfo = string.Format("当前选择调整{0}", BtGrids.GetElementString(currentElemIndex));
+                notfInfo = string.Format(/*"当前选择调整{0}"*/GetPlainString(StringItemType.NotfAdjustCurrentElementFmt),
+                                        BtGrids.GetElementString(currentElemIndex));
             }
 
             draw.FillRectangle(rc, Colors.Green);
@@ -1972,13 +1979,13 @@ namespace BeitieSpliter
                 draw.DrawRectangle(BtImageShowRect, Colors.White, 1);
                 if ((BtGrids == null) || (BtImage == null))
                 {
-                    draw.DrawText("参数错误!", new Vector2(100, 100), Colors.Black);
+                    draw.DrawText(/*"参数错误!"*/GetPlainString(StringItemType.ParamError), new Vector2(100, 100), Colors.Black);
                     return;
                 }
                 if (BtImage.cvsBmp == null)
                 {
                     draw.Clear(Colors.Black);
-                    draw.DrawText("图片正在加载中...", new Vector2(100, 100), Colors.Blue);
+                    draw.DrawText(/*"图片正在加载中..."*/GetPlainString(StringItemType.ImageLoading), new Vector2(100, 100), Colors.Blue);
                     Refresh();
                     return;
                 }
@@ -2218,13 +2225,14 @@ namespace BeitieSpliter
         {
             string info = "";
             int selectedElemIndex = CurrentElements.SelectedIndex;
-            info += string.Format("当前可修改元素: {0}个, ", BtGrids.XingcaoMode ?
+            info += string.Format(/*"当前可修改元素: {0}个, "*/GetPlainString(StringItemType.CurrentReviseElemFmt), BtGrids.XingcaoMode ?
                 GetXingCaoElementCount() : DrawLineElements.Count );
-            info += string.Format("当前选中元素：{0}, ", BtGrids.GetElementString(selectedElemIndex));
-            info += string.Format("当前元素区域尺寸： {0:0}*{1:0}, ", ToAdjustRect.Width, ToAdjustRect.Height);
+            info += string.Format(/*"当前选中元素：{0}, "*/GetPlainString(StringItemType.CurrentSelectElemFmt), BtGrids.GetElementString(selectedElemIndex));
+            info += string.Format(/*"当前元素区域尺寸： {0:0}*{1:0}, "*/GetPlainString(StringItemType.CurrentElemRectSizeFmt), ToAdjustRect.Width, ToAdjustRect.Height);
             if (!BtGrids.XingcaoMode)
             {
-                info += string.Format("当前元素区域改变量: {0:0},{1:0},{2:0},{3:0}, ", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
+                info += string.Format(/*"当前元素区域改变量: {0:0},{1:0},{2:0},{3:0}, "*/GetPlainString(StringItemType.CurrentElemChangedFmt),
+                                ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
             }
             info += string.Format("修改角度: {0:F1}", BtGrids.angle);
             NotifyUser(info, NotifyType.StatusMessage);
@@ -3047,11 +3055,11 @@ namespace BeitieSpliter
             if (!BtGrids.XingcaoMode)
             {
                 int selectedElemIndex = CurrentElements.SelectedIndex + 1;
-                MenuFlyoutItem setAsKb = new MenuFlyoutItem { Text = "设为空白元素" };
-                MenuFlyoutItem setAsYz = new MenuFlyoutItem { Text = "设为印章元素" };
-                MenuFlyoutItem setAsZi = new MenuFlyoutItem { Text = "设为字元素" };
-                MenuFlyoutItem setAsQuezi = new MenuFlyoutItem { Text = "设为阙字元素" };
-                MenuFlyoutItem AdjustElem = new MenuFlyoutItem { Text = "调整元素" + selectedElemIndex };
+                MenuFlyoutItem setAsKb = new MenuFlyoutItem { Text = /*"设为空白元素"*/GetPlainString(StringItemType.SetAsKongbai) };
+                MenuFlyoutItem setAsYz = new MenuFlyoutItem { Text = /*"设为印章元素"*/GetPlainString(StringItemType.SetAsYin) };
+                MenuFlyoutItem setAsZi = new MenuFlyoutItem { Text = /*"设为字元素"*/GetPlainString(StringItemType.SetAsZi) };
+                MenuFlyoutItem setAsQuezi = new MenuFlyoutItem { Text = /*"设为阙字元素"*/GetPlainString(StringItemType.SetAsQuezi) };
+                MenuFlyoutItem AdjustElem = new MenuFlyoutItem { Text = /*"调整元素"*/GetPlainString(StringItemType.AdjustElement) + selectedElemIndex };
                 AdjustElem.Click += ElementMenuAdjusttElement_Click;
                 setAsKb.Click += ElementMenuSetAs_Click;
                 setAsYz.Click += ElementMenuSetAs_Click;
@@ -3329,12 +3337,12 @@ namespace BeitieSpliter
             {
                 ChkAvgCol.Visibility = Visibility.Visible;
                 ChkHideGrid.IsChecked = false;
-                OpObjectTitle.Text = "操作对象";
+                OpObjectTitle.Text = /*"操作对象"*/GetPlainString(StringItemType.AdjustObject);
             }
             else
             {
                 ChkAvgCol.Visibility = Visibility.Collapsed;
-                OpObjectTitle.Text = "选取蓝本";
+                OpObjectTitle.Text = /*"选取蓝本"*/GetPlainString(StringItemType.AdjustBase);
             }
             Refresh();
         }
@@ -3425,7 +3433,7 @@ namespace BeitieSpliter
                 BtGrids.XingcaoElements.TryGetValue(index, out bgr);
                 if (bgr == null)
                 {
-                    Common.ShowMessageDlg("请先定义当前元素矩形!", null);
+                    Common.ShowMessageDlg(/*"请先定义当前元素矩形!"*/GetPlainString(StringItemType.DefineElemRectFirst), null);
                     return;
                 }
             }
@@ -3458,7 +3466,7 @@ namespace BeitieSpliter
             {
                 type = BeitieElement.BeitieElementType.Yinzhang;
             }
-            else if (txt.Contains("阙字"))
+            else if (txt.Contains(/*"阙字"*/GetPlainString(StringItemType.Quezi)))
             {
                 type = BeitieElement.BeitieElementType.Quezi;
             }
@@ -3500,7 +3508,7 @@ namespace BeitieSpliter
             bool bRet = await ParentPage.SetPenWidth(PenWidthCombo.Text);
             if (!bRet)
             {
-                Common.ShowMessageDlg("无效宽度: " + PenWidthCombo.Text, null);
+                Common.ShowMessageDlg(/*"无效宽度: "*/GetPlainString(StringItemType.InvalidWidth) + PenWidthCombo.Text, null);
                 PenWidthCombo.Text = string.Format("{0:F0}", BtGrids.PenWidth);
                 await ParentPage.SetPenWidth(PenWidthCombo.Text);
             }
