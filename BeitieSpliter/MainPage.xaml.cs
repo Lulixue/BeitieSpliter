@@ -1252,7 +1252,7 @@ namespace BeitieSpliter
 
         public async Task<SaveErrorType> SaveSplitImagesProc(object para)
         {
-            string album = TieAlbum.Text;
+            string album = TieAlbum.Text + "_" + GetPlainString(StringItemType.SingleChar);
             WriteableBitmap inputBitmap;
             HashSet<int> ElementIndexes = (HashSet<int>)para;
             int StartNo = int.Parse(StartNoBox.Text);
@@ -1688,6 +1688,7 @@ namespace BeitieSpliter
                 MoreOptionBtn.IsEnabled = bEnable;
                 if (XingcaoMode)
                 {
+                    NoNameSwitch.IsEnabled = bEnable;
                     ZiCountBox.IsEnabled = bEnable;
                     PageText.IsEnabled = bEnable;
                 }

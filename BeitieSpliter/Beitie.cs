@@ -117,6 +117,7 @@ namespace BeitieSpliter
             Folder,             //  文件夹: 
             PictureNotFound,    // 所选文件夹下找不到碑帖图片！
             FileBroken,         // 文件损坏或文件不支持!
+            SingleChar,         // 单字
         }
 
 

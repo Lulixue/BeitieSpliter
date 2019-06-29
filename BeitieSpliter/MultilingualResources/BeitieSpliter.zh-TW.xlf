@@ -53,7 +53,6 @@
         <trans-unit id="SaveSplitImgs.Content" translate="yes" xml:space="preserve">
           <source>保存分割图片</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">保存分割圖片</target>
-          
         </trans-unit>
         <trans-unit id="TextSizeGrade.Header" translate="yes" xml:space="preserve">
           <source>总字数</source>
@@ -268,7 +267,6 @@
         <trans-unit id="PleaseChooseBeitie" translate="yes" xml:space="preserve">
           <source>请选择书法碑帖图片！</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">請選擇書法碑帖圖片！</target>
-          
         </trans-unit>
         <trans-unit id="NotfAfterSaveFmt" translate="yes" xml:space="preserve">
           <source>单字分割图片({0}张)已保存到文件夹{1}</source>
@@ -445,6 +443,10 @@
         <trans-unit id="BottomMost" translate="yes" xml:space="preserve">
           <source>已经到了最下边了!</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">已經到了最下邊了!</target>
+        </trans-unit>
+        <trans-unit id="SingleChar" translate="yes" xml:space="preserve">
+          <source>单字</source>
+          <target state="needs-review-translation" state-qualifier="tm-suggestion">單字</target>
         </trans-unit>
       </group>
     </body>

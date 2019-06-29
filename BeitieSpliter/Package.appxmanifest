@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="7306CBEBBB89.2446588ED59CF" Publisher="CN=3A7406AE-57BC-445A-A17D-01ACE0CBE125" Version="1.1.0.0" />
+  <Identity Name="7306CBEBBB89.2446588ED59CF" Publisher="CN=3A7406AE-57BC-445A-A17D-01ACE0CBE125" Version="1.2.0.0" />
   <mp:PhoneIdentity PhoneProductId="2515244b-20c7-49be-88d8-1411ad08f1b6" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>碑帖分割器</DisplayName>

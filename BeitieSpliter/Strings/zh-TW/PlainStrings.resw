@@ -204,4 +204,7 @@
   <data name="BottomMost" xml:space="preserve">
     <value>已經到了最下邊了!</value>
   </data>
+  <data name="SingleChar" xml:space="preserve">
+    <value>單字</value>
+  </data>
 </root>

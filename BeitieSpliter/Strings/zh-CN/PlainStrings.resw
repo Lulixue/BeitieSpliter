@@ -297,9 +297,19 @@
   <data name="FileBroken" xml:space="preserve">
     <value>文件损坏或不支持!</value>
   </data>
-  
-             <data name="TopMost" xml:space="preserve"> <value>已经到了最上边了!</value>  </data>
-             <data name="LeftMost" xml:space="preserve"> <value>已经到了最左边了!</value>  </data>
-             <data name="RightMost" xml:space="preserve"> <value>已经到了最右边了!</value>  </data>
-             <data name="BottomMost" xml:space="preserve"> <value>已经到了最下边了!</value>  </data>
+  <data name="TopMost" xml:space="preserve">
+    <value>已经到了最上边了!</value>
+  </data>
+  <data name="LeftMost" xml:space="preserve">
+    <value>已经到了最左边了!</value>
+  </data>
+  <data name="RightMost" xml:space="preserve">
+    <value>已经到了最右边了!</value>
+  </data>
+  <data name="BottomMost" xml:space="preserve">
+    <value>已经到了最下边了!</value>
+  </data>
+  <data name="SingleChar" xml:space="preserve">
+    <value>单字</value>
+  </data>
 </root>
