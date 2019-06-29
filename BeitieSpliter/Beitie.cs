@@ -221,7 +221,7 @@ namespace BeitieSpliter
         public static List<ColorBoxItem> DarkColorItems = new List<ColorBoxItem>();
 
         public static readonly string[] TEXT_SIZE_GRADES = { "10+", "100+", "1000+", "10000+" };
-        public static readonly string[] HANT_LANGUAGE_CODES = { "zh-hk", "zh-mo", "zh-tw" };
+        public static readonly string[] HANT_LANGUAGE_CODES = { "zh-hk", "zh-mo", "zh-tw", "zh-hant"};
         public static void Init()
         {
             // 添加颜色
@@ -259,7 +259,7 @@ namespace BeitieSpliter
             topUserLanguage = topUserLanguage.ToLower();
             foreach (var item in HANT_LANGUAGE_CODES)
             {
-                if (item.Equals(topUserLanguage, StringComparison.OrdinalIgnoreCase))
+                if (topUserLanguage.Contains(item, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
