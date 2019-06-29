@@ -479,7 +479,9 @@ namespace BeitieSpliter
             }
 
             scroll.ChangeView(0, 0, factor);
+
         }
+
 
         public void InitAfterBack()
         {
@@ -495,6 +497,18 @@ namespace BeitieSpliter
             ParsePageText();
             BtnMore.IsEnabled = true;
 
+            int larger = (int)Common.GetLargerOne(CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
+            int size = (larger / Common.PEN_WIDTH_DIVIDER);
+            if (size < Common.DEFAULT_PEN_WIDTH)
+            {
+                size = Common.DEFAULT_PEN_WIDTH;
+            }
+            else
+            {
+                size += 1;
+                size = Common.GetLessOne(size, PenWidthCombo.Items.Count); 
+            } 
+            PenWidthCombo.SelectedIndex = size - 1;
             RefreshPage(1);
 
         }
@@ -947,8 +961,8 @@ namespace BeitieSpliter
             catch
             {
                 Common.ShowMessageDlg(/*"无效宽度: "*/GetPlainString(StringItemType.InvalidWidth) + PenWidthCombo.Text, null);
-                BtGrids.PenWidth = 2;
-                PenWidthCombo.Text = "2";
+                BtGrids.PenWidth = Common.DEFAULT_PEN_WIDTH;
+                PenWidthCombo.Text = Common.DEFAULT_PEN_WIDTH.ToString();
             }
             CurrentPage.Invalidate();
         }

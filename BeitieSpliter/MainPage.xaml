@@ -73,20 +73,20 @@
         <Button Grid.Row="0" Grid.Column="2" Margin="0,0,10,0"  x:Name="SaveSplitImgs" x:Uid="SaveSplitImgs" HorizontalAlignment="Stretch"  Height="50" Content="保存分割图片" FontSize="18" Click="OnSaveSplitImages"/>
 
 
-        <StackPanel Padding="10,2,0,0"   Name="FastParaPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel Padding="10,3,0,0"   Name="FastParaPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock Name="ZiCountTitle" Text="字数：" x:Uid="ZiCountTitle" Visibility="Collapsed" Margin="1,0,5,0" Style="{StaticResource LeftFriendly}" />
             <TextBox  x:Name="ZiCountBox" Text="100" Visibility="Collapsed" InputScope="TelephoneNumber" FontSize="14"
-                        LostFocus="ZiCount_LostFocus" Margin="0,3,5,3"/>
+                        LostFocus="ZiCount_LostFocus" Margin="0,3,5,0" VerticalAlignment="Center"/>
             <TextBlock  Name="RowCountTitle" Text="行数：" x:Uid="RowCountTitle" Margin="1,0,0,0" Style="{StaticResource LeftFriendly}" />
-            <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"  
+            <ComboBox  x:Name="RowCount" Margin="0,3,0,0"  SelectionChanged="RowCount_SelectionChanged"    VerticalAlignment="Center"
                         LostFocus="RowCount_LostFocus" IsDropDownOpen="True" IsEditable="True" />
             <TextBlock x:Name="ColumnCountTitle" Text="列数：" x:Uid="ColumnCountTitle" Margin="10,0,0,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="ColumnCount"  Margin="0,3,0,0" SelectionChanged="ColumnCount_SelectionChanged"  
-                        LostFocus="ColumnCount_LostFocus"
+                        LostFocus="ColumnCount_LostFocus"  VerticalAlignment="Center"
                         IsDropDownOpen="True" IsEditable="True"  />
             <TextBlock Name="MarginTitle"  x:Uid="MarginTitle" Text="裁边：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
-            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1"  LostFocus="PageMargin_LostFocus"  FontSize="14"
-                         Margin="0,3,5,3">
+            <TextBox  x:Name="PageMarginsBox" Text="1,1,1,1"  LostFocus="PageMargin_LostFocus"  FontSize="14" VerticalAlignment="Center"
+                         Margin="0,3,5,0">
                 <ToolTipService.ToolTip>
                     <ToolTip Name="MarginToolTip" x:Uid="MarginToolTip" Content="左侧，顶部，右侧，底部"
                      Placement="Bottom"
@@ -96,17 +96,18 @@
 
             <TextBlock  Name="GridColorTitle" x:Uid="GridColorTitle"  Text="网格颜色：" Margin="5,0,5,0" Style="{StaticResource LeftFriendly}" />
 
-            <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
+            <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}"  VerticalAlignment="Center"
                         SelectedValuePath="Value" DisplayMemberPath="Text" Margin="0,3,0,0" 
                         SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
                         SelectionChanged="PenColor_SelectionChanged"  IsDropDownOpen="True" 
                          />
             <TextBlock  Name="GridWidthTitle" x:Uid="GridWidthTitle"  Text="网格宽度：" Margin="10,0,5,0" Style="{StaticResource LeftFriendly}" />
             <ComboBox  x:Name="PenWidthCombo" Margin="0,3,0,0"  SelectionChanged="PenWidth_SelectionChanged"  
-                        LostFocus="PenWidth_LostFocus"
+                        LostFocus="PenWidth_LostFocus" VerticalAlignment="Center"
                         IsDropDownOpen="True" IsEditable="True" />
            
-            <Button Name="MoreOptionBtn" Background="Transparent" VerticalAlignment="Center" Click="ClickedMoreOptions" Margin="5,0,0,0">
+            <Button Name="MoreOptionBtn" Background="Transparent" VerticalAlignment="Center" Click="ClickedMoreOptions" 
+                    Margin="5,3,0,0">
                 <Button.Content>
                     <FontIcon x:Name="More" FontFamily="Segoe MDL2 Assets" FontSize="25" Glyph="&#xE712;"/>
                 </Button.Content>
@@ -122,9 +123,9 @@
 
 
 
-        <RelativePanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0" >
-            <CheckBox Name="XingcaoModeCheck" Click="XincaoModeCheck_Clicked" Content="行草模式" Margin="15,0,0,0" FontSize="16" MinWidth="100"/>
-            <Button x:Name="BtnMore" x:Uid="BtnMore" Content="高级" RelativePanel.RightOf="XingcaoModeCheck" Margin="10,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
+        <RelativePanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="0,3,10,0" >
+            <CheckBox Name="XingcaoModeCheck" Click="XincaoModeCheck_Clicked"  VerticalAlignment="Center" Content="行草模式" Margin="15,0,0,0" FontSize="16" MinWidth="100"/>
+            <Button x:Name="BtnMore" x:Uid="BtnMore" Content="高级"  VerticalAlignment="Center" RelativePanel.RightOf="XingcaoModeCheck" Margin="10,0,0,0" Click="BtnMore_Clicked" IsEnabled="False"/>
         </RelativePanel>
 
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="3" Margin="10,5,5,0"

@@ -51,7 +51,7 @@
           <target state="needs-review-translation" state-qualifier="mt-suggestion">行數：</target>
         </trans-unit>
         <trans-unit id="SaveSplitImgs.Content" translate="yes" xml:space="preserve">
-          <source>保存碑帖图片</source>
+          <source>保存分割图片</source>
           <target state="needs-review-translation" state-qualifier="mt-suggestion">保存分割圖片</target>
           
         </trans-unit>

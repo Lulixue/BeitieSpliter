@@ -201,6 +201,8 @@ namespace BeitieSpliter
         public static readonly int UNICODE_CHS_START = 0x4E00;
         public static readonly int UNICODE_CHS_END = 0x9FBB;
         public static readonly int AUTOSLIDE_OFFSET = 10;
+        public static readonly int DEFAULT_PEN_WIDTH = 2;
+        public static readonly int PEN_WIDTH_DIVIDER = 1000;
 
 
         public enum NavigationTransitionType
@@ -236,6 +238,18 @@ namespace BeitieSpliter
             DarkColorItems.Add(new ColorBoxItem(Colors.Purple, "紫色")); 
         }
 
+        public static int GetLessOne(int first, int second)
+        {
+            return (first > second) ? second : first;
+        }
+        public static int GetLargerOne(int first, int second)
+        {
+            return (first < second) ? second : first;
+        }
+        public static float GetLargerOne(float first, float second)
+        {
+            return (first < second) ? second : first;
+        }
         // 系统语言是繁体
         public static bool SystemLanguageIsHanT()
         {
