@@ -94,7 +94,7 @@
     <value>圖片正在加載中...</value>
   </data>
   <data name="SoftwareVersion" xml:space="preserve">
-    <value>軟件版本：{0}. {1}. {2}. {3}</value>
+    <value>軟件版本：{0}.{1}.{2}.{3}</value>
   </data>
   <data name="ConfigNotifyInfoFmt" xml:space="preserve">
     <value>當前圖片: {0:0}*{1:0}, 元素個數: {2}, 行列數：{3}*{4}, 修改步進: {5:F1}</value>

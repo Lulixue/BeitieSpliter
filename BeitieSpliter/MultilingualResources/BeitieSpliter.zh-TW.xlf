@@ -298,7 +298,7 @@
         </trans-unit>
         <trans-unit id="SoftwareVersion" translate="yes" xml:space="preserve">
           <source>软件版本：{0}.{1}.{2}.{3}</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">軟件版本：{0}. {1}. {2}. {3}</target>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">軟件版本：{0}.{1}.{2}.{3}</target>
         </trans-unit>
         <trans-unit id="ConfigNotifyInfoFmt" translate="yes" xml:space="preserve">
           <source>当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}</source>

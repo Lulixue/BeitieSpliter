@@ -1244,6 +1244,7 @@ namespace BeitieSpliter
         private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
         {
             ParentPage.SetConfigPage(null);
+            this.ShowSaveResultEvtHdlr = null;
         }
 
         private void UpdateChineseLanguage()
@@ -2488,7 +2489,6 @@ namespace BeitieSpliter
                     Common.ShowMessageDlg(ParentPage.SaveNotfInfo, null);
                 }
 
-                ApplicationView.GetForCurrentView().ExitFullScreenMode();
             });
         }
 

@@ -13,6 +13,8 @@ using Windows.Foundation;
 using Windows.Graphics.Display;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Core;
+using Windows.UI.Notifications;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -373,6 +375,21 @@ namespace BeitieSpliter
             ContentDialogResult result = await locationPromptDialog.ShowAsync();
             return (result == ContentDialogResult.Primary);
         }
+        private static void ShowToastNotification(string title, string stringContent)
+        {
+            ToastNotifier ToastNotifier = ToastNotificationManager.CreateToastNotifier();
+            Windows.Data.Xml.Dom.XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText02);
+            Windows.Data.Xml.Dom.XmlNodeList toastNodeList = toastXml.GetElementsByTagName("text");
+            toastNodeList.Item(0).AppendChild(toastXml.CreateTextNode(title));
+            toastNodeList.Item(1).AppendChild(toastXml.CreateTextNode(stringContent));
+            Windows.Data.Xml.Dom.IXmlNode toastNode = toastXml.SelectSingleNode("/toast");
+            Windows.Data.Xml.Dom.XmlElement audio = toastXml.CreateElement("audio");
+            audio.SetAttribute("src", "ms-winsoundevent:Notification.SMS");
+
+            ToastNotification toast = new ToastNotification(toastXml);
+            toast.ExpirationTime = DateTime.Now.AddSeconds(4);
+            ToastNotifier.Show(toast);
+        }
         public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
         {
             // Create the message dialog and set its content
@@ -389,7 +406,7 @@ namespace BeitieSpliter
             messageDialog.CancelCommandIndex = 1;
 
             // Show the message dialog
-            await messageDialog.ShowAsync();
+            await messageDialog.ShowAsync(); 
         }
     }
     public sealed class BeitieElement
