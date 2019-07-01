@@ -206,6 +206,7 @@ namespace BeitieSpliter
         public static readonly int AUTOSLIDE_OFFSET = 10;
         public static readonly int DEFAULT_PEN_WIDTH = 2;
         public static readonly int PEN_WIDTH_DIVIDER = 1000;
+        public static readonly int DEFAULT_SINGLE_PREVIEW_EXTSIZE = 10;
 
 
         public enum NavigationTransitionType
@@ -245,7 +246,11 @@ namespace BeitieSpliter
         {
             return (first > second) ? second : first;
         }
-        public static int GetLargerOne(int first, int second)
+        public static double GetLessOne(double first, double second)
+        {
+            return (first > second) ? second : first;
+        }
+        public static double GetLargerOne(double first, double second)
         {
             return (first < second) ? second : first;
         }
@@ -622,7 +627,7 @@ namespace BeitieSpliter
             }
         }
 
-        public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol, bool actualSize = false)
+        public Rect GetMaxRectangle(int minRow, int minCol, int maxRow, int maxCol, bool actualSize = false, int extsize = 0)
         {
             Point pntLt = new Point();
             Point pntRb = new Point();
@@ -630,33 +635,16 @@ namespace BeitieSpliter
             GetMinLeftTop(minRow, maxRow, minCol, maxCol, ref pntLt);
             GetMaxRightBottom(minRow, maxRow, minCol, maxCol, ref pntRb);
 
-
+            Point imgLt = new Point(0, 0);
+            Point imgRb = new Point(BtImageParent.resolutionX, BtImageParent.resolutionY);
             if (!actualSize)
             {
-                //pntLt.X -= ExtraSize;
-                //pntLt.Y -= ExtraSize;
-                //pntRb.X += ExtraSize;
-                //pntRb.Y += ExtraSize;
+                imgLt.X += PageMargin.Left;
+                imgLt.Y += PageMargin.Top;
+                imgRb.X -= PageMargin.Right;
+                imgRb.Y -= PageMargin.Bottom;
 
-                //if (pntLt.X < 0)
-                //{
-                //    pntLt.X = 0;
-                //}
 
-                //if (pntLt.Y < 0)
-                //{
-                //    pntLt.Y = 0;
-                //}
-
-                //if (pntRb.X > BtImageParent.resolutionX)
-                //{
-                //    pntRb.X = BtImageParent.resolutionX;
-                //}
-
-                //if (pntRb.Y > BtImageParent.resolutionY)
-                //{
-                //    pntRb.Y = BtImageParent.resolutionY;
-                //}
                 // 显示全图
                 if (minRow == Common.MIN_ROW_COL)
                 {
@@ -676,6 +664,18 @@ namespace BeitieSpliter
                     double tailored = BtImageParent.resolutionX - PageMargin.Right;
                     pntRb.X = (tailored < pntRb.X) ? pntRb.X : tailored;
                 }
+            }
+            if (extsize > 0)
+            {
+                double left = pntLt.X - extsize;
+                double top  = pntLt.Y - extsize;
+                double right = pntRb.X + extsize;
+                double bottom = pntRb.Y + extsize;
+
+                pntLt.X = Common.GetLargerOne(left, imgLt.X);
+                pntLt.Y = Common.GetLargerOne(top, imgLt.Y);
+                pntRb.X = Common.GetLessOne(right, imgRb.X);
+                pntRb.Y = Common.GetLessOne(bottom, imgRb.Y);
             }
 
 

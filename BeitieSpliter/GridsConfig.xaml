@@ -293,8 +293,9 @@
                         <RadioButton x:Name="OpSingleElement"  x:Uid="OpSingleElement"   Content="单字" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
                         <RadioButton x:Name="OpSingleColumn"    Content="整列" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0"/>
                         <RadioButton x:Name="OpSingleRow"  Content="整行" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" />
+                        <RadioButton x:Name="OpSinglePreview"  Content="预览" MinWidth="80"  Checked="Operation_Checked" GroupName="OperationGroup" HorizontalAlignment="Left" FontSize="16" Margin="1,0" Visibility="Collapsed"/>
                     </StackPanel>
-                    <StackPanel Margin="0,50,0,50"></StackPanel>
+                    <StackPanel Margin="0,20,0,50"></StackPanel>
                     <StackPanel  Margin="2" Orientation="Vertical" VerticalAlignment="Bottom">
                         <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" >
                             <Button Name="BtnTopElement" Content="上一字" Margin="2" Background="Green" Click="ElementMove_Clicked"/>
@@ -317,7 +318,7 @@
                     <AppBarButton Name="BtnZoomIn" Icon="ZoomIn" Label="放大" HorizontalAlignment="Center"  Margin="2" Click="Clicked_Zoom"/>
                     <AppBarButton Name="BtnZoomOut" Icon="ZoomOut" x:Uid="BtnZoomOut" Label="缩小" HorizontalAlignment="Center"   Margin="2" Click="Clicked_Zoom" />
 
-                    <StackPanel Orientation="Horizontal" Margin="5">
+                    <StackPanel Orientation="Horizontal" Margin="5,20,5,5">
                         <Button Name="LeftScrollBtn" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Right" Click="ClickHorizontalScroll"  >
                             <Button.Content>
                                 <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="16" Glyph="&#xE76B;"/>

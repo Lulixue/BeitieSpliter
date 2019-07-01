@@ -110,6 +110,7 @@ namespace BeitieSpliter
             SingleRow,
             SingleColumn,
             WholePage,
+            SinglePreview,
         }
 
         enum PenLineType
@@ -951,6 +952,13 @@ namespace BeitieSpliter
                 NextCol = BtGrids.Columns;
                 minRow = maxRow = SelectedRow;
             }
+            else if (OpType == OperationType.SinglePreview)
+            {
+                PreCol = NextCol = SelectedCol;
+                PreRow = NextRow = SelectedRow;
+                minCol = maxCol = SelectedCol;
+                minRow = maxRow = SelectedRow;
+            }
             else if (OperationType.SingleElement == OpType)
             {
                 // 单字专注，只显示周围区域
@@ -977,7 +985,15 @@ namespace BeitieSpliter
                 NextCol = maxCol;
             }
             
-            BtImageAdjustRect = BtGrids.GetMaxRectangle(PreRow, PreCol, NextRow, NextCol);
+            if (OpType == OperationType.SinglePreview)
+            { 
+                BtImageAdjustRect = BtGrids.GetMaxRectangle(PreRow, PreCol, NextRow, NextCol, 
+                                                false, Common.DEFAULT_SINGLE_PREVIEW_EXTSIZE);
+            }
+            else
+            { 
+                BtImageAdjustRect = BtGrids.GetMaxRectangle(PreRow, PreCol, NextRow, NextCol);
+            }
 
             pntLt.X = AdjustExtendSize; // 0
             pntLt.Y = AdjustExtendSize; // 0
@@ -1094,17 +1110,21 @@ namespace BeitieSpliter
             TestCase();
 
             int index = 0;
+            CurrentElements.Items.Clear();
             foreach (KeyValuePair<int, BeitieElement> pair in BtGrids.Elements)
             {
                 CurrentElements.Items.Add(String.Format("{0}[{1}]", pair.Value.content, ++index));
             }
             CurrentElements.SelectedIndex = 0;
 
+            RowNumber.Items.Clear();
             for (int i = 1; i <= BtGrids.Rows; i++)
             {
                 RowNumber.Items.Add(i);
             }
             RowNumber.SelectedIndex = 0;
+
+            ColumnNumber.Items.Clear();
             for (int i = 1; i <=BtGrids.Columns; i++)
             {
                 ColumnNumber.Items.Add(i);
@@ -1113,21 +1133,32 @@ namespace BeitieSpliter
             CurrentItem.Height = BtImage.resolutionY;
             CurrentItem.Width = BtImage.resolutionX;
 
-            foreach (ColorBoxItem item in Common.LightColorItems)
+            if (!IsPageUnloaded)
             {
-                ColorBoxItems.Add(item);
+                ColorBoxItems.Clear();
+                foreach (ColorBoxItem item in Common.LightColorItems)
+                {
+                    ColorBoxItems.Add(item);
+                }
+                foreach (ColorBoxItem item in Common.DarkColorItems)
+                {
+                    ColorBoxItems.Add(item);
+                }
+                PenWidthCombo.Items.Clear();
+                for (int i = 1; i < Common.DEFAULT_MAX_PEN_WIDTH; i++)
+                {
+                    PenWidthCombo.Items.Add(i);
+                }
+
+                PenLineTypeCombo.Items.Clear();
+                PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dash));
+                PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dot));
+                PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Line));
             }
-            foreach (ColorBoxItem item in Common.DarkColorItems)
-            {
-                ColorBoxItems.Add(item);
-            }
+
+             
             ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Value == BtGrids.PenColor);
 
-            //////网格
-            for (int i = 1; i < Common.DEFAULT_MAX_PEN_WIDTH; i++)
-            {
-                PenWidthCombo.Items.Add(i);
-            }
             bool IsFloat = (BtGrids.PenWidth - (int)BtGrids.PenWidth) > 0;
             string strWidth;
             if (IsFloat)
@@ -1140,17 +1171,12 @@ namespace BeitieSpliter
 
             }
             PenWidthCombo.Text = strWidth;
-
-            PenLineTypeCombo.Items.Clear();
-            PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dash));
-            PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dot));
-            PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Line));
+            
 
             if (BtGrids.PenWidth > 3)
             {
                 LineType = PenLineType.Line;
             }
-
             PenLineTypeCombo.SelectedIndex = (int)LineType;
 
             // 设置存储变量
@@ -1223,7 +1249,7 @@ namespace BeitieSpliter
         }
 
         void AdjustAddHandler(Button btn)
-        {
+        {  
             btn.AddHandler(PointerPressedEvent, new PointerEventHandler(Adjust_PointerPressed), true);
             btn.AddHandler(PointerReleasedEvent, new PointerEventHandler(Adjust_PointerReleased), true);
         }
@@ -1240,11 +1266,10 @@ namespace BeitieSpliter
 
             ChangeStepTxtBox.Text = string.Format("{0:0}", ChangeStep);
         }
-
+        bool IsPageUnloaded = false;
         private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            ParentPage.SetConfigPage(null);
-            this.ShowSaveResultEvtHdlr = null;
+            IsPageUnloaded = true;  
         }
 
         private void UpdateChineseLanguage()
@@ -1283,27 +1308,32 @@ namespace BeitieSpliter
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("SettingsPage_Loaded() called");
-
+            Debug.WriteLine("SettingsPage_Loaded() called: " + IsPageUnloaded);
             InitControls();
             CalculateDrawRect();
             UpdateAngle();
             Operation_Checked(null, null);
             UpdateChangeStep();
 
-            AdjustAddHandler(BtnLeftAdd);
-            AdjustAddHandler(BtnLeftMinus);
-            AdjustAddHandler(BtnTopAdd);
-            AdjustAddHandler(BtnTopMinus);
-            AdjustAddHandler(BtnBottomAdd);
-            AdjustAddHandler(BtnBottomMinus);
-            AdjustAddHandler(BtnRightMinus);
-            AdjustAddHandler(BtnRightAdd);
+            if (!IsPageUnloaded)
+            {
+                AdjustAddHandler(BtnLeftAdd);
+                AdjustAddHandler(BtnLeftMinus);
+                AdjustAddHandler(BtnTopAdd);
+                AdjustAddHandler(BtnTopMinus);
+                AdjustAddHandler(BtnBottomAdd);
+                AdjustAddHandler(BtnBottomMinus);
+                AdjustAddHandler(BtnRightMinus);
+                AdjustAddHandler(BtnRightAdd);
+                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
+                Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
+                this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);
+            }
+         
             NotifyUser(string.Format(/*"当前图片: {0:0}*{1:0}, 元素个数: {2}, 行列数：{3}*{4}, 修改步进: {5:F1}"*/GetPlainString(StringItemType.ConfigNotifyInfoFmt),
                 BtImage.resolutionX, BtImage.resolutionY, BtGrids.ElementRects.Count, BtGrids.Rows, BtGrids.Columns, ChangeStep),
                 NotifyType.StatusMessage);
 
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
 
             if (BtGrids.XingcaoMode)
             {
@@ -1325,14 +1355,15 @@ namespace BeitieSpliter
             {
                 MainPage.ImgAutoFitScrollView(BtImage, ItemScrollViewer);
             }
-            Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
-            this.ShowSaveResultEvtHdlr += new EventHandler(this.OnShowSaveResultEvtHdlr);
+            
             ParentPage.SetConfigPage(this);
             if (GlobalSettings.MultiWindowMode)
             {
                 Common.SetWindowSize();
             }
             UpdateChineseLanguage();
+            OpWholePage.IsChecked = true;
+            IsPageUnloaded = false;
         }
 
 
@@ -2064,7 +2095,7 @@ namespace BeitieSpliter
             else if (OpSingleRow?.IsChecked ?? false)
             {
                 OpType = OperationType.SingleRow;
-                
+
                 if (BtnLeftElement != null)
                 {
                     BtnTopElement.Content = "上一行";
@@ -2096,7 +2127,7 @@ namespace BeitieSpliter
                 if (BtnLeftElement != null)
                 {
                     SetButton(BtnRightElement, false);
-                        SetButton(BtnLeftElement, false);
+                    SetButton(BtnLeftElement, false);
                     if (BtGrids.XingcaoMode)
                     {
                         SetButton(BtnTopElement, true);
@@ -2108,6 +2139,29 @@ namespace BeitieSpliter
                         SetButton(BtnBottomElement, false);
                     }
                     UpdateFixedChecks(false, false);
+                }
+            }
+            else if (OpSinglePreview?.IsChecked ?? false)
+            {
+                OpType = OperationType.SinglePreview;
+
+                BtnTopElement.Content = "上一字";
+                BtnBottomElement.Content = "下一字";
+                SetButton(BtnTopElement, true);
+                SetButton(BtnBottomElement, true);
+
+                if (!BtGrids.XingcaoMode)
+                {
+                    SetButton(BtnLeftElement, true);
+                    SetButton(BtnRightElement, true);
+                    BtnLeftElement.Content = "左一字";
+                    BtnRightElement.Content = "右一字";
+                    UpdateFixedChecks(true, true);
+                }
+                else
+                {
+                    SetButton(BtnLeftElement, false);
+                    SetButton(BtnRightElement, false);
                 }
             }
 
@@ -3523,6 +3577,10 @@ namespace BeitieSpliter
 
         private async void SelectionChangedPen(object sender, SelectionChangedEventArgs e)
         {
+            if (IsPageUnloaded)
+            {
+                return;
+            }
             if (sender == PenColorCombo)
             {
                 ParentPage.SetPenColor(ColorBoxSelectedItem.Text);
