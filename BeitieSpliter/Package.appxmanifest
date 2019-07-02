@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="BeitieSpliter.App">
-      <uap:VisualElements DisplayName="碑帖分割器" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\BeitieSpliter44X44Logo.png" Description="对碑帖图片进行单字分割" BackgroundColor="transparent">
+      <uap:VisualElements DisplayName="碑帖分割器" Square150x150Logo="Assets\Square150x150Logo.png" Description="对碑帖图片进行单字分割" Square44x44Logo="Assets\BeitieSpliter44X44Logo.png" BackgroundColor="transparent">
         <uap:DefaultTile>
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo" />

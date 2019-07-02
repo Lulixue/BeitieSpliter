@@ -162,7 +162,6 @@
   <ItemGroup>
     <Content Include="Assets\alipay_rewardme.jpg" />
     <Content Include="Assets\BeitieSpliter44X44Logo.scale-200.png" />
-    <Content Include="Assets\BeitieSpliter44X44Logo.targetsize-24.png" />
     <Content Include="Assets\StoreLogo.scale-100.png" />
     <Content Include="Assets\StoreLogo.scale-200.png" />
     <None Include="Package.StoreAssociation.xml" />
@@ -170,12 +169,8 @@
     <Content Include="Properties\Default.rd.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
