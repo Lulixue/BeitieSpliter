@@ -866,7 +866,7 @@ namespace BeitieSpliter
             UpdateRowCount();
         }
         private void RowCount_LostFocus(object sender, RoutedEventArgs e)
-        {
+        { 
             UpdateRowCount();
         }
 
@@ -912,9 +912,8 @@ namespace BeitieSpliter
 
         private void PageMargin_LostFocus(object sender, RoutedEventArgs e)
         {
-            string TotalPattern = "([\\d\\.]+),?([\\d\\.]?),?([\\d\\.]?),?([\\d\\.]?)";
+            string TotalPattern = "^([0-9]+),?([0-9]+)?,?([0-9]+)?,?([0-9]+)?$";
             var textbox = (TextBox)sender;
-            string backupText = textbox.Text;
             if (Regex.IsMatch(textbox.Text, TotalPattern) && textbox.Text != "")
             {
                 InitDrawParameters();
@@ -922,8 +921,8 @@ namespace BeitieSpliter
             }
             else
             {
-                Common.ShowMessageDlg("Invalid margin: " + textbox.Text, null);
-                textbox.Text = backupText;
+                Common.ShowMessageDlg(/*"Invalid margin: " */GetPlainString(StringItemType.InvalidMargin) + textbox.Text, null);
+                textbox.Text = Common.DEFAULT_MARGIN;
             }
         }
 
