@@ -165,7 +165,7 @@ namespace BeitieSpliter
             }
             catch
             {
-                Common.ShowMessageDlg("列数非法: " + ColumnCount.Text, new UICommandInvokedHandler(ColumnIllegalHandler));
+                Common.ShowMessageDlg(/*"列数非法: "*/GetPlainString(StringItemType.InvalidColumn) + ColumnCount.Text, new UICommandInvokedHandler(ColumnIllegalHandler));
             }
             return columns;
         }
@@ -184,7 +184,7 @@ namespace BeitieSpliter
             }
             catch
             {
-               Common.ShowMessageDlg("行数非法: " + RowCount.Text, new UICommandInvokedHandler(RowIllegalHandler));
+               Common.ShowMessageDlg(/*"行数非法: "*/GetPlainString(StringItemType.InvalidRow) + RowCount.Text, new UICommandInvokedHandler(RowIllegalHandler));
             }
             return columns;
         }
@@ -2083,6 +2083,16 @@ namespace BeitieSpliter
 
         private void ZiCount_LostFocus(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                int.Parse(ZiCountBox.Text);
+            }
+            catch
+            {
+                Common.ShowMessageDlg(GetPlainString(StringItemType.InvalidZiCount) + ZiCountBox.Text);
+                ZiCountBox.Text = Common.DEFAULT_XINGCAO_ZI_COUNT.ToString();
+            }
+
             InitDrawParameters();
             RefreshPage();
         }

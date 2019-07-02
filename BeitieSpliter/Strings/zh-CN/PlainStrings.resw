@@ -312,4 +312,9 @@
   <data name="SingleChar" xml:space="preserve">
     <value>单字</value>
   </data>
+  
+             <data name="InvalidColumn" xml:space="preserve"> <value>无效列数: </value>  </data>
+             <data name="InvalidRow" xml:space="preserve"> <value>无效行数: </value>  </data>
+             <data name="InvalidMargin" xml:space="preserve"> <value>无效裁边: </value>  </data>
+             <data name="InvalidZiCount" xml:space="preserve"> <value>无效字数: </value>  </data>
 </root>

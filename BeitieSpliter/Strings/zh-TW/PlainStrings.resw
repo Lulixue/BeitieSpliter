@@ -207,4 +207,16 @@
   <data name="SingleChar" xml:space="preserve">
     <value>單字</value>
   </data>
+  <data name="InvalidColumn" xml:space="preserve">
+    <value>無效列數: </value>
+  </data>
+  <data name="InvalidRow" xml:space="preserve">
+    <value>無效行數: </value>
+  </data>
+  <data name="InvalidMargin" xml:space="preserve">
+    <value>無效裁邊: </value>
+  </data>
+  <data name="InvalidZiCount" xml:space="preserve">
+    <value>無效字數: </value>
+  </data>
 </root>

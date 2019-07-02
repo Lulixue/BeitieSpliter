@@ -87,6 +87,10 @@ namespace BeitieSpliter
             NoElemSelected,     // 未选择元素进行保存!
             BeginSaving,        // 开始保存分割单字图片...
             InvalidWidth,       // 无效宽度: 
+            InvalidColumn,       // 无效列数: 
+            InvalidRow,         // 无效行数: 
+            InvalidMargin,       // 无效裁边: 
+            InvalidZiCount,       // 无效字数: 
             InvalidParam,       // 参数错误，请更改参数后重试!
             ImageLoading,       // 图片正在加载中...
             SoftwareVersion,      // 软件版本：{0}.{1}.{2}.{3}
@@ -207,6 +211,7 @@ namespace BeitieSpliter
         public static readonly int DEFAULT_PEN_WIDTH = 2;
         public static readonly int PEN_WIDTH_DIVIDER = 1000;
         public static readonly int DEFAULT_SINGLE_PREVIEW_EXTSIZE = 10;
+        public static readonly int DEFAULT_XINGCAO_ZI_COUNT = 100;
 
 
         public enum NavigationTransitionType
@@ -395,7 +400,7 @@ namespace BeitieSpliter
             toast.ExpirationTime = DateTime.Now.AddSeconds(4);
             ToastNotifier.Show(toast);
         }
-        public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler)
+        public static async void ShowMessageDlg(string msg, UICommandInvokedHandler handler = null)
         {
             // Create the message dialog and set its content
             var messageDialog = new MessageDialog(msg);

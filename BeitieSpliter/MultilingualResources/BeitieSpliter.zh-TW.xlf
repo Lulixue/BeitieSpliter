@@ -448,6 +448,22 @@
           <source>单字</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">單字</target>
         </trans-unit>
+        <trans-unit id="InvalidColumn" translate="yes" xml:space="preserve">
+          <source>无效列数: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">無效列數: </target>
+        </trans-unit>
+        <trans-unit id="InvalidRow" translate="yes" xml:space="preserve">
+          <source>无效行数: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">無效行數: </target>
+        </trans-unit>
+        <trans-unit id="InvalidMargin" translate="yes" xml:space="preserve">
+          <source>无效裁边: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">無效裁邊: </target>
+        </trans-unit>
+        <trans-unit id="InvalidZiCount" translate="yes" xml:space="preserve">
+          <source>无效字数: </source>
+          <target state="needs-review-translation" state-qualifier="mt-suggestion">無效字數: </target>
+        </trans-unit>
       </group>
     </body>
   </file>
