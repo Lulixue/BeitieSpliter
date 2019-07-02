@@ -18,3 +18,9 @@ Split Shufa Beitie Images to single chinese characters <br/>
 5.增加多窗口/单窗口切换功能<br/>
 6.增加TIF文件支持<br/>
 7.其他BUG修复和优化<br/>
+
+## V1.2 2019.7.2
+1. 增加繁体中文支持<br/>
+2. 修复单窗口模式下的BUG<br/>
+3. 图标更新，布局优化<br/>
+4. 其他BUG修复以及改进<br/>
