@@ -406,8 +406,7 @@ namespace BeitieSpliter
                 {
                     col = colNumber
                 };
-                BtGrids.XingcaoElements.Add(elemIndex, bgr);
-                FirstShowBanner = false;
+                BtGrids.XingcaoElements.Add(elemIndex, bgr); 
             }
             else
             {
@@ -1525,8 +1524,7 @@ namespace BeitieSpliter
             if (rc.Height > 30)
             {
                 rc.Height = 30;
-            }
-            rcBanner = rc;
+            } 
             // 在下方/上方显示当前元素名称
             CanvasTextFormat fmt = new CanvasTextFormat()
             {
@@ -1736,9 +1734,7 @@ namespace BeitieSpliter
             VerticalAlignment = CanvasVerticalAlignment.Center,
             HorizontalAlignment = CanvasHorizontalAlignment.Center,
         };
-        bool FirstShowBanner = true;
-        Rect rcBanner = new Rect();
-        
+
         private void FillOpacity(CanvasDrawingSession draw, Rect rc, Color clr, double opacity, bool noOpacity=false)
         {
             if (noOpacity)
@@ -1834,7 +1830,6 @@ namespace BeitieSpliter
             //Color OpacityColor = (BtGrids.BackupColors.Count > 0) ? BtGrids.BackupColors.ElementAt(0) : Colors.Green;
             float penWidth = BtGrids.PenWidth;
             Color drawColor = BtGrids.PenColor;
-            Color RevisedColor = BtGrids.PenColor;// GetRandomColor();
 
             pntLt.X += ChangeRect.left;
             pntLt.Y += ChangeRect.top;
@@ -1854,19 +1849,6 @@ namespace BeitieSpliter
                     rc.X -= BtImageAdjustRect.X;
                     rc.Y -= BtImageAdjustRect.Y;
                     drawColor = BtGrids.PenColor;
-                    if (BtGrids.GetRevised(row, col))
-                    {
-                        if (DrawLineElements.Count > 1)
-                        {
-                            //  在改变过程中不变化颜色
-                            if ((CurrentPntrStatus != PointerStatus.MoveToScalingBorder) &&
-                                (CurrentPntrStatus != PointerStatus.PressedToDrag))
-                            {
-                                drawColor = RevisedColor;
-                            }
-                             
-                        }
-                    }
                     if (BtGrids.ElementIsKongbai(BtGrids.GetIndex(row, col, BtGrids.BookOldType)))
                     {
                         InfoCTF.FontSize = (float)rc.Height / 4;
@@ -2964,7 +2946,7 @@ namespace BeitieSpliter
             }
 
         }
-
+         
         void CursorAdjustRect(Point pp)
         {
             double deltaX = pp.X - LastPointerPnt.X;
@@ -3260,25 +3242,24 @@ namespace BeitieSpliter
                         CursorAdjustRect(pp);
                         return;
                     }
-                    else if (BtGrids.XingcaoMode)
+                    else if (!IsOnElement(loc))
                     {
-                        if ((OpType != OperationType.SingleElement) &&
-                            (!AdjustGridsSwitch.IsOn))
+                        if (BtGrids.XingcaoMode)
                         {
-                            GetCursorOnXcElement(pp);
+                            if ((OpType != OperationType.SingleElement) &&
+                                (!AdjustGridsSwitch.IsOn))
+                            {
+                                GetCursorOnXcElement(pp);
+                            }
                         }
-                        if (FirstShowBanner && IsPntInRect(pp, rcBanner, 1))
+                        else
                         {
-                            FirstShowBanner = false;
+                            if (OpType != OperationType.SingleElement)
+                            {
+                                GetCursorOnElement(pp);
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (OpType != OperationType.SingleElement)
-                        {
-                            GetCursorOnElement(pp);
-                        }
-                    }
+                    } 
                     break;
                 case PointerStatus.Exited:
                     if ((LastPntrStatus == PointerStatus.PressedToDrag) ||
