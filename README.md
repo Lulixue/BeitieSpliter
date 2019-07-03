@@ -24,3 +24,8 @@ Split Shufa Beitie Images to single chinese characters <br/>
 2. 修复单窗口模式下的BUG<br/>
 3. 图标更新，布局优化<br/>
 4. 其他BUG修复以及改进<br/>
+
+## V1.2.1 2019.7.3
+1. 修复繁体中文无法切换的问题<br/>
+2. 去除一些不必要的权限G<br/>
+3. APP图标去除噪点<br/> 
