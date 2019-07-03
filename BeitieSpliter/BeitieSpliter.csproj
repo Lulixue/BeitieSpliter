@@ -124,12 +124,6 @@
   <PropertyGroup>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
-  <PropertyGroup Label="MultilingualAppToolkit">
-    <MultilingualAppToolkitVersion>4.0</MultilingualAppToolkitVersion>
-    <MultilingualFallbackLanguage>zh-CN</MultilingualFallbackLanguage>
-    <TranslationReport Condition="'$(Configuration)' == 'Release'">true</TranslationReport>
-    <SuppressPseudoWarning Condition="'$(Configuration)' == 'Debug'">true</SuppressPseudoWarning>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -152,12 +146,12 @@
     </AppxManifest>
     <None Include="BeitieSpliter_StoreKey.pfx" />
     <None Include="BeitieSpliter_TemporaryKey.pfx" />
-    <PRIResource Include="Strings\zh-TW\PlainStrings.resw" />
-    <PRIResource Include="Strings\zh-CN\PlainStrings.resw" />
-    <PRIResource Include="Strings\zh-TW\Config.resw" />
-    <PRIResource Include="Strings\zh-CN\Config.resw" />
-    <PRIResource Include="Strings\zh-TW\Resources.resw" />
-    <PRIResource Include="Strings\zh-CN\Resources.resw" />
+    <PRIResource Include="Strings\TResources.resw" />
+    <PRIResource Include="Strings\TPlainStrings.resw" />
+    <PRIResource Include="Strings\TConfig.resw" />
+    <PRIResource Include="Strings\Resources.resw" />
+    <PRIResource Include="Strings\PlainStrings.resw" />
+    <PRIResource Include="Strings\Config.resw" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\alipay_rewardme.jpg" />
@@ -201,17 +195,10 @@
       <Version>1.6.2</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <XliffResource Include="MultilingualResources\BeitieSpliter.zh-TW.xlf" />
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Multilingual App Toolkit\Microsoft.Multilingual.PriResources.targets" Label="MultilingualAppToolkit" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\Multilingual App Toolkit\v$(MultilingualAppToolkitVersion)\Microsoft.Multilingual.PriResources.targets')" />
-  <Target Name="MATPrerequisite" BeforeTargets="PrepareForBuild" Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\Multilingual App Toolkit\Microsoft.Multilingual.PriResources.targets')" Label="MultilingualAppToolkit">
-    <Warning Text="$(MSBuildProjectFile) is Multilingual build enabled, but the Multilingual App Toolkit is unavailable during the build. If building with Visual Studio, please check to ensure that toolkit is properly installed." />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

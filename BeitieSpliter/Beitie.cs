@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Foundation;
 using Windows.Graphics.Display;
@@ -45,12 +46,6 @@ namespace BeitieSpliter
 
     public sealed class LanguageHelper
     {
-        private static readonly ResourceContext ResContextHanS;
-        private static readonly ResourceContext ResContextHanT;
-        private static readonly ResourceMap ResMap;
-        private static readonly ResourceMap ConfigResMap;
-        private static readonly ResourceMap PlainStringsResMap;
-
         public enum StringItemType
         {
             EnterText,          // 输入释文
@@ -126,19 +121,24 @@ namespace BeitieSpliter
             SingleChar,         // 单字
         }
 
+        public enum ResourceType{
+            Config,
+            PlainStrings,
+            Resources,
+        }
 
+        private static readonly int RESOURCE_COUNT = Enum.GetValues(typeof(ResourceType)).Length;
+        private static readonly ResourceLoader[] ResLoaderHans = new ResourceLoader[RESOURCE_COUNT];
+        private static readonly ResourceLoader[] ResLoaderHant = new ResourceLoader[RESOURCE_COUNT];
 
         static LanguageHelper()
         {
-            ResContextHanS = new ResourceContext();
-            ResContextHanS.QualifierValues["Language"] = "zh-CN";
+            foreach (var type in Enum.GetValues(typeof(ResourceType)))
+            {
+                ResLoaderHans[(int)type] = ResourceLoader.GetForViewIndependentUse(type.ToString());
+                ResLoaderHant[(int)type] = ResourceLoader.GetForViewIndependentUse("T" + type.ToString());
+            }
 
-            ResContextHanT = new ResourceContext();
-            ResContextHanT.QualifierValues["Language"] = "zh-TW";
-            ResMap = ResourceManager.Current.MainResourceMap.GetSubtree("Resources");
-            ConfigResMap = ResourceManager.Current.MainResourceMap.GetSubtree("Config");
-
-            PlainStringsResMap = ResourceManager.Current.MainResourceMap.GetSubtree("PlainStrings");
         }
 
         public static string GetPlainString(StringItemType type)
@@ -147,46 +147,34 @@ namespace BeitieSpliter
         }
 
         public static string GetPlainString(StringItemType type, bool hant, string defValue = "")
-        {
+        { 
             string ret;
-            if (hant)
-            {
-                ret = PlainStringsResMap.GetValue(type.ToString(), ResContextHanT)?.ValueAsString ?? defValue;
-            }
-            else
-            {
-                ret = PlainStringsResMap.GetValue(type.ToString(), ResContextHanS)?.ValueAsString ?? defValue;
-            }
+            int index = (int)ResourceType.PlainStrings;
+            ResourceLoader loader = hant ? ResLoaderHant[index] : ResLoaderHans[index];
+
+            ret = loader.GetString(type.ToString());
 
             return ret?.Replace("\\r\\n", "\r\n") ?? null;
         }
 
         public static string GetConfigString(string name, bool hant, string defValue = null)
         {
-            string ret;
-            if (hant)
-            {
-                ret = ConfigResMap.GetValue(name, ResContextHanT)?.ValueAsString ?? defValue;
-            }
-            else
-            {
-                ret = ConfigResMap.GetValue(name, ResContextHanS)?.ValueAsString ?? defValue;
-            }
+            string ret; 
 
+            int index = (int)ResourceType.Config;
+            ResourceLoader loader = hant ? ResLoaderHant[index] : ResLoaderHans[index];
+            ret = loader.GetString(name);
+
+            
             return ret?.Replace("\\r\\n", "\r\n") ?? null;
         }
 
         public static string GetString(string name, bool hant, string defValue = null)
         {
             string ret;
-            if (hant)
-            {
-                ret = ResMap.GetValue(name, ResContextHanT)?.ValueAsString ?? defValue;
-            }
-            else
-            {
-                ret = ResMap.GetValue(name, ResContextHanS)?.ValueAsString ?? defValue;
-            }
+            int index = (int)ResourceType.Resources;
+            ResourceLoader loader = hant ? ResLoaderHant[index] : ResLoaderHans[index];
+            ret = loader.GetString(name);
 
             return ret?.Replace("\\r\\n", "\r\n") ?? null;
         }
