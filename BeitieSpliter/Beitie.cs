@@ -538,6 +538,18 @@ namespace BeitieSpliter
         public bool IsImageRotated() { return angle != 0; }
         public double ExtraSize = 5;
 
+        public Rect GetDrawRect()
+        {
+            Rect drawRc = new Rect()
+            {
+                X = PageMargin.Left,
+                Y = PageMargin.Top,
+                Width = DrawWidth,
+                Height = DrawHeight
+            };
+
+            return drawRc;
+        }
         public int GetZiCount()
         {
             int ziCount = 0;

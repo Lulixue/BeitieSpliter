@@ -1712,27 +1712,30 @@ namespace BeitieSpliter
                 Width = rc.Width,
                 Height = rc.Height,
             };
+            Rect drawRc = BtGrids.GetDrawRect();
             // 确保图片不变形
-            if (srcRc.X < BtGrids.PageMargin.Left)
+            // V1.2.1 出现负数导致闪现
+            if (srcRc.X < drawRc.Left)
             {
-                srcRc.X = BtGrids.PageMargin.Left;
+                srcRc.X = drawRc.Left;
             }
-            if (srcRc.Y < BtGrids.PageMargin.Top)
+            if (srcRc.Y < drawRc.Top)
             {
-                srcRc.Y = BtGrids.PageMargin.Top;
+                srcRc.Y = drawRc.Top;
             }
-            if (srcRc.Right > BtGrids.DrawWidth)
+            if (srcRc.Right > drawRc.Right)
             {
-                srcRc.Width = BtGrids.DrawWidth - srcRc.X;
+                srcRc.Width = drawRc.Right - srcRc.X;
             }
-            if (srcRc.Bottom > BtGrids.DrawHeight)
+            if (srcRc.Bottom > drawRc.Bottom)
             {
-                srcRc.Height = BtGrids.DrawHeight - srcRc.Y;
+                srcRc.Height = drawRc.Bottom - srcRc.Y;
             }
             rc.Width = srcRc.Width;
             rc.Height = srcRc.Height;
 
-            draw.FillRectangle(rc, Colors.Red);
+            
+            //draw.FillRectangle(rc, Colors.Red);
             draw.DrawImage(BtImage.cvsBmp, rc, srcRc);
         }
         private double GetItemScrollHeight()
