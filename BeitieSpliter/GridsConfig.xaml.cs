@@ -1714,7 +1714,6 @@ namespace BeitieSpliter
             };
             Rect drawRc = BtGrids.GetDrawRect();
             // 确保图片不变形
-            // V1.2.1 出现负数导致闪现
             if (srcRc.X < drawRc.Left)
             {
                 srcRc.X = drawRc.Left;
@@ -1725,6 +1724,7 @@ namespace BeitieSpliter
             }
             if (srcRc.Right > drawRc.Right)
             {
+                // V1.2.1 出现负数导致闪现
                 srcRc.Width = drawRc.Right - srcRc.X;
             }
             if (srcRc.Bottom > drawRc.Bottom)
