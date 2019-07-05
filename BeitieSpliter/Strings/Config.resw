@@ -181,7 +181,7 @@
     <value>元素固定高度</value>
   </data>
   <data name="ChkHideGrid.Content" xml:space="preserve">
-    <value>隐藏网格线</value>
+    <value>隐藏辅助线</value>
   </data>
   <data name="ChkHideScrollBar.Content" xml:space="preserve">
     <value>隐藏滚动条</value>

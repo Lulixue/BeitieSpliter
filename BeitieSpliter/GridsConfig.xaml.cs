@@ -1352,6 +1352,19 @@ namespace BeitieSpliter
             }
             else
             {
+                HangNoTitle.Visibility = Visibility.Visible;
+                RowNumber.Visibility = Visibility.Visible;
+                OpSingleRow.Visibility = Visibility.Visible;
+                ChkFixedHeight.Visibility = Visibility.Visible;
+                ChkFixedWidth.Visibility = Visibility.Visible;
+                ChkAvgCol.Visibility = Visibility.Visible;
+                ChkAvgRow.Visibility = Visibility.Visible;
+                ChkSingleFocus.Visibility = Visibility.Visible;
+                OpObjectTitle.Text = /*"选取蓝本"*/GetPlainString(StringItemType.AdjustObject);
+
+                AdjustGridsSwitch.Visibility = Visibility.Collapsed;
+                ChkHideGrid.Visibility = Visibility.Collapsed;
+
                 MainPage.ImgAutoFitScrollView(BtImage, ItemScrollViewer);
             }
             
