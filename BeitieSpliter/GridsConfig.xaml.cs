@@ -576,21 +576,29 @@ namespace BeitieSpliter
                     if (pnt.row == MIN_ROW_COLUMN)
                     {
                         pntLt.Y += offset.top;
+                        if (AvgRow)
+                            pntRb.Y += offset.top;
                         revised = false;
                     }
                     if (pnt.row == BtGrids.Rows)
                     {
                         pntRb.Y += offset.bottom;
+                        if (AvgRow)
+                            pntLt.Y += offset.bottom;
                         revised = false;
                     }
                     if (pnt.col == MIN_ROW_COLUMN)
                     {
                         pntLt.X += offset.left;
+                        if (AvgCol)
+                            pntRb.X += offset.left;
                         revised = false;
                     }
                     if (pnt.col == BtGrids.Columns)
                     {
                         pntRb.X += offset.right;
+                        if (AvgCol)
+                            pntLt.X += offset.right; 
                         revised = false;
                     }
                 }
@@ -653,6 +661,11 @@ namespace BeitieSpliter
                 int minRow = MIN_ROW_COLUMN;
                 int maxCol = BtGrids.Columns;
                 int maxRow = BtGrids.Rows;
+                Rect newRc = new Rect(
+                    new Point(ToAdjustRect.X + offset.left, ToAdjustRect.Y + offset.top),
+                    new Point(ToAdjustRect.Right + offset.right, ToAdjustRect.Bottom + offset.bottom)
+                    );
+
                 if (AvgRow && ((OperationType.SingleColumn == OpType) || (OperationType.WholePage == OpType)))
                 {
                     
@@ -661,6 +674,7 @@ namespace BeitieSpliter
                         minCol = maxCol = ColumnNumber.SelectedIndex + 1;
                     }
                     double height = BtGrids.GetRectangle(maxRow, maxCol).Bottom - BtGrids.GetRectangle(minRow, minCol).Top;
+                    height = newRc.Height;
                     double AvgHeight = height / BtGrids.Rows;
 
                     Debug.WriteLine("Height: {0:F1}, Avg Height: {1:F1}", height, AvgHeight);
@@ -685,12 +699,12 @@ namespace BeitieSpliter
                             PntLeftTop.X = dstRc.X;
                             pntRightBottom.X = PntLeftTop.X + dstRc.Width;
                             pntRightBottom.Y = PntLeftTop.Y + AvgHeight;
-                            if (row == BtGrids.Rows)
-                            {
-                                pntRightBottom.Y = dstRc.Bottom;
-                            }
+                            //if (row == BtGrids.Rows)
+                            //{
+                            //    pntRightBottom.Y = dstRc.Bottom;
+                            //}
                             // 已经调整过了就不再弄了
-                            if (!revised)
+                            //if (!revised)
                             {
                                 BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop, pntRightBottom), false);
 
@@ -710,6 +724,7 @@ namespace BeitieSpliter
                         minRow = maxRow = RowNumber.SelectedIndex + 1;
                     }
                     double width = BtGrids.GetRectangle(maxRow, maxCol).Right - BtGrids.GetRectangle(minRow, minCol).Left;
+                    width = newRc.Width;
                     double AvgWidth = width / BtGrids.Columns;
 
                     Debug.WriteLine("Width: {0:F1}, Avg Width: {1:F1}", width, AvgWidth);
@@ -733,12 +748,12 @@ namespace BeitieSpliter
                             PntLeftTop.Y = dstRc.Y;
                             pntRightBottom.X = PntLeftTop.X + AvgWidth;
                             pntRightBottom.Y = PntLeftTop.Y + dstRc.Height;
-                            if (col == BtGrids.Columns)
-                            {
-                                pntRightBottom.X = dstRc.Right;
-                            }
+                            //if (col == BtGrids.Columns)
+                            //{
+                            //    pntRightBottom.X = dstRc.Right;
+                            //}
                             // 已经调整过了就不再弄了
-                            if (!revised)
+                            //if (!revised)
                             {
                                 BtGrids.ElementRects[index] = new BeitieGridRect(new Rect(PntLeftTop, pntRightBottom), false);
                                 
@@ -1900,7 +1915,7 @@ namespace BeitieSpliter
                     UpdateOpNotfText(selrow, selcol, index);
 
                     rc.X -= BtImageAdjustRect.X;
-                    rc.Y -= BtImageAdjustRect.Y; 
+                    rc.Y -= BtImageAdjustRect.Y;
                     if ((OperationType.SingleElement == OpType))
                     {
                         FillOpacity(draw, BtImageShowRect, Colors.White, 0.1);
@@ -1908,13 +1923,18 @@ namespace BeitieSpliter
                     }
                     else
                     {
-                        rc.X += 1;
-                        rc.Y += 1;
-                        rc.Width -= 2;
-                        rc.Height -= 2;
-                        RedrawImageRect(draw, rc);
+                        Rect redrawRc = new Rect(
+                            new Point(rc.X + 1, rc.Y + 1),
+                            new Point(rc.Right - 1, rc.Bottom - 1)
+                            );
+                            
+                        //rc.X += 1;
+                        //rc.Y += 1;
+                        //rc.Width -= 2;
+                        //rc.Height -= 2;
+                        RedrawImageRect(draw, redrawRc);
                         //draw.DrawRectangle(rc, Colors.Red);
-                        FillOpacity(draw, rc, Colors.White, 0.2);
+                        FillOpacity(draw, redrawRc, Colors.White, 0.2);
                     } 
                 }
             }
@@ -3193,9 +3213,9 @@ namespace BeitieSpliter
                 case PointerStatus.Pressed:
                     if (loc == PointerLocation.OnElementBody)
                     {
+                        bool bDisableAllMove = (OpType == OperationType.WholePage) && !BtGrids.XingcaoMode;
                         // 禁用楷书整体的拖拽移动
-                        if ((OpType == OperationType.WholePage) &&
-                              !BtGrids.XingcaoMode)
+                        if (bDisableAllMove)
                         {
                             GetCursorOnElement(pp);
                             ShowElementMenu(pp);

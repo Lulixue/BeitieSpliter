@@ -201,6 +201,7 @@ namespace BeitieSpliter
         public static readonly int DEFAULT_SINGLE_PREVIEW_EXTSIZE = 10;
         public static readonly int DEFAULT_XINGCAO_ZI_COUNT = 100;
         public static readonly string DEFAULT_MARGIN = "1,1,1,1";
+        public static readonly double WHOLEPAGE_DRAG_PROP = 2.0;
 
 
         public enum NavigationTransitionType
