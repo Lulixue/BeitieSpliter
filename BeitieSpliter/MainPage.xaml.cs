@@ -2137,14 +2137,25 @@ namespace BeitieSpliter
             multiElem.IsChecked = GlobalSettings.MultiWindowMode;
             multiElem.Click += ClickedMultiWindow;
 
+            MenuFlyoutItem refresh = new MenuFlyoutItem { Text = "刷新" };
+
+            refresh.Click += ClickedRefresh;
             chtElem.IsChecked = GlobalSettings.TranditionalChineseMode;
             chtElem.Click += ClickedTrandChinese;
             myFlyout.MenuFlyoutPresenterStyle = menuStyle;
+            myFlyout.Items.Add(refresh);
             myFlyout.Items.Add(chtElem);
             myFlyout.Items.Add(new MenuFlyoutSeparator());
             myFlyout.Items.Add(multiElem);
 
             myFlyout.ShowAt(MoreOptionBtn, new Point(0, MoreOptionBtn.ActualHeight)); 
+        }
+
+        private void ClickedRefresh(object sender, RoutedEventArgs e)
+        {
+            CurrentPage.Height = ImageScrollViewer.ViewportHeight;
+            CurrentPage.Width = ImageScrollViewer.ViewportWidth;
+            FolderFileCombo_SelectionChanged(null, null);
         }
 
         private void ClickedTrandChinese(object sender, RoutedEventArgs e)
