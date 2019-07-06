@@ -3183,6 +3183,11 @@ namespace BeitieSpliter
 
         private void UpdatePointer(Point pp, PointerStatus status)
         {
+            bool bDisableAllMove = (OpType == OperationType.WholePage) && !BtGrids.XingcaoMode;
+            double adjustProp = BtImageAdjustRect.Width / ToAdjustRect.Width;
+            double adjustPropY = BtImageAdjustRect.Height / ToAdjustRect.Height;
+            adjustProp = (adjustProp < adjustPropY) ? adjustPropY : adjustProp;
+            bDisableAllMove = bDisableAllMove && (adjustProp < Common.WHOLEPAGE_DRAG_PROP);
             LastPntrStatus = CurrentPntrStatus;
             LastPointerPnt = CurrentPointerPnt;
             LastLocation = CurrentLocation;
@@ -3213,7 +3218,6 @@ namespace BeitieSpliter
                 case PointerStatus.Pressed:
                     if (loc == PointerLocation.OnElementBody)
                     {
-                        bool bDisableAllMove = (OpType == OperationType.WholePage) && !BtGrids.XingcaoMode;
                         // 禁用楷书整体的拖拽移动
                         if (bDisableAllMove)
                         {
@@ -3313,7 +3317,7 @@ namespace BeitieSpliter
                 default:
                     break;
             }
-            if (!BtGrids.XingcaoMode && (OpType == OperationType.WholePage))
+            if (bDisableAllMove)
             {
                 if ((loc == PointerLocation.OnElementBody))
                 {
