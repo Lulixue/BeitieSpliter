@@ -195,4 +195,10 @@
   <data name="ThankTitle.Text" xml:space="preserve">
     <value>感謝使用軟件，掃描下方二維碼讚賞開發者，謝謝!</value>
   </data>
+  <data name="AdjustGridsSwitch.OffContent" xml:space="preserve">
+    <value>設置元素</value>
+  </data>
+  <data name="AdjustGridsSwitch.OnContent" xml:space="preserve">
+    <value>調整輔助綫</value>
+	</data>
 </root>

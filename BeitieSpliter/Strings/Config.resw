@@ -195,4 +195,10 @@
   <data name="ThankTitle.Text" xml:space="preserve">
     <value>感谢使用软件，扫描下方二维码赞赏开发者，谢谢!</value>
   </data>
+  <data name="AdjustGridsSwitch.OffContent" xml:space="preserve">
+    <value>设置元素</value>
+  </data>
+  <data name="AdjustGridsSwitch.OnContent" xml:space="preserve">
+    <value>调整辅助线</value>
+  </data>
 </root>

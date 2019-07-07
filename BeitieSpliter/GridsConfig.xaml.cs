@@ -1313,6 +1313,8 @@ namespace BeitieSpliter
             ChkHideGrid.Content = LanguageHelper.GetConfigString("ChkHideGrid/Content", hant);
             ChkHideScrollBar.Content = LanguageHelper.GetConfigString("ChkHideScrollBar/Content", hant);
             RewardMe.Content = LanguageHelper.GetConfigString("RewardMe/Content", hant);
+            AdjustGridsSwitch.OffContent = LanguageHelper.GetConfigString("AdjustGridsSwitch/OffContent", hant);
+            AdjustGridsSwitch.OnContent = LanguageHelper.GetConfigString("AdjustGridsSwitch/OnContent", hant);
         }
 
         private string GetPlainString(StringItemType type)
@@ -1890,8 +1892,9 @@ namespace BeitieSpliter
                     }
                     else
                     {
-                        //辅助线使用点
-                        if (BtGrids.XingcaoMode)
+                        // 辅助线使用点
+                        // 调整辅助线时采用网格设置
+                        if (BtGrids.XingcaoMode && (!AdjustGridsSwitch?.IsOn ?? true))
                         {
                             DrawRectangle(draw, rc, drawColor, penWidth, false, CanvasDashStyle.Dot);
                         }
@@ -3411,6 +3414,7 @@ namespace BeitieSpliter
 
         private void GridCheck_Clicked(object sender, RoutedEventArgs e)
         {
+            HideGridChecked = !HideGridChecked;
             Refresh();
         }
 
@@ -3425,6 +3429,7 @@ namespace BeitieSpliter
             else
             {
                 ChkAvgCol.Visibility = Visibility.Collapsed;
+                ChkHideGrid.IsChecked = HideGridChecked;
                 OpObjectTitle.Text = /*"选取蓝本"*/GetPlainString(StringItemType.AdjustBase);
             }
             Refresh();

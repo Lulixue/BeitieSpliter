@@ -222,7 +222,7 @@
 
 
                             <StackPanel  Margin="20,10,0,0" Orientation="Vertical" VerticalAlignment="Center">
-                                <ToggleSwitch Margin="0,2,0,2" Name="AdjustGridsSwitch" Visibility="Collapsed" Width="120"  OffContent="设置文字" 
+                                <ToggleSwitch Margin="0,2,0,2" x:Uid="AdjustGridsSwitch" Name="AdjustGridsSwitch" Visibility="Collapsed"  OffContent="设置文字" 
                                           OnContent="调整网格" Toggled="AdjustGrids_Toggled" />
                                 <CheckBox Margin="0,2,0,2" Name="ChkShowSize" x:Uid="ChkShowSize" Content="显示尺寸" IsChecked="True" Click="ClickedShowSize" />
                                 <CheckBox Margin="0,2,0,2" Name="ChkNoOpacity" x:Uid="ChkNoOpacity" Content="护眼模式" IsChecked="True" Click="ClickedNoOpacity" />
