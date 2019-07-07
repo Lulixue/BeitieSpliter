@@ -29,3 +29,7 @@ Split Shufa Beitie Images to single chinese characters <br/>
 1. 修复繁体中文无法切换的问题<br/>
 2. 去除一些不必要的权限<br/>
 3. APP图标去除噪点<br/> 
+
+## V1.2.2 2019.7.7
+1. 修复更改裁边崩溃的BUG
+2. 其他BUG修复和优化
