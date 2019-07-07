@@ -33,3 +33,4 @@ Split Shufa Beitie Images to single chinese characters <br/>
 ## V1.2.2 2019.7.7
 1. 修复更改裁边崩溃的BUG
 2. 其他BUG修复和优化
+3. 增加刷新功能
