@@ -2137,7 +2137,7 @@ namespace BeitieSpliter
             multiElem.IsChecked = GlobalSettings.MultiWindowMode;
             multiElem.Click += ClickedMultiWindow;
 
-            MenuFlyoutItem refresh = new MenuFlyoutItem { Text = "刷新" };
+            MenuFlyoutItem refresh = new MenuFlyoutItem { Text = "重载" };
 
             refresh.Click += ClickedRefresh;
             chtElem.IsChecked = GlobalSettings.TranditionalChineseMode;

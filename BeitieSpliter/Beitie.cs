@@ -192,9 +192,7 @@ namespace BeitieSpliter
         public static readonly int DEFAULT_MAX_ROW_COLUMN = 20;
         public static readonly int MIN_ELEMENT_TEXT_HEIGHT = 20;
         public static readonly int MAX_ELEMENT_TEXT_HEIGHT = 50;
-        public static readonly int EXTRA_MAX_ELEM_TXT_HEIGHT = 100;
-        public static readonly int UNICODE_CHS_START = 0x4E00;
-        public static readonly int UNICODE_CHS_END = 0x9FBB;
+        public static readonly int EXTRA_MAX_ELEM_TXT_HEIGHT = 100; 
         public static readonly int AUTOSLIDE_OFFSET = 10;
         public static readonly int DEFAULT_PEN_WIDTH = 2;
         public static readonly int PEN_WIDTH_DIVIDER = 1000;
@@ -300,10 +298,57 @@ namespace BeitieSpliter
             }
         }
 
+        /* 
+         * Block                                   Range       Comment
+            CJK Unified Ideographs                  4E00-9FFF   Common
+            CJK Unified Ideographs Extension A      3400-4DBF   Rare
+            CJK Unified Ideographs Extension B      20000-2A6DF Rare, historic
+            CJK Unified Ideographs Extension C      2A700–2B73F Rare, historic
+            CJK Unified Ideographs Extension D      2B740–2B81F Uncommon, some in current use
+            CJK Unified Ideographs Extension E      2B820–2CEAF Rare, historic
+            private use                             E815 - E864
+            CJK Compatibility Ideographs            F900-FAFF   Duplicates, unifiable variants, corporate characters
+            CJK Compatibility Ideographs Supplement 2F800-2FA1F Unifiable variants
+         * 
+         */
+        /*
+         * private use  E815 - E864
+         * '','','','','','','','','','','','','','','',
+         * '','','','','','','','','','','','','','','',
+         * '','','','','','','','','','','','','','','',
+         * '','','','','','','','','','','','','','','',
+         * '','','','','','','','','','','','','','','',
+         * '','','','','',
+         */
+
+        public static readonly char UNICODE_CHS_EXT_A_START = (char)0x3400;  // CJK扩展字符集A
+        public static readonly char UNICODE_CHS_EXT_A_END = (char)0x4DB5;
+        public static readonly char UNICODE_CHS_CJK_CI_START = (char)0xF900;  // CJK扩展字符集CI
+        public static readonly char UNICODE_CHS_CJK_CI_END = (char)0xFAFF;
+        public static readonly char UNICODE_CHS_CJK_PRIVATE_START = (char)0xE815;  // CJK扩展字符集private
+        public static readonly char UNICODE_CHS_CJK_PRIVATE_END = (char)0xE864;
+        public static readonly char UNICODE_CHS_START = (char)0x4E00;      // CJK字符集
+        public static readonly char UNICODE_CHS_END = (char)0x9FBB;
+
+        public static Dictionary<char, char> DICT_UNICODE_CHINESE_RANGES = new Dictionary<char, char>
+        {
+            { UNICODE_CHS_START, UNICODE_CHS_END },
+            { UNICODE_CHS_EXT_A_START, UNICODE_CHS_EXT_A_END },
+            { UNICODE_CHS_CJK_CI_START, UNICODE_CHS_CJK_CI_END },
+            { UNICODE_CHS_CJK_PRIVATE_START, UNICODE_CHS_CJK_PRIVATE_END },
+        };
+         
         public static bool CharIsChineseChar(char ch)
         {
-            return (ch >= UNICODE_CHS_START) && (ch <= UNICODE_CHS_END);
-        }
+            foreach (var pair in DICT_UNICODE_CHINESE_RANGES)
+            {
+                if ((pair.Key <= ch) && (pair.Value >= ch))
+                {
+                    return true;
+                }
+            }
+            return false;
+        } 
         public static void SetWindowSize()
         {
             {
