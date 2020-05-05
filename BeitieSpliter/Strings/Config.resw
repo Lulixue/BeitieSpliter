@@ -147,6 +147,12 @@
   <data name="PenColorTitle.Text" xml:space="preserve">
     <value>颜色：</value>
   </data>
+   <data name="SelectedColorTitle.Text" xml:space="preserve">
+    <value>颜色：</value>
+  </data>
+    <data name="AuxLineTitle.Text" xml:space="preserve">
+    <value>辅助线</value>
+  </data>
   <data name="PenStyleTitle.Text" xml:space="preserve">
     <value>类型：</value>
   </data>
@@ -203,5 +209,12 @@
   </data>
   <data name="AdjustGridsSwitch.OnContent" xml:space="preserve">
     <value>调整辅助线</value>
+  </data>
+  
+    <data name="CircleRadiusSwitch.OffContent" xml:space="preserve">
+    <value>短边半径</value>
+  </data>
+  <data name="CircleRadiusSwitch.OnContent" xml:space="preserve">
+    <value>长边半径</value>
   </data>
 </root>

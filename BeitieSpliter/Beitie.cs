@@ -66,10 +66,6 @@ namespace BeitieSpliter
             Black,      // 黑色
             Purple,		// 紫色
 
-            TopMost,    // 已经到了最上边了!
-            LeftMost,   // 已经到了最左边了!
-            RightMost,  // 已经到了最右边了!
-            BottomMost, // 已经到了最下边了!
 
             Close,      // 关闭
             Quezi,      // 阙字
@@ -125,6 +121,11 @@ namespace BeitieSpliter
             AuxCircle,          // 圆加十字
             AuxMi,              // 圆加米字
             Reload,             // 重载
+
+            TopMost = 0x0100,    // 已经到了最上边了!
+            LeftMost = 0x0200,   // 已经到了最左边了!
+            RightMost = 0x0400,  // 已经到了最右边了!
+            BottomMost = 0x0800, // 已经到了最下边了!
         }
 
         public enum ResourceType{
@@ -195,6 +196,8 @@ namespace BeitieSpliter
         public static readonly int MIN_ROW_COL = 1;
         public static readonly int MIN_INDEX = 0;
         public static readonly int DEFAULT_MAX_PEN_WIDTH = 10;
+        public static readonly float DEFAULT_AUX_WIDTH = 2.5F;
+        public static readonly float DEFAULT_MAX_AUX_WIDTH = 6F;
         public static readonly int DEFAULT_MAX_ROW_COLUMN = 20;
         public static readonly int MIN_ELEMENT_TEXT_HEIGHT = 20;
         public static readonly int MAX_ELEMENT_TEXT_HEIGHT = 50;
@@ -224,6 +227,19 @@ namespace BeitieSpliter
 
         public static readonly string[] TEXT_SIZE_GRADES = { "10+", "100+", "1000+", "10000+" };
         public static readonly string[] HANT_LANGUAGE_CODES = { "zh-hk", "zh-mo", "zh-tw", "zh-hant"};
+
+        public static Color GetColorOtherwise(Color bgColor)
+        {  
+            foreach (var item in LightColorItems)
+            {
+                if (item.Value == bgColor)
+                {
+                    return Colors.Black;
+                }
+            }
+            return Colors.White;
+
+        }
         public static void Init()
         {
             // 添加颜色

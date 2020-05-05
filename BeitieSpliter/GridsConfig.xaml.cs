@@ -92,6 +92,19 @@ namespace BeitieSpliter
                     return "";
             }
         }
+        public static bool HasCircle(this AuxiliaryLineType type)
+        {
+            switch (type)
+            {
+                case AuxiliaryLineType.None: 
+                case AuxiliaryLineType.Cross:
+                    return false;
+                case AuxiliaryLineType.Circle: 
+                case AuxiliaryLineType.Mi: 
+                default:
+                    return true;
+            }
+        }
     }
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -143,6 +156,9 @@ namespace BeitieSpliter
         static bool ShowSizeMode = false;
         static bool NoOpacityMode = false;
         static bool HideScrollBar = false;
+        static float AuxStrokeWidth = Common.DEFAULT_AUX_WIDTH;
+        static Color SelectedColor = Colors.Red;
+        static Color SelectedTextColor = Colors.White;
         static PenLineType LineType = PenLineType.Dash;
         static AuxiliaryLineType AuxLineType = AuxiliaryLineType.Circle;
         OperationType OpType = OperationType.WholePage;
@@ -171,7 +187,10 @@ namespace BeitieSpliter
         }
 
         private ColorBoxItem _ColorBoxSelectedItem = null;
+        private ColorBoxItem _SelectedColorBoxSelectedItem = null;
         public ColorBoxItem ColorBoxSelectedItem { get { return _ColorBoxSelectedItem; } set { Set(ref _ColorBoxSelectedItem, value); } }
+        public ColorBoxItem SelectedColorBoxSelectedItem { get { return _SelectedColorBoxSelectedItem; } set { Set(ref _SelectedColorBoxSelectedItem, value); } }
+
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -300,18 +319,73 @@ namespace BeitieSpliter
                     break;
             }
         }
+        static Dictionary<int, bool> OverflowShown = new Dictionary<int, bool>();
+        void ShowOverflowError(int type)
+        {
+            if (OverflowShown.ContainsKey(type))
+            {
+                return;
+            }
 
+            string info = "";
+            for (int i = 0; i < 4; i++)
+            {
+                int most = (0x100 << i);
+                if ((most & type) != 0)
+                {
+                    info += GetPlainString((StringItemType)most); 
+                } 
+            }
+
+            OverflowShown.TryAdd(type, true);
+             
+            Common.ShowMessageDlg(info, null);
+            NotifyUser(info, NotifyType.ErrorMessage);
+        }
         void ShowOverflowError(StringItemType type)
         {
             string info = GetPlainString(type);
-
+             
             Common.ShowMessageDlg(info, null);
             NotifyUser(info, NotifyType.ErrorMessage);
         }
 
+        int AutofitChangeRectOverflow()
+        {
+            int ret = 0;
+            Point pntLt, pntRb;
+            GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb);
+
+            pntLt.X += ChangeRect.left;
+            pntLt.Y += ChangeRect.top;
+            pntRb.X += ChangeRect.right;
+            pntRb.Y += ChangeRect.bottom;
+
+            if (pntLt.X < 0)
+            {
+                ChangeRect.left = (0 - ToAdjustRect.Left);
+                ret |= (int)StringItemType.LeftMost;
+            }
+            if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
+            {
+                ChangeRect.right = BtGrids.BtImageParent.resolutionX - ToAdjustRect.Right; 
+                ret |= (int)StringItemType.RightMost;
+            }
+            if (pntLt.Y < 0)
+            {
+                ChangeRect.top = 0 - ToAdjustRect.Top; 
+                ret |= (int)StringItemType.TopMost;
+            }
+            if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
+            { 
+                ChangeRect.right = BtGrids.BtImageParent.resolutionY - ToAdjustRect.Bottom;
+                ret |= (int)StringItemType.BottomMost;
+            }
+            return ret;
+        }
 
         bool IsChangeNoteOverflow()
-        {
+        { 
             Point pntLt, pntRb;
             GetRectPoints(ToAdjustRect, ref pntLt, ref pntRb); 
 
@@ -321,25 +395,25 @@ namespace BeitieSpliter
             pntRb.Y += ChangeRect.bottom;
 
             if (pntLt.X < 0)
-            { 
+            {
                 ShowOverflowError(StringItemType.LeftMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
-            else if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
-            { 
+            if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
+            {
                 ShowOverflowError(StringItemType.RightMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
-            else if (pntLt.Y < 0)
-            { 
+            if (pntLt.Y < 0)
+            {
                 ShowOverflowError(StringItemType.TopMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
             }
-            else if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
-            { 
+            if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
+            {
                 ShowOverflowError(StringItemType.BottomMost);
                 PrintRect("[Change] Invalid", new Rect(pntLt, pntRb));
                 return false;
@@ -373,6 +447,42 @@ namespace BeitieSpliter
             }
         }
 
+        int AutoFitRect(ref Point pntLt, ref Point pntRb)
+        {
+            int ret = 0;
+            if (pntLt.X < 0)
+            {
+                //ShowOverflowError(StringItemType.LeftMost);
+                //return false;
+                ret |= (int)StringItemType.LeftMost;
+                pntLt.X = 0;
+            }
+            if ((int)pntRb.X > (int)BtGrids.BtImageParent.resolutionX)
+            {
+                //ShowOverflowError(StringItemType.RightMost);
+                //return false;
+
+                ret |= (int)StringItemType.RightMost;
+                pntRb.X = BtGrids.BtImageParent.resolutionX;
+            }
+            if (pntLt.Y < 0)
+            {
+                //ShowOverflowError(StringItemType.TopMost);
+                //return false;
+                ret |= (int)StringItemType.TopMost;
+                pntLt.Y = 0;
+            }
+            if ((int)pntRb.Y > (int)BtGrids.BtImageParent.resolutionY)
+            {
+                //ShowOverflowError(StringItemType.BottomMost);
+                //return false;
+
+                ret |= (int)StringItemType.BottomMost;
+                pntRb.Y = BtGrids.BtImageParent.resolutionY;
+            }
+            return ret;
+        }
+
         bool UpdateXingcaoElementsRects()
         {
             ChangeStruct offset = new ChangeStruct();
@@ -391,11 +501,12 @@ namespace BeitieSpliter
             pntLt.Y += offset.top;
             pntRb.Y += offset.bottom;
 
-            if (!CheckIfOutOfimage(pntLt, pntRb))
-            {
-                PrintRect("Invalid", new Rect(pntLt, pntRb));
-                return false;
-            }
+            int overflow = AutoFitRect(ref pntLt, ref pntRb);
+            //if (!CheckIfOutOfimage(pntLt, pntRb))
+            //{
+            //    PrintRect("Invalid", new Rect(pntLt, pntRb));
+            //    return false;
+            //}
             ToAdjustRect = new Rect(pntLt, pntRb);
 
             int colNumber = ColumnNumber.SelectedIndex+1;
@@ -432,6 +543,10 @@ namespace BeitieSpliter
                 BtGrids.XingcaoElements[elemIndex].col = colNumber;
                 BtGrids.XingcaoElements[elemIndex].rc = new Rect(lt, rb);
                 
+            }
+            if (overflow > 0)
+            {
+                ShowOverflowError(overflow);
             }
 
             return true;
@@ -641,21 +756,25 @@ namespace BeitieSpliter
                     {
                         FixedChangedRect(chgType, ref pntLt, ref pntRb, offset);
                     }
-                    if (!CheckIfOutOfimage(pntLt, pntRb))
-                    { 
-                        PrintRect("[" + pnt.row + "," + pnt.col + "] Invalid", new Rect(pntLt, pntRb));
-                        // 恢复修改的元素
-                        foreach (KeyValuePair<int, BeitieGridRect> pair in backupElements)
-                        {
-                            BtGrids.ElementRects[pair.Key] =
-                                new BeitieGridRect(pair.Value.rc)
-                                {
-                                    revised = pair.Value.revised
-                                };
-                        }
-                        return false;
+                    int overflow = AutoFitRect(ref pntLt, ref pntRb);
+                    //if (!CheckIfOutOfimage(pntLt, pntRb))
+                    //{ 
+                    //    PrintRect("[" + pnt.row + "," + pnt.col + "] Invalid", new Rect(pntLt, pntRb));
+                    //    // 恢复修改的元素
+                    //    foreach (KeyValuePair<int, BeitieGridRect> pair in backupElements)
+                    //    {
+                    //        BtGrids.ElementRects[pair.Key] =
+                    //            new BeitieGridRect(pair.Value.rc)
+                    //            {
+                    //                revised = pair.Value.revised
+                    //            };
+                    //    }
+                    //    return false;
+                    //}
+                    if (overflow > 0)
+                    {
+                        ShowOverflowError(overflow);
                     }
-
 
                     PrintRect("[" + pnt.row + "," + pnt.col + "] Before", dstRc);
                     backupElements.Add(index, new BeitieGridRect(BtGrids.ElementRects[index].rc)
@@ -1137,6 +1256,22 @@ namespace BeitieSpliter
             //Debug.Assert(col == 4);
             Debug.WriteLine("float: {0},{0:F1},{0:F0}, {0:0}", 1.24F, 1.24F, 1.4F, 1.4F);
         }
+
+        string GetPenWidth(float width)
+        {
+            bool IsFloat = (width - (int)width) > 0;
+            string strWidth;
+            if (IsFloat)
+            {
+                strWidth = string.Format("{0:F1}", BtGrids.PenWidth);
+            }
+            else
+            {
+                strWidth = string.Format("{0:0}", BtGrids.PenWidth);
+
+            }
+            return strWidth;
+        }
         void InitControls()
         {
             TestCase();
@@ -1181,6 +1316,11 @@ namespace BeitieSpliter
                 {
                     PenWidthCombo.Items.Add(i);
                 }
+                AuxWidthCombo.Items.Clear(); 
+                for (float i = 0.5F; i < Common.DEFAULT_MAX_AUX_WIDTH; i += 0.5F)
+                { 
+                    AuxWidthCombo.Items.Add(i);
+                }
 
                 PenLineTypeCombo.Items.Clear();
                 PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dash));
@@ -1196,20 +1336,14 @@ namespace BeitieSpliter
 
              
             ColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Value == BtGrids.PenColor);
+            SelectedColorBoxSelectedItem = ColorBoxItems.FirstOrDefault(f => f.Value == SelectedColor);
 
-            bool IsFloat = (BtGrids.PenWidth - (int)BtGrids.PenWidth) > 0;
-            string strWidth;
-            if (IsFloat)
-            {
-                strWidth = string.Format("{0:F1}", BtGrids.PenWidth);
-            }
-            else
-            {
-                strWidth = string.Format("{0:0}", BtGrids.PenWidth);
+            
+            PenWidthCombo.Text = GetPenWidth(BtGrids.PenWidth); 
+            AuxWidthCombo.Text = GetPenWidth(AuxStrokeWidth);
+            AuxWidthCombo.SelectedIndex = (int)(AuxStrokeWidth / 0.5F) - 1;
 
-            }
-            PenWidthCombo.Text = strWidth;
-             
+
             if (BtGrids.PenWidth > 3)
             {
                 LineType = PenLineType.Line;
@@ -1325,7 +1459,10 @@ namespace BeitieSpliter
             PenColorTitle.Text = LanguageHelper.GetConfigString("PenColorTitle/Text", hant);
             PenStyleTitle.Text = LanguageHelper.GetConfigString("PenStyleTitle/Text", hant);
             AuxilliaryLineType.Text = LanguageHelper.GetConfigString("AuxilliaryLineType/Text", hant);
+            SelectedColorTitle.Text = LanguageHelper.GetConfigString("SelectedColorTitle/Text", hant);
+            AuxLineTitle.Text = LanguageHelper.GetConfigString("AuxLineTitle/Text", hant);
             PenWidthTitle.Text = LanguageHelper.GetConfigString("PenWidthTitle/Text", hant);
+            AuxWidthTitle.Text = LanguageHelper.GetConfigString("PenWidthTitle/Text", hant);
             RotateTitle.Text = LanguageHelper.GetConfigString("RotateTitle/Text", hant);
             StepTitle.Text = LanguageHelper.GetConfigString("StepTitle/Text", hant);
             ChkShowSize.Content = LanguageHelper.GetConfigString("ChkShowSize/Content", hant);
@@ -1340,6 +1477,9 @@ namespace BeitieSpliter
             RewardMe.Content = LanguageHelper.GetConfigString("RewardMe/Content", hant);
             AdjustGridsSwitch.OffContent = LanguageHelper.GetConfigString("AdjustGridsSwitch/OffContent", hant);
             AdjustGridsSwitch.OnContent = LanguageHelper.GetConfigString("AdjustGridsSwitch/OnContent", hant);
+
+            CircleRadiusSwitch.OffContent = LanguageHelper.GetConfigString("CircleRadiusSwitch/OffContent", hant);
+            CircleRadiusSwitch.OnContent = LanguageHelper.GetConfigString("CircleRadiusSwitch/OnContent", hant);
         }
 
         private static string GetPlainString(StringItemType type)
@@ -1479,7 +1619,7 @@ namespace BeitieSpliter
             }
            
         }
-        CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
+        readonly CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
         {
             TransformBehavior = CanvasStrokeTransformBehavior.Hairline,
             DashCap = CanvasCapStyle.Round,
@@ -1740,9 +1880,9 @@ namespace BeitieSpliter
 
                 // 在调整区域时不覆盖
                 RedrawImageRect(draw, rc);
-                DrawRectangle(draw, rc, Colors.Red, (float)selectedPenWidth, true);
-                draw.FillRectangle(txtRc, Colors.Red);
-                draw.DrawText(name, txtRc, Colors.White, fmt);
+                DrawRectangle(draw, rc, SelectedColor, (float)selectedPenWidth, true);
+                draw.FillRectangle(txtRc, SelectedColor);
+                draw.DrawText(name, txtRc, SelectedTextColor, fmt);
             }
 
 
@@ -1751,7 +1891,7 @@ namespace BeitieSpliter
             //{
             //    center.Y += txtRc.Height;
             //}
-            DrawAuxiliary(draw, rc, (float)selectedPenWidth-1);
+            DrawAuxiliary(draw, rc, AuxStrokeWidth);
         }
 
         private void DrawAuxiliary(CanvasDrawingSession draw, Rect rcD, float width)
@@ -1762,7 +1902,7 @@ namespace BeitieSpliter
                 return;
             }
 
-            Windows.UI.Color color = Colors.Red;
+            Windows.UI.Color color = SelectedColor;
             // 绘制圆圈，把字圈在中间
             float imgW = (float)rcD.Width;
             float imgH = (float)rcD.Height;
@@ -1787,8 +1927,13 @@ namespace BeitieSpliter
             }
              
             float radius = Math.Min(imgW, imgH) / 2;
+            if (CircleRadiusSwitch?.IsOn ?? false)
+            {
+                radius = Math.Max(imgW, imgH) / 2; 
+            }
+            radius -= width;
             draw.DrawCircle(new Vector2(center.X, center.Y),
-                radius, Colors.Red, width, AuxStrokeStyle);
+                radius, SelectedColor, width, AuxStrokeStyle);
 
             if (AuxLineType == AuxiliaryLineType.Circle)
             {
@@ -2333,12 +2478,13 @@ namespace BeitieSpliter
             }
             UpdateOpInfoBox();
             Debug.WriteLine("Change: {0:0},{1:0},{2:0},{3:0}", ChangeRect.left, ChangeRect.top, ChangeRect.right, ChangeRect.bottom);
-            if (!IsChangeNoteOverflow())
-            {
-                Debug.WriteLine("Change invalid, revert to last one");
-                ChangeRect.Copy(LastChangeRect);
-                return;
-            }
+            int overflow = AutofitChangeRectOverflow();
+            //if (!IsChangeNoteOverflow())
+            //{
+            //    Debug.WriteLine("Change invalid, revert to last one");
+            //    ChangeRect.Copy(LastChangeRect);
+            //    return;
+            //}
             if (UpdateRect)
             {
                 if (!UpdateElementsRects())
@@ -2352,6 +2498,10 @@ namespace BeitieSpliter
             else
             {
                 UpdateAdjustStatus();
+            }
+            if (overflow > 0)
+            {
+                ShowOverflowError(overflow);
             }
         }
 
@@ -3697,9 +3847,18 @@ namespace BeitieSpliter
             {
                 ParentPage.SetPenColor(ColorBoxSelectedItem.Text);
             }
+            else if (sender == SelectedColorCombo)
+            {
+                SelectedColor = SelectedColorBoxSelectedItem.Value;
+                SelectedTextColor = Common.GetColorOtherwise(SelectedColor);
+            }
             else if (sender == PenWidthCombo)
             {
                 await ParentPage.SetPenWidth(PenWidthCombo.Text);
+            } 
+            else if (sender == AuxWidthCombo)
+            {
+                AuxStrokeWidth = float.Parse(AuxWidthCombo.Text);
             }
             else if (sender == PenLineTypeCombo)
             {
@@ -3716,6 +3875,7 @@ namespace BeitieSpliter
                 {
                     AuxLineType = (AuxiliaryLineType)selected;
                 }
+                CircleRadiusSwitch.Visibility = AuxLineType.HasCircle() ? Visibility.Visible : Visibility.Collapsed;
             }
             Refresh(CtrlMessageType.RedrawRequest);
         }
@@ -3824,6 +3984,11 @@ namespace BeitieSpliter
         {
             HideScrollBar = ChkHideScrollBar.IsChecked ?? false;
             HideViewerScrollBar(HideScrollBar);
+        }
+
+        private void CircleRadiusSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            Refresh(CtrlMessageType.RedrawRequest);
         }
     }
 }

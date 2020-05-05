@@ -153,6 +153,12 @@
   <data name="AuxilliaryLineType.Text" xml:space="preserve"> 
     <value>輔助綫：</value>
   </data>
+     <data name="SelectedColorTitle.Text" xml:space="preserve">
+    <value>顔色：</value>
+  </data>
+      <data name="AuxLineTitle.Text" xml:space="preserve">
+    <value>輔助綫</value>
+  </data>
   <data name="PenWidthTitle.Text" xml:space="preserve">
     <value>寬度：</value>
   </data>
@@ -203,5 +209,11 @@
   </data>
   <data name="AdjustGridsSwitch.OnContent" xml:space="preserve">
     <value>調整輔助綫</value>
-	</data>
+  </data>
+    <data name="CircleRadiusSwitch.OffContent" xml:space="preserve">
+    <value>短邊半徑</value>
+  </data>
+  <data name="CircleRadiusSwitch.OnContent" xml:space="preserve">
+    <value>長邊半徑</value>
+  </data>
 </root>

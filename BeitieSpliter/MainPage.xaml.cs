@@ -869,7 +869,7 @@ namespace BeitieSpliter
         { 
             UpdateRowCount();
         }
-
+ 
         public async void SetPenColor(string clr)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
