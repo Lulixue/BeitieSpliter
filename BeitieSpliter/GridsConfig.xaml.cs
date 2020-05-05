@@ -1263,11 +1263,11 @@ namespace BeitieSpliter
             string strWidth;
             if (IsFloat)
             {
-                strWidth = string.Format("{0:F1}", BtGrids.PenWidth);
+                strWidth = string.Format("{0:F1}", width);
             }
             else
             {
-                strWidth = string.Format("{0:0}", BtGrids.PenWidth);
+                strWidth = string.Format("{0:0}", width);
 
             }
             return strWidth;
@@ -1851,6 +1851,7 @@ namespace BeitieSpliter
                 }
                 if (!moveToCapture)
                 {
+                    // 没有对图片进行鼠标截取
                     if (ShowSizeMode)
                     {
                         FillOpacity(draw, szRc, Colors.White, 0.7);
@@ -1868,8 +1869,7 @@ namespace BeitieSpliter
             }
 
             if (!moveToCapture)
-            {
-
+            { 
                 // 在下方/上方显示当前元素名称
                 CanvasTextFormat fmt = new CanvasTextFormat()
                 {
@@ -1881,7 +1881,11 @@ namespace BeitieSpliter
                 // 在调整区域时不覆盖
                 RedrawImageRect(draw, rc);
                 DrawRectangle(draw, rc, SelectedColor, (float)selectedPenWidth, true);
-                draw.FillRectangle(txtRc, SelectedColor);
+
+                //FillOpacity(draw, txtRc, Colors.White, 0.7);
+                //draw.DrawText(name, txtRc, Colors.Black, fmt);
+                //draw.FillRectangle(txtRc, SelectedColor);
+                FillOpacity(draw, txtRc, SelectedColor, 0.7);
                 draw.DrawText(name, txtRc, SelectedTextColor, fmt);
             }
 
@@ -1946,7 +1950,7 @@ namespace BeitieSpliter
         }
 
         private readonly CanvasStrokeStyle AuxStrokeStyle = new CanvasStrokeStyle()
-        { 
+        {
             DashCap = CanvasCapStyle.Round, 
             DashStyle = CanvasDashStyle.Dash
         };
@@ -3065,14 +3069,14 @@ namespace BeitieSpliter
             Entered,
             Moved,
             Pressed,
-            RBtnPressed,
+            RBtnPressed,            // 右键
             Released,
             Exited,
-            PressedToDrag,
+            PressedToDrag,          // 全部元素拖拽
             ReleasedToExit,
-            MoveOnBorder,
-            MoveToScalingBorder,
-            MoveToCapture,
+            MoveOnBorder,           // 
+            MoveToScalingBorder,    // 缩放区域边框
+            MoveToCapture,          // 鼠标截取元素区域
         }
         PointerStatus LastPntrStatus = PointerStatus.Exited;
         PointerStatus CurrentPntrStatus = PointerStatus.Exited;
@@ -3837,7 +3841,7 @@ namespace BeitieSpliter
             Refresh(CtrlMessageType.RedrawRequest);
         }
 
-        private async void SelectionChangedPen(object sender, SelectionChangedEventArgs e)
+        private async void SelectionConfigChanged(object sender, SelectionChangedEventArgs e)
         {
             if (IsPageUnloaded)
             {
@@ -3858,7 +3862,7 @@ namespace BeitieSpliter
             } 
             else if (sender == AuxWidthCombo)
             {
-                AuxStrokeWidth = float.Parse(AuxWidthCombo.Text);
+                AuxStrokeWidth = (AuxWidthCombo.SelectedIndex + 1) * 0.5F;
             }
             else if (sender == PenLineTypeCombo)
             {

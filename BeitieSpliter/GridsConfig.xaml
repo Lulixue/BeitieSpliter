@@ -154,7 +154,7 @@
                                 <TextBlock x:Name="PenColorTitle" x:Uid="PenColorTitle"  Text="颜色：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="PenColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
                                             SelectedValuePath="Value" DisplayMemberPath="Text"
-                                           Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
+                                           Margin="0,0,0,0" SelectionChanged="SelectionConfigChanged"  
                                             VerticalAlignment="Center" SelectedItem="{x:Bind ColorBoxSelectedItem, Mode=TwoWay}"
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
@@ -162,14 +162,14 @@
 
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock x:Name="PenWidthTitle" x:Uid="PenWidthTitle" Text="宽度：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                                <ComboBox  x:Name="PenWidthCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
+                                <ComboBox  x:Name="PenWidthCombo"  Margin="0,0,0,0" SelectionChanged="SelectionConfigChanged"  
                                            LostFocus="LostFocusPen" 
                                     VerticalAlignment="Center" SelectionChangedTrigger="Committed" IsEditable="True"
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock x:Name="PenStyleTitle" x:Uid="PenStyleTitle" Text="类型：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                                <ComboBox  x:Name="PenLineTypeCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
+                                <ComboBox  x:Name="PenLineTypeCombo"  Margin="0,0,0,0" SelectionChanged="SelectionConfigChanged"  
                                     VerticalAlignment="Center" 
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
@@ -183,20 +183,20 @@
                                 <TextBlock x:Name="SelectedColorTitle" x:Uid="SelectedColorTitle"  Text="颜色：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
                                 <ComboBox  x:Name="SelectedColorCombo" ItemsSource="{x:Bind ColorBoxItems}" 
                                             SelectedValuePath="Value" DisplayMemberPath="Text"
-                                           Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
+                                           Margin="0,0,0,0" SelectionChanged="SelectionConfigChanged"  
                                             VerticalAlignment="Center" SelectedItem="{x:Bind SelectedColorBoxSelectedItem, Mode=TwoWay}"
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock x:Name="AuxWidthTitle" x:Uid="AuxWidthTitle" Text="宽度：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                                <ComboBox  x:Name="AuxWidthCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"   
-                                    VerticalAlignment="Center" SelectionChangedTrigger="Committed" IsEditable="False"
+                                <ComboBox  x:Name="AuxWidthCombo"  Margin="0,0,0,0" SelectionChanged="SelectionConfigChanged"   
+                                    VerticalAlignment="Center" SelectionChangedTrigger="Always" IsEditable="True"
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
                             <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock x:Name="AuxilliaryLineType" x:Uid="AuxilliaryLineType" Text="辅助线：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
-                                <ComboBox  x:Name="AuxilliaryLineTypeCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
-                                    VerticalAlignment="Center" 
+                                <ComboBox  x:Name="AuxilliaryLineTypeCombo"  Margin="0,0,0,0" SelectionChanged="SelectionConfigChanged" 
+                                    VerticalAlignment="Center" IsEditable="False"
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
                             <StackPanel Margin="20,5,0,0" Orientation="Horizontal" VerticalAlignment="Center"  HorizontalAlignment="Center">
