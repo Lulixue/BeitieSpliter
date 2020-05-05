@@ -150,6 +150,9 @@
   <data name="PenStyleTitle.Text" xml:space="preserve">
     <value>类型：</value>
   </data>
+  <data name="AuxilliaryLineType.Text" xml:space="preserve"> 
+    <value>辅助线：</value>
+  </data>
   <data name="PenWidthTitle.Text" xml:space="preserve">
     <value>宽度：</value>
   </data>

@@ -173,6 +173,13 @@
                                     VerticalAlignment="Center" 
                                     IsDropDownOpen="True" Width="100" />
                             </StackPanel>
+                            <StackPanel Margin="20,10,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="AuxilliaryLineType" x:Uid="AuxilliaryLineType" Text="辅助线：" Margin="0,0,0,0" VerticalAlignment="Center" Style="{StaticResource LeftFriendly}" />
+                                <ComboBox  x:Name="AuxilliaryLineTypeCombo"  Margin="0,0,0,0" SelectionChanged="SelectionChangedPen"  
+                                    VerticalAlignment="Center" 
+                                    IsDropDownOpen="True" Width="100" />
+                            </StackPanel>
+                            
                         </StackPanel>
 
                         <StackPanel Margin="0,20,0,0" Orientation="Vertical">

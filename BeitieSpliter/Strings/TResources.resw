@@ -57,4 +57,7 @@
   <data name="PageText.PlaceholderText" xml:space="preserve">
     <value>在這裡輸入釋文;\r\n特殊元素:\r\n 闕字用"{缺}/□"\r\n 印章用"{印:}"\r\n 空白用"{}"\r\n 其他用"{XX}"</value>
   </data>
+  <data name="TieAlbum.PlaceholderText" xml:space="preserve">
+    <value>輸入碑帖名稱</value>
+  </data>
 </root>

@@ -1960,7 +1960,7 @@ namespace BeitieSpliter
             SaveSplitImgs.Content = LanguageHelper.GetString("SaveSplitImgs/Content", hant);
             TextSizeGrade.Header = LanguageHelper.GetString("TextSizeGrade/Header", hant);
             ZiCountTitle.Text = LanguageHelper.GetString("ZiCountTitle/Text", hant);
-
+            TieAlbum.PlaceholderText = LanguageHelper.GetString("TieAlbum/PlaceholderText", hant);
         }
 
         public int PageViewId = 0;
@@ -2137,7 +2137,7 @@ namespace BeitieSpliter
             multiElem.IsChecked = GlobalSettings.MultiWindowMode;
             multiElem.Click += ClickedMultiWindow;
 
-            MenuFlyoutItem refresh = new MenuFlyoutItem { Text = "重载" };
+            MenuFlyoutItem refresh = new MenuFlyoutItem { Text = GetPlainString(StringItemType.Reload) };
 
             refresh.Click += ClickedRefresh;
             chtElem.IsChecked = GlobalSettings.TranditionalChineseMode;

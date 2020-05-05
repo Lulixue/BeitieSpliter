@@ -219,4 +219,9 @@
   <data name="InvalidZiCount" xml:space="preserve">
     <value>無效字數: </value>
   </data>
+    <data name="AuxNone" xml:space="preserve"> <value>無輔助綫</value></data>
+    <data name="AuxCross" xml:space="preserve"> <value>十字</value></data>
+    <data name="AuxCircle" xml:space="preserve"> <value>圓加十字</value></data>
+    <data name="AuxMi" xml:space="preserve"> <value>圓加米字</value></data>
+    <data name="Reload" xml:space="preserve"> <value>重載</value></data>
 </root>

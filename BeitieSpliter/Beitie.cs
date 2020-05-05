@@ -119,6 +119,12 @@ namespace BeitieSpliter
             PictureNotFound,    // 所选文件夹下找不到碑帖图片！
             FileBroken,         // 文件损坏或文件不支持!
             SingleChar,         // 单字
+ 
+            AuxNone,            // 无辅助线
+            AuxCross,           // 十字
+            AuxCircle,          // 圆加十字
+            AuxMi,              // 圆加米字
+            Reload,             // 重载
         }
 
         public enum ResourceType{

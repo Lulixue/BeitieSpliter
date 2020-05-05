@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Diagnostics;
-using Windows.Storage.Streams;
-using Windows.UI.Xaml.Media.Imaging;
-using Windows.Storage;
 using Windows.UI;
 using System.Numerics;
 using Microsoft.Graphics.Canvas;
@@ -34,14 +26,13 @@ using Microsoft.Graphics.Canvas.Brushes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Windows.UI.Xaml.Media.Animation;
 using static BeitieSpliter.LanguageHelper;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace BeitieSpliter
 {
-    
+
     public class ChangeStruct
     {
         public double left = 0;
@@ -75,6 +66,32 @@ namespace BeitieSpliter
         }
         public int row = -1;
         public int col = -1;
+    }
+    enum AuxiliaryLineType
+    {
+        None = 0,
+        Cross = 1,
+        Circle = 2,
+        Mi = 3
+    }
+    static class EnumExtensions
+    {
+        public static String GetString(this AuxiliaryLineType type)
+        {
+            switch (type)
+            {
+                case AuxiliaryLineType.None:
+                    return GetPlainString(StringItemType.AuxNone);
+                case AuxiliaryLineType.Cross:
+                    return GetPlainString(StringItemType.AuxCross);
+                case AuxiliaryLineType.Circle:
+                    return GetPlainString(StringItemType.AuxCircle);
+                case AuxiliaryLineType.Mi:
+                    return GetPlainString(StringItemType.AuxMi);
+                default:
+                    return "";
+            }
+        }
     }
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -119,7 +136,7 @@ namespace BeitieSpliter
             Dot = 1,
             Line = 2
         }
-        
+         
         public event EventHandler ShowSaveResultEvtHdlr;
         static bool HideGridChecked = false;
         static bool SingleFocusMode = false;
@@ -127,6 +144,7 @@ namespace BeitieSpliter
         static bool NoOpacityMode = false;
         static bool HideScrollBar = false;
         static PenLineType LineType = PenLineType.Dash;
+        static AuxiliaryLineType AuxLineType = AuxiliaryLineType.Circle;
         OperationType OpType = OperationType.WholePage;
         BeitieGrids BtGrids = null;
         BeitieGrids LastBtGrids = new BeitieGrids();
@@ -1168,6 +1186,12 @@ namespace BeitieSpliter
                 PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dash));
                 PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Dot));
                 PenLineTypeCombo.Items.Add(GetLineTypeString(PenLineType.Line));
+
+
+                AuxilliaryLineTypeCombo.Items.Clear();
+                foreach (AuxiliaryLineType type in Enum.GetValues(typeof(AuxiliaryLineType))) {
+                    AuxilliaryLineTypeCombo.Items.Add(type.GetString());
+                } 
             }
 
              
@@ -1185,13 +1209,13 @@ namespace BeitieSpliter
 
             }
             PenWidthCombo.Text = strWidth;
-            
-
+             
             if (BtGrids.PenWidth > 3)
             {
                 LineType = PenLineType.Line;
             }
             PenLineTypeCombo.SelectedIndex = (int)LineType;
+            AuxilliaryLineTypeCombo.SelectedIndex = (int)AuxLineType;
 
             // 设置存储变量
             ChkSingleFocus.IsChecked = SingleFocusMode;
@@ -1300,6 +1324,7 @@ namespace BeitieSpliter
             OpWholePage.Content = LanguageHelper.GetConfigString("OpWholePage/Content", hant);
             PenColorTitle.Text = LanguageHelper.GetConfigString("PenColorTitle/Text", hant);
             PenStyleTitle.Text = LanguageHelper.GetConfigString("PenStyleTitle/Text", hant);
+            AuxilliaryLineType.Text = LanguageHelper.GetConfigString("AuxilliaryLineType/Text", hant);
             PenWidthTitle.Text = LanguageHelper.GetConfigString("PenWidthTitle/Text", hant);
             RotateTitle.Text = LanguageHelper.GetConfigString("RotateTitle/Text", hant);
             StepTitle.Text = LanguageHelper.GetConfigString("StepTitle/Text", hant);
@@ -1317,7 +1342,7 @@ namespace BeitieSpliter
             AdjustGridsSwitch.OnContent = LanguageHelper.GetConfigString("AdjustGridsSwitch/OnContent", hant);
         }
 
-        private string GetPlainString(StringItemType type)
+        private static string GetPlainString(StringItemType type)
         {
             return LanguageHelper.GetPlainString(type);
         }
@@ -1719,7 +1744,67 @@ namespace BeitieSpliter
                 draw.FillRectangle(txtRc, Colors.Red);
                 draw.DrawText(name, txtRc, Colors.White, fmt);
             }
+
+
+            //// 在上方
+            //if (txtRc.Bottom < rc.Bottom)
+            //{
+            //    center.Y += txtRc.Height;
+            //}
+            DrawAuxiliary(draw, rc, (float)selectedPenWidth-1);
         }
+
+        private void DrawAuxiliary(CanvasDrawingSession draw, Rect rcD, float width)
+        {
+
+            if (AuxLineType == AuxiliaryLineType.None)
+            {
+                return;
+            }
+
+            Windows.UI.Color color = Colors.Red;
+            // 绘制圆圈，把字圈在中间
+            float imgW = (float)rcD.Width;
+            float imgH = (float)rcD.Height;
+
+            System.Drawing.RectangleF rc = new System.Drawing.RectangleF
+            {
+                X = (float)rcD.Left,
+                Y = (float)rcD.Top,
+                Width = imgW,
+                Height = imgH
+            };
+
+            System.Drawing.PointF center = new System.Drawing.PointF(imgW / 2 + rc.Left, imgH / 2 + rc.Top);
+
+            draw.DrawLine(rc.Left, center.Y, rc.Right, center.Y, color, width, AuxStrokeStyle);
+            draw.DrawLine(center.X, rc.Top, center.X, rc.Bottom, color, width, AuxStrokeStyle);
+
+
+            if (AuxLineType == AuxiliaryLineType.Cross)
+            {
+                return;
+            }
+             
+            float radius = Math.Min(imgW, imgH) / 2;
+            draw.DrawCircle(new Vector2(center.X, center.Y),
+                radius, Colors.Red, width, AuxStrokeStyle);
+
+            if (AuxLineType == AuxiliaryLineType.Circle)
+            {
+                return;
+            }
+
+
+            draw.DrawLine(rc.Left, rc.Top, rc.Right, rc.Bottom, color, width, AuxStrokeStyle);
+            draw.DrawLine(rc.Right, rc.Top, rc.Left, rc.Bottom, color, width, AuxStrokeStyle);
+        }
+
+        private readonly CanvasStrokeStyle AuxStrokeStyle = new CanvasStrokeStyle()
+        { 
+            DashCap = CanvasCapStyle.Round, 
+            DashStyle = CanvasDashStyle.Dash
+        };
         private void RedrawImageRect(CanvasDrawingSession draw, Rect rc)
         {
             Rect srcRc = new Rect()
@@ -1754,6 +1839,7 @@ namespace BeitieSpliter
             
             //draw.FillRectangle(rc, Colors.Red);
             draw.DrawImage(BtImage.cvsBmp, rc, srcRc);
+
         }
         private double GetItemScrollHeight()
         {
@@ -3621,6 +3707,14 @@ namespace BeitieSpliter
                 if (selected >= 0)
                 {
                     LineType = (PenLineType)selected;
+                }
+            } 
+            else if (sender == AuxilliaryLineTypeCombo)
+            { 
+                int selected = AuxilliaryLineTypeCombo.SelectedIndex;
+                if (selected >= 0)
+                {
+                    AuxLineType = (AuxiliaryLineType)selected;
                 }
             }
             Refresh(CtrlMessageType.RedrawRequest);
