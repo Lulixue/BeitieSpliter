@@ -1567,7 +1567,7 @@ namespace BeitieSpliter
             row = RowNumber.SelectedIndex + 1;
         }
 
-        private Object SyncObj = new Object();
+        private readonly Object SyncObj = new Object();
         private void UpdateElementRowCol(bool baseOnRowCol)
         {
             if (BtGrids.XingcaoMode)
@@ -2256,10 +2256,12 @@ namespace BeitieSpliter
                 RedrawImageRect(draw, drawRect);
                 DrawRectangle(draw, drawRect, BaseColor, penWidth, true);
             }
-        }
+        } 
         private void CurrentItem_OnDraw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
             Debug.WriteLine("CurrentItem_OnDraw() called");
+            Debug.WriteLine("ScrollView: " + ItemScrollViewer.ToString());
+            Debug.WriteLine("CurrentItem: " + CurrentItem.ToString());
             lock(BtImage.cvsBmp)
             {
                 var draw = args.DrawingSession;
@@ -3736,6 +3738,12 @@ namespace BeitieSpliter
         {
             Debug.WriteLine("OnSizeChanged() called");
             Debug.WriteLine("New Size: {0}", e.NewSize);
+
+              
+            //CurrentItem.Height = ItemScrollViewer.ViewportHeight;
+            //CurrentItem.Width = ItemScrollViewer.ViewportWidth;
+            //Refresh();
+            //ItemBorder.InvalidateMeasure();
         }
         private void ElementMenuAdjusttElement_Click(object sender, RoutedEventArgs e)
         {
@@ -3993,6 +4001,12 @@ namespace BeitieSpliter
         private void CircleRadiusSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             Refresh(CtrlMessageType.RedrawRequest);
+        }
+
+        private void OnSizeChangedWindow(object sender, SizeChangedEventArgs e)
+        {
+            //ItemBorder.InvalidateMeasure();
+            ItemBorder.InvalidateArrange();
         }
     }
 }
