@@ -49,7 +49,10 @@ namespace BeitieSpliter
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             object multiWin = localSettings.Values[GlobalSettings.SETTING_MULTI_WINDOW];
-            object hanT = localSettings.Values[GlobalSettings.SETTING_TRANDITIONAL_HAN]; 
+            object hanT = localSettings.Values[GlobalSettings.SETTING_TRANDITIONAL_HAN];
+            object row = localSettings.Values[GlobalSettings.SETTING_SELECTED_ROW];
+            object column = localSettings.Values[GlobalSettings.SETTING_SELECTED_COLUMN];
+            object xingcao = localSettings.Values[GlobalSettings.SETTING_SELECTED_XINGCAO];
 
             GlobalSettings.MultiWindowMode = (multiWin != null) ? 
                                                 (bool)multiWin : GlobalSettings.MultiWindowMode;
@@ -64,12 +67,29 @@ namespace BeitieSpliter
                 GlobalSettings.TranditionalChineseMode = bHanT;
             }
 
+            if (row != null)
+            {
+                GlobalSettings.LastSelectedColumn = (int)column;
+            }
+            if (column != null)
+            {
+                GlobalSettings.LastSelectedRow = (int)row;
+            }
+            if (xingcao != null)
+            {
+                GlobalSettings.LastSelectedXingcao = (bool)xingcao;
+            }
+
         }
         public void StoreSettings()
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values[GlobalSettings.SETTING_MULTI_WINDOW] = GlobalSettings.MultiWindowMode;
             localSettings.Values[GlobalSettings.SETTING_TRANDITIONAL_HAN] = GlobalSettings.TranditionalChineseMode;
+
+            localSettings.Values[GlobalSettings.SETTING_SELECTED_COLUMN] = GlobalSettings.LastSelectedColumn;
+            localSettings.Values[GlobalSettings.SETTING_SELECTED_ROW] = GlobalSettings.LastSelectedRow;
+            localSettings.Values[GlobalSettings.SETTING_SELECTED_XINGCAO] = GlobalSettings.LastSelectedXingcao;
         }
 
         /// <summary>

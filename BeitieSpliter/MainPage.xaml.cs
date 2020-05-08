@@ -144,11 +144,11 @@ namespace BeitieSpliter
         private void ColumnIllegalHandler(IUICommand command)
         {
 
-            ColumnCount.SelectedIndex = 3;
+            ColumnCount.SelectedIndex = GlobalSettings.LastSelectedColumn;
         }
         private void RowIllegalHandler(IUICommand command)
         {
-            RowCount.SelectedIndex = 6;
+            RowCount.SelectedIndex = GlobalSettings.LastSelectedRow;
         }
 
         public int GetColumnCount()
@@ -252,8 +252,8 @@ namespace BeitieSpliter
                 PenWidthCombo.Items.Add(i);
             }
 
-            RowCount.SelectedIndex = 8;
-            ColumnCount.SelectedIndex = 5;
+            RowCount.SelectedIndex = GlobalSettings.LastSelectedRow;
+            ColumnCount.SelectedIndex = GlobalSettings.LastSelectedColumn;
             PenWidthCombo.SelectedIndex = 1;
 
             PenColorCombo.MinWidth = PenColorCombo.ActualWidth;
@@ -831,6 +831,7 @@ namespace BeitieSpliter
                 IsColumnRowValid())
             {
                 InitDrawParameters();
+                GlobalSettings.LastSelectedColumn = columns-1;
             }
             ParsePageText();
             RefreshPage();
@@ -857,6 +858,7 @@ namespace BeitieSpliter
             if (IsColumnRowValid())
             {
                 InitDrawParameters();
+                GlobalSettings.LastSelectedRow = rows-1;
             }
             ParsePageText();
             CurrentPage.Invalidate();
@@ -1988,6 +1990,11 @@ namespace BeitieSpliter
             ApplicationView.TerminateAppOnFinalViewClose = false;
             CurrentView.Consolidated += ConsolidatedMainView;
             UpdateChineseLanguage();
+            if (GlobalSettings.LastSelectedXingcao)
+            {
+                XingcaoModeCheck.IsChecked = true;
+                XincaoModeCheck_Clicked(null, null);
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -2078,6 +2085,7 @@ namespace BeitieSpliter
             InitDrawParameters();
             ParsePageText();
             RefreshPage();
+            GlobalSettings.LastSelectedXingcao = XingcaoMode;
         }
 
         private void ZiCount_LostFocus(object sender, RoutedEventArgs e)

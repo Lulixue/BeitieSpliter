@@ -40,8 +40,16 @@ namespace BeitieSpliter
     {
         public static readonly string SETTING_MULTI_WINDOW = "MultiWindowMode";
         public static readonly string SETTING_TRANDITIONAL_HAN = "TranditionalHan";
+        public static readonly string SETTING_SELECTED_ROW = "LastSelectedRow";
+        public static readonly string SETTING_SELECTED_COLUMN = "LastSelectedColumn";
+        public static readonly string SETTING_SELECTED_XINGCAO = "LastSelectedXingcao";
+        private static readonly int DEFAULT_ROW = 9;
+        private static readonly int DEFAULT_COLUMN = 6;
         public static bool MultiWindowMode = true;
         public static bool TranditionalChineseMode = false;
+        public static int LastSelectedRow = DEFAULT_ROW - 1;
+        public static int LastSelectedColumn = DEFAULT_COLUMN - 1;
+        public static bool LastSelectedXingcao = false;
     }
 
     public sealed class LanguageHelper
