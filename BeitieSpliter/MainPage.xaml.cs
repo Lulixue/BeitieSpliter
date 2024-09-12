@@ -38,11 +38,21 @@ using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.ApplicationModel.Resources;
 using static BeitieSpliter.LanguageHelper;
+using Newtonsoft.Json;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace BeitieSpliter
 {
+    public sealed class BeitieLocation
+    { 
+        public int l { set; get; }
+        public int r { set; get; }
+        public int t { set; get; }
+        public int b { set; get; }
+        public int w { set; get; }
+        public int h { set; get; }
+    }
     public sealed class BeitieImage
     {
         public BeitieImage(MainPage parent, CanvasControl cvs, StorageFile f, AutoResetEvent evt)
@@ -57,6 +67,8 @@ namespace BeitieSpliter
         public StorageFile file;
         public float resolutionX = 0;
         public float resolutionY = 0;
+        public float ratioY = 1f;
+        public float ratioX = 1f;
         public double DipX = 0;
         public double DipY = 0;
         public string contents;
@@ -251,8 +263,15 @@ namespace BeitieSpliter
             {
                 PenWidthCombo.Items.Add(i);
             }
+            if (GlobalSettings.LastSelectedRow < RowCount.Items.Count)
+            { 
+                RowCount.SelectedIndex = GlobalSettings.LastSelectedRow;
+            } 
+            else
+            {
+                RowCount.Text = GlobalSettings.LastSelectedRow.ToString();
+            }
 
-            RowCount.SelectedIndex = GlobalSettings.LastSelectedRow;
             ColumnCount.SelectedIndex = GlobalSettings.LastSelectedColumn;
             PenWidthCombo.SelectedIndex = 1;
 
@@ -286,9 +305,28 @@ namespace BeitieSpliter
             ColumnNumber = GetColumnCount();
             RowNumber = GetRowCount();
             InitPageMargin();
-
-            CurrentPage.Height = CurrentBtImage.resolutionY;
-            CurrentPage.Width = CurrentBtImage.resolutionX;
+            var ratioXy = CurrentBtImage.resolutionX / CurrentBtImage.resolutionY;
+            var maxSize = 16384;
+            if (CurrentBtImage.resolutionX > maxSize || CurrentBtImage.resolutionY > maxSize)
+            {
+                if (ratioXy > 1f)
+                {
+                    CurrentPage.Width = maxSize;
+                    CurrentPage.Height = maxSize / ratioXy;
+                } 
+                else
+                {
+                    CurrentPage.Height = maxSize;
+                    CurrentPage.Width = maxSize * ratioXy;
+                } 
+                CurrentBtImage.ratioX = (float)(CurrentBtImage.resolutionX * 1.0 / CurrentPage.Width);
+                CurrentBtImage.ratioY = (float)(CurrentBtImage.resolutionY * 1.0 / CurrentPage.Height);
+            } 
+            else
+            {
+                CurrentPage.Height = CurrentBtImage.resolutionY;
+                CurrentPage.Width = CurrentBtImage.resolutionX;
+            }
 
             BtGrids.Columns = ColumnNumber;
             if (XingcaoMode)
@@ -1028,6 +1066,14 @@ namespace BeitieSpliter
             Debug.WriteLine("New Bitmap: {0:0},{1:0}", CurrentBtImage.resolutionX, CurrentBtImage.resolutionY);
             InitDrawParameters();
         }
+        private static async Task<StorageFolder> GetSaveCopyFolder(string dir)
+        {
+            //StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
+            StorageFolder picFolder = KnownFolders.PicturesLibrary;
+            StorageFolder folder = await picFolder.CreateFolderAsync(dir + " - 副本", CreationCollisionOption.OpenIfExists);
+
+            return folder;
+        }
         private static async Task<StorageFolder> GetSaveFolder(string dir)
         {
             //StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
@@ -1062,9 +1108,27 @@ namespace BeitieSpliter
             }
 
             StorageFolder folder = await GetSaveFolder(dir);
+            StorageFolder copyFolder = await GetSaveCopyFolder(dir);
             StorageFile outputFile = await folder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
+            StorageFile outputCopyFile = await copyFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
 
             using (IRandomAccessStream stream = await outputFile.OpenAsync(FileAccessMode.ReadWrite, StorageOpenOptions.None))
+            {
+                BitmapEncoder encoder = await BitmapEncoder.CreateAsync(bitmapEncoderGuid, stream);
+                Stream pixelStream = image.PixelBuffer.AsStream();
+                byte[] pixels = new byte[pixelStream.Length];
+                await pixelStream.ReadAsync(pixels, 0, pixels.Length);
+
+                encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore,
+                          (uint)image.PixelWidth,
+                          (uint)image.PixelHeight,
+                          96.0,
+                          96.0,
+                          pixels);
+
+                await encoder.FlushAsync();
+            }
+            using (IRandomAccessStream stream = await outputCopyFile.OpenAsync(FileAccessMode.ReadWrite, StorageOpenOptions.None))
             {
                 BitmapEncoder encoder = await BitmapEncoder.CreateAsync(bitmapEncoderGuid, stream);
                 Stream pixelStream = image.PixelBuffer.AsStream();
@@ -1131,7 +1195,29 @@ namespace BeitieSpliter
         async void SaveSingleCropImage(WriteableBitmap input, Rect roi, string album, string filename)
         {
             WriteableBitmap croppedBmp = input.Crop(roi);
-             
+
+            var location = new BeitieLocation
+            {
+                l = (int)roi.Left + imageXOffset,
+                r = (int)roi.Right + imageXOffset,
+                t = (int)roi.Top,
+                b = (int)roi.Bottom,
+                w = (int)input.PixelWidth,
+                h = (int)input.PixelHeight
+            };
+
+
+            StorageFolder folder = await GetSaveFolder(album);
+            StorageFile outputFile = await folder.CreateFileAsync(filename + ".json", CreationCollisionOption.ReplaceExisting);
+            var data = await outputFile.OpenStreamForWriteAsync();
+
+            using (StreamWriter r = new StreamWriter(data))
+            {
+                var serelizedfile = JsonConvert.SerializeObject(location);
+                r.Write(serelizedfile);
+            }
+            data.Close();
+
             Debug.WriteLine("Save Single Crop Image: ({0:0},{3:0},{4:0},{5:0}), -> {1}\\{2}", roi.X, album, filename,
                 roi.Y, roi.Width, roi.Height);
             await SaveWriteableBitmapToFile(croppedBmp, album, filename);
@@ -1141,13 +1227,19 @@ namespace BeitieSpliter
         {
             this.SaveSplitted.Invoke(para, null);
         }
-
+        private bool saving = false;
         async void SaveSplitImagesProcWait(object para)
         {
+            if (saving)
+            {
+                return;
+            }
+            saving = true;
             InitWait();
             await SaveSplitImagesProc(para);
             WaitForSaving();
             ConfigPage.HandlerShowSaveResultEvt(null);
+            saving = false;
         }
 
         public async void OnSaveSplitImagesDelegate(object sender, EventArgs e)
@@ -1261,7 +1353,7 @@ namespace BeitieSpliter
 
             SaveNotfInfo = "";
 
-            if (BtGrids.IsImageRotated())
+            if (BtGrids.IsImageRotated() && BtGrids.RotateFile != null)
             {
                 inputBitmap = await OpenWriteableBitmapFile(BtGrids.RotateFile);
             }
@@ -1372,14 +1464,39 @@ namespace BeitieSpliter
             SetWait();
             return SaveErrType;
         }
-        private void OnSaveSplitImages(object sender, RoutedEventArgs e)
+        private async void OnSaveSplitImages(object sender, RoutedEventArgs e)
         {
-            if (CurrentBtImage == null)
+            //if (CurrentBtImage == null)
+            //{
+            //    Common.ShowMessageDlg(/*"请选择书法碑帖图片!"*/GetPlainString(StringItemType.PleaseChooseBeitie), null);
+            //    return;
+            //}
+            //SaveSplitImages(null);
+
+            StorageFolder picFolder = KnownFolders.PicturesLibrary;
+            StorageFolder folder = await picFolder.CreateFolderAsync("location", CreationCollisionOption.OpenIfExists);
+
+            IReadOnlyList<StorageFile> BtFolderFileList = await folder.GetFilesAsync();
+            var ordered = BtFolderFileList.OrderBy(f => f.Name);
+
+            Dictionary<int, Rect> rects = new Dictionary<int, Rect>();
+            var counter = 0;
+            foreach (var file in ordered)
             {
-                Common.ShowMessageDlg(/*"请选择书法碑帖图片!"*/GetPlainString(StringItemType.PleaseChooseBeitie), null);
-                return;
+                if (file.Name.Contains(".json"))
+                {
+                    var lines = await FileIO.ReadTextAsync(file);
+                    var location = JsonConvert.DeserializeObject<BeitieLocation>(lines);
+                    var x = location.l; 
+                    BtGrids.XingcaoElements.Add(counter, new BeitieGridRect(new Rect(x, location.t,
+                        location.r - location.l, location.b - location.t))
+                    {
+                        col = counter,
+                        revised = true 
+                    });
+                    counter++;
+                }
             }
-            SaveSplitImages(null);
         }
         private List<char> IGNORED_CHARS = new List<char>();
         private List<string> FILETYPE_FILTERS = new List<string>();
@@ -2177,5 +2294,25 @@ namespace BeitieSpliter
         {
             GlobalSettings.MultiWindowMode = !GlobalSettings.MultiWindowMode;
         }
+
+        private void PageText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+        private int imageXOffset = 0;
+        private void PageTextWritten_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try {
+
+                imageXOffset = int.Parse(PageTextWritten.Text);
+            }
+            catch (Exception exc)
+            {
+                imageXOffset = 0;
+                Debug.WriteLine("Exception: " + exc.ToString());
+                return;
+            }
+        }
     }
 }
+
