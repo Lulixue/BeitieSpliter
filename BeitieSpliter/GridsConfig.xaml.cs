@@ -1771,7 +1771,8 @@ namespace BeitieSpliter
         private void DrawElementText(CanvasDrawingSession draw, Rect rc, int index, bool moveToCapture = false)
         {
             string name = BtGrids.GetElementString(index);
-            string sizeTxt = string.Format("{0:0}✕{1:0}", rc.Width, rc.Height);
+            string element = BtGrids.GetElementChar(index);
+            string sizeTxt = string.Format("{0:0}✕{1:0} {2:0}", rc.Width, rc.Height, element);
             double selectedPenWidth = BtGrids.PenWidth + 1;
             double smallerLength = (rc.Height > rc.Width) ? rc.Width : rc.Height;
             
@@ -2804,6 +2805,12 @@ namespace BeitieSpliter
                 {
                     NotifyUser(ParentPage.SaveNotfInfo, NotifyType.StatusMessage);
                     Common.ShowMessageDlg(ParentPage.SaveNotfInfo, null);
+                } 
+                else if (type == SaveErrorType.NoChinese)
+                {
+
+                    NotifyUser("单字为空", NotifyType.ErrorMessage);
+                    Common.ShowMessageDlg("单字为空!", null);
                 }
 
             });
@@ -3386,8 +3393,8 @@ namespace BeitieSpliter
                 setAsKb.Click += ElementMenuSetAs_Click;
                 myFlyout.Items.Add(AdjustElem);
                 myFlyout.Items.Add(setAsKb);
-                myFlyout.Items.Add(setAsYz);
-                myFlyout.Items.Add(setAsQuezi);
+                //myFlyout.Items.Add(setAsYz);
+                //myFlyout.Items.Add(setAsQuezi);
                 myFlyout.Items.Add(setAsZi);
 
             }

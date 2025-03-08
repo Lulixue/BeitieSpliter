@@ -665,6 +665,16 @@ namespace BeitieSpliter
             return count;
 
         }
+        public string GetElementChar(int index)
+        {
+            BeitieElement be;
+            Elements.TryGetValue(index, out be);
+            if (be == null)
+            {
+                be = new BeitieElement(BeitieElement.BeitieElementType.Kongbai, "", -1);
+            } 
+            return be.content.ToString();
+        }
 
         public string GetElementString(int index)
         {
@@ -768,6 +778,7 @@ namespace BeitieSpliter
         {
             Point pntLt = new Point();
             ElementRects.Clear();
+            XingcaoElements.Clear();
             for (int i = 0; i < Columns; i++)
             {
                 pntLt.X = i * GridWidth + OriginPoint.X;

@@ -11,6 +11,7 @@
     RequestedTheme="Dark"
     Unloaded="Page_OnUnloaded"  
     Loaded="Page_Loaded"
+    CanDrag="True"
     NavigationCacheMode="Required"
     FontFamily="微软雅黑"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
@@ -37,7 +38,10 @@
     </Page.Resources>
     
     
-    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Padding="0,10,0,0" BorderBrush="DarkGray" BorderThickness="0" SizeChanged="OnSizeChanged">
+    <Grid x:Name="RootGrid" Grid.Row="6" Grid.ColumnSpan="2" Padding="0,10,0,0" BorderBrush="DarkGray" BorderThickness="0" 
+          AllowDrop="True" Drop="ImageDrope" DragEnter="ImageDragEnter" DragOver="ImageDragOver"
+          CanDrag="True"
+          SizeChanged="OnSizeChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1.5*"/>
@@ -132,6 +136,9 @@
         <Border x:Name="PageBorder" Grid.Row="2" Grid.RowSpan="4" Margin="10,5,5,0"
                 Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="1" >
             <ScrollViewer x:Name="ImageScrollViewer" Margin="5" 
+                          DragStarting="ImageDragStarting" DropCompleted="ImageDropCompleted"
+                          AllowDrop="True" Drop="ImageDrope" DragEnter="ImageDragEnter" DragOver="ImageDragOver"
+          CanDrag="True"
                           HorizontalScrollBarVisibility="Visible"  VerticalScrollBarVisibility="Visible" 
                     ZoomMode="Enabled">
 
@@ -151,12 +158,19 @@
         <RelativePanel  Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="3,3,13,3">
             <ToggleSwitch Width="110" Name="NoNameSwitch" x:Uid="NoNameSwitch" OnContent="所有编号" OffContent="只字编号" FontSize="12" Toggled="NoNameSwitch_Toggled"/>
             <TextBox x:Name="StartNoBox" RelativePanel.RightOf="NoNameSwitch" Margin="10,0,0,0"  Text="1" RelativePanel.AlignRightWithPanel="True" TextAlignment="Left" TextWrapping="Wrap" MinWidth="30" InputScope="Number" LostFocus="LostFocus_StartNoBox"/>
-        </RelativePanel> 
-        <TextBox x:Name="PageText"  Grid.Row="4" x:Uid="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" FontSize="18" LostFocus="PageText_LostFocus" AcceptsReturn="True"  Grid.Column="2"  Margin="3,3,13,0" VerticalAlignment="Stretch"  Text="" TextWrapping="Wrap" IsSpellCheckEnabled="False" TextChanged="PageText_TextChanged" VerticalContentAlignment="Stretch" MaxWidth="200"
+        </RelativePanel>
+
+        <TextBox x:Name="PageText"  Grid.Column="2" Grid.Row="4"  x:Uid="PageText" PlaceholderText="在这里输入释文&#x000D;&#x000A;&#x000D;&#x000A;特殊元素:&#x000D;&#x000A; 阙字用&quot;{缺}/□&quot;&#x000D;&#x000A; 印章用&quot;{印:}&quot;&#x000D;&#x000A; 空白用&quot;{}&quot;&#x000D;&#x000A; 其他用&quot;{XX}&quot;" FontSize="18" LostFocus="PageText_LostFocus" AcceptsReturn="True"    Margin="3,3,13,0" VerticalAlignment="Stretch"  Text="" TextWrapping="Wrap" 
+                     IsSpellCheckEnabled="False" TextChanged="PageText_TextChanged" VerticalContentAlignment="Stretch" MaxWidth="200"
                 />
-        <TextBox Margin="3,5,13,0"  Grid.Column="2" Grid.Row="5" x:Name="PageTextWritten" x:Uid="PageText" 
+        <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="5">
+
+            <ToggleSwitch Width="110" Name="FilterSwitch"   x:Uid="FilterSwitch" OnContent="过滤缺字" OffContent="不过滤" FontSize="12"  
+                          Toggled="FilterSwitch_Toggled"/>
+            <TextBox Margin="3,5,13,0"  x:Name="PageTextWritten" x:Uid="PageText" 
                  PlaceholderText="X偏移"  FontSize="18"   LostFocus="PageText_LostFocus"  AcceptsReturn="True"  Text="" VerticalAlignment="Stretch"  TextWrapping="Wrap" VerticalContentAlignment="Stretch" IsSpellCheckEnabled="False" TextChanged="PageTextWritten_TextChanged" MaxWidth="200"
-                />  
+                />
+        </StackPanel>
         <RelativePanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,3,0,0" >
             <Frame x:Name="ScenarioFrame" Margin="0,1,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
             <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">

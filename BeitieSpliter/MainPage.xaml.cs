@@ -39,6 +39,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.ApplicationModel.Resources;
 using static BeitieSpliter.LanguageHelper;
 using Newtonsoft.Json;
+using Windows.ApplicationModel.DataTransfer;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -272,7 +273,14 @@ namespace BeitieSpliter
                 RowCount.Text = GlobalSettings.LastSelectedRow.ToString();
             }
 
-            ColumnCount.SelectedIndex = GlobalSettings.LastSelectedColumn;
+            if (GlobalSettings.LastSelectedColumn < ColumnCount.Items.Count)
+            {
+                ColumnCount.SelectedIndex = GlobalSettings.LastSelectedColumn;
+            } 
+            else
+            {
+                ColumnCount.Text = GlobalSettings.LastSelectedColumn.ToString();
+            }
             PenWidthCombo.SelectedIndex = 1;
 
             PenColorCombo.MinWidth = PenColorCombo.ActualWidth;
@@ -643,6 +651,31 @@ namespace BeitieSpliter
             StartNoBox.Text = string.Format("{0}", no);
         }
 
+        private void LoadFile(StorageFile file)
+        {
+            if (file != null)
+            {
+                ImageSlidePanel.Visibility = Visibility;
+                // Application now has read/write access to the picked file
+                BtFolder = null;
+
+                DictBtFiles.Clear();
+                FolderFileCombo.Items.Clear();
+                FolderFileCombo.Items.Add("[1/1]" + file.Name);
+                DictBtFiles.Add(0, new BeitieAlbumItem(file, 1));
+
+                StartFolderFiles();
+
+                SetDirFilePath(/*"图片: " */GetPlainString(StringItemType.Picture) + file.Path);
+                TieAlbum.Text = GetFileTitle(file);
+            }
+            else
+            {
+                SetDirFilePath(null);
+            }
+
+        }
+
         private int FilePickerID = 1;
         private async void OnImportBeitieFile(object sender, RoutedEventArgs e)
         {
@@ -657,26 +690,7 @@ namespace BeitieSpliter
                 openPicker.FileTypeFilter.Add(type);
             }
             StorageFile file = await openPicker.PickSingleFileAsync((++FilePickerID).ToString());
-            if (file != null)
-            {
-                ImageSlidePanel.Visibility = Visibility;
-                // Application now has read/write access to the picked file
-                BtFolder = null;
-
-                DictBtFiles.Clear();
-                FolderFileCombo.Items.Clear();
-                FolderFileCombo.Items.Add("[1/1]" + file.Name);
-                DictBtFiles.Add(0, new BeitieAlbumItem(file, 1));
-
-                StartFolderFiles();
-                
-                SetDirFilePath(/*"图片: " */GetPlainString(StringItemType.Picture) + file.Path);
-                TieAlbum.Text = GetFileTitle(file);
-            }
-            else
-            {
-                SetDirFilePath(null);
-            }
+            LoadFile(file);
         }
 
         CanvasStrokeStyle StrokeStyle = new CanvasStrokeStyle()
@@ -1254,6 +1268,7 @@ namespace BeitieSpliter
         {
             NoPageText,
             NoSelectedItem,
+            NoChinese,
             ParaError,
             Success,
         }
@@ -1323,6 +1338,11 @@ namespace BeitieSpliter
             else if (type == SaveErrorType.Success)
             {
                 NotifyUser(SaveNotfInfo, NotifyType.StatusMessage);
+                Common.ShowMessageDlg(SaveNotfInfo, null);
+            }
+            else if (type == SaveErrorType.NoChinese)
+            { 
+                NotifyUser(SaveNotfInfo, NotifyType.ErrorMessage);
                 Common.ShowMessageDlg(SaveNotfInfo, null);
             }
         }
@@ -1401,6 +1421,22 @@ namespace BeitieSpliter
                 SaveErrType = SaveErrorType.NoSelectedItem;
                 return SaveErrType;
             }
+            
+            foreach (int index in ElementIndexes)
+            {  
+                BeitieElement element = BtGrids.Elements[index];
+                if (element.type == BeitieElement.BeitieElementType.Kongbai)
+                {
+                    continue;
+                }
+                if (element.content.Length == 0)
+                { 
+                    SetWait(); 
+                    SaveErrType = SaveErrorType.NoChinese;
+                    return SaveErrType;
+                }
+            }
+
             HashSet<string> SaveFileNames = new HashSet<string>();
 
             string noFormatter = string.Format("{0}{1}{2}", "{0:D", TextSizeGrade.SelectedIndex + 2, "}");
@@ -1644,7 +1680,6 @@ namespace BeitieSpliter
         private void ParsePageText()
         {
             string txt = PageText.Text;
-            int length = txt.Length;
             char single;
             bool specialTypeDetected = false;
             int OthersNo = 0;
@@ -1652,6 +1687,13 @@ namespace BeitieSpliter
             int QueziNo = 0;
             int ZiNo = 0;
             StringBuilder sb = new StringBuilder();
+
+            if (FilterSwitch.IsOn)
+            {
+                var reg = new Regex("[(（](.*?)[)）]");
+                txt = reg.Replace(txt, "");
+            }
+            int length = txt.Length;
 
             BtGrids.Elements.Clear();
             if (length == 0)
@@ -2313,6 +2355,43 @@ namespace BeitieSpliter
                 return;
             }
         }
+
+        private void FilterSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private async void ImageDrope(object sender, DragEventArgs e)
+        {
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+                LoadFile(items[0] as StorageFile);
+
+            }
+        }
+
+        private void ImageDragEnter(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine("ImageDragEnter");
+        }
+
+        private void ImageDragOver(object sender, DragEventArgs e)
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy; 
+            Debug.WriteLine("ImageDragOver");
+        }
+
+        private void ImageDragStarting(UIElement sender, DragStartingEventArgs args)
+        {
+
+            Debug.WriteLine("ImageDragStarting");
+        }
+
+        private void ImageDropCompleted(UIElement sender, DropCompletedEventArgs args)
+        {
+
+            Debug.WriteLine("ImageDropCompleted");
+        }
     }
 }
-
