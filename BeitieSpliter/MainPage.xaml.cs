@@ -452,6 +452,44 @@ namespace BeitieSpliter
             return false;
         }
 
+        private async void loadFolder(StorageFolder folder)
+        {
+            BtFolder = folder;
+            // Application now has read/write access to all contents in the picked folder
+            // (including other sub-folder contents)
+            Windows.Storage.AccessCache.StorageApplicationPermissions.
+            FutureAccessList.AddOrReplace("PickedFolderToken", BtFolder);
+
+            IReadOnlyList<StorageFile> BtFolderFileList = await BtFolder.GetFilesAsync();
+
+            if (BtFolderFileList.Count < 1)
+            {
+                Common.ShowMessageDlg(/*"所选文件夹下找不到碑帖图片！"*/GetPlainString(StringItemType.PictureNotFound), null);
+                return;
+            }
+
+            ImageSlidePanel.Visibility = Visibility;
+            FolderFileCombo.Items.Clear();
+            DictBtFiles.Clear();
+            int i = 0;
+            int baseNo = 1;
+            int pageSize = (ColumnNumber * RowNumber);
+            foreach (StorageFile file in BtFolderFileList)
+            {
+                if (!FileIsInFilterTypes(file))
+                {
+                    continue;
+                }
+
+                FolderFileCombo.Items.Add(string.Format("[{0}/{1}]{2}", i + 1, BtFolderFileList.Count, file.Name));
+                DictBtFiles.Add(i++, new BeitieAlbumItem(file, baseNo));
+                baseNo += pageSize;
+            }
+            StartFolderFiles();
+            SetDirFilePath(/*"文件夹: "*/GetPlainString(StringItemType.Folder) + BtFolder.Path);
+            TieAlbum.Text = BtFolder.Name;
+        }
+
         private async void OnImportBeitieDir(object sender, RoutedEventArgs e)
         {
             var folderPicker = new Windows.Storage.Pickers.FolderPicker
@@ -464,39 +502,7 @@ namespace BeitieSpliter
             BtFolder = await folderPicker.PickSingleFolderAsync();
             if (BtFolder != null)
             {
-                // Application now has read/write access to all contents in the picked folder
-                // (including other sub-folder contents)
-                Windows.Storage.AccessCache.StorageApplicationPermissions.
-                FutureAccessList.AddOrReplace("PickedFolderToken", BtFolder);
-
-                IReadOnlyList<StorageFile> BtFolderFileList = await BtFolder.GetFilesAsync();
-
-                if (BtFolderFileList.Count < 1)
-                {
-                    Common.ShowMessageDlg(/*"所选文件夹下找不到碑帖图片！"*/GetPlainString(StringItemType.PictureNotFound), null);
-                    return;
-                }
-
-                ImageSlidePanel.Visibility = Visibility;
-                FolderFileCombo.Items.Clear();
-                DictBtFiles.Clear();
-                int i = 0;
-                int baseNo = 1;
-                int pageSize = (ColumnNumber * RowNumber);
-                foreach (StorageFile file in BtFolderFileList)
-                {
-                    if (!FileIsInFilterTypes(file))
-                    {
-                        continue;
-                    }
-                    
-                    FolderFileCombo.Items.Add(string.Format("[{0}/{1}]{2}", i+1, BtFolderFileList.Count, file.Name));
-                    DictBtFiles.Add(i++, new BeitieAlbumItem(file, baseNo));
-                    baseNo += pageSize;
-                }
-                StartFolderFiles();
-                SetDirFilePath(/*"文件夹: "*/GetPlainString(StringItemType.Folder) + BtFolder.Path);
-                TieAlbum.Text = BtFolder.Name;
+                loadFolder(BtFolder);
             }
             else
             {
@@ -1523,7 +1529,8 @@ namespace BeitieSpliter
                 {
                     var lines = await FileIO.ReadTextAsync(file);
                     var location = JsonConvert.DeserializeObject<BeitieLocation>(lines);
-                    var x = location.l; 
+                    var offset = 0;
+                    var x = location.l - offset; 
                     BtGrids.XingcaoElements.Add(counter, new BeitieGridRect(new Rect(x, location.t,
                         location.r - location.l, location.b - location.t))
                     {
@@ -2366,8 +2373,16 @@ namespace BeitieSpliter
             if (e.DataView.Contains(StandardDataFormats.StorageItems))
             {
                 var items = await e.DataView.GetStorageItemsAsync();
-                LoadFile(items[0] as StorageFile);
+                var item = items[0];
+                if (item is StorageFolder)
+                {
+                    loadFolder(item as StorageFolder);
+                } 
+                else
+                {
 
+                    LoadFile(item as StorageFile);
+                }
             }
         }
 

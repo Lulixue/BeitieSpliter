@@ -1555,8 +1555,21 @@ namespace BeitieSpliter
             {
                 Common.SetWindowSize();
             }
-            UpdateChineseLanguage();
-            OpWholePage.IsChecked = true;
+            UpdateChineseLanguage(); 
+            if (BtGrids.XingcaoMode)
+            {
+                OpWholePage.IsChecked = true;
+            } else {
+                if (false && BtGrids.Elements.Count > 0)
+                {
+
+                    OpSingleColumn.IsChecked = true;
+                } else
+                {
+                    OpWholePage.IsChecked = true;
+                }
+            }
+            
             IsPageUnloaded = false;
         }
 
@@ -3161,18 +3174,19 @@ namespace BeitieSpliter
         static readonly double IN_OFFSET_MAX = 20;
         private PointerLocation GetPointerLocation(Point pp)
         {
-            double outMaxOffset = BtGrids.XingcaoMode ? 1 : AdjustDelta;
+            double adjustDelta = Math.Min(ToAdjustRect.Width, ToAdjustRect.Height) * 0.1;
+            double outMaxOffset = BtGrids.XingcaoMode ? 1 : adjustDelta;
             double inMaxOffsetX = ToAdjustRect.Width * IN_OFFSET_PROP;
             double inMaxOffsetY = ToAdjustRect.Height * IN_OFFSET_PROP;
 
-            if (inMaxOffsetX > IN_OFFSET_MAX)
-            {
-                inMaxOffsetX = IN_OFFSET_MAX;
-            }
-            if (inMaxOffsetY > IN_OFFSET_MAX)
-            {
-                inMaxOffsetY = IN_OFFSET_MAX;
-            }
+            //if (inMaxOffsetX > IN_OFFSET_MAX)
+            //{
+            //    inMaxOffsetX = IN_OFFSET_MAX;
+            //}
+            //if (inMaxOffsetY > IN_OFFSET_MAX)
+            //{
+            //    inMaxOffsetY = IN_OFFSET_MAX;
+            //}
 
             if (!IsPntInRect(pp, new Rect(0, 0, BtImageAdjustRect.Width, BtImageAdjustRect.Height), outMaxOffset))
             {
