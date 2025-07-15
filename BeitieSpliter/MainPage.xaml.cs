@@ -657,6 +657,36 @@ namespace BeitieSpliter
             StartNoBox.Text = string.Format("{0}", no);
         }
 
+        Regex regex =  new Regex("(\\d+)-(\\S).jpg.json");
+
+        private async void LoadDropFile(StorageFile file)
+        {
+            var result = regex.Match(file.Name);
+            if (!result.Success)
+            {
+                LoadFile(file);
+                return;
+            }
+
+            var number = result.Groups[1].ToString();
+
+            this.PageText.Text = result.Groups[2].ToString();
+            this.StartNoBox.Text = number;
+            XingcaoModeCheck.IsChecked = true;
+            var lines = await FileIO.ReadTextAsync(file);
+            var location = JsonConvert.DeserializeObject<BeitieLocation>(lines);
+            var offset = 0;
+            var x = location.l - offset;
+            BtGrids.XingcaoElements.Clear();
+            BtGrids.XingcaoElements.Add(0, new BeitieGridRect(new Rect(x, location.t,
+                location.r - location.l, location.b - location.t))
+            {
+                col = 0,
+                revised = true
+            });
+            PageText_LostFocus(null, null);
+        }
+
         private void LoadFile(StorageFile file)
         {
             if (file != null)
@@ -2380,8 +2410,7 @@ namespace BeitieSpliter
                 } 
                 else
                 {
-
-                    LoadFile(item as StorageFile);
+                    LoadDropFile(item as StorageFile);
                 }
             }
         }

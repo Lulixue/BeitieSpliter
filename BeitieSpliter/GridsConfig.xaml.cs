@@ -3418,7 +3418,7 @@ namespace BeitieSpliter
                 myFlyout.Items.Add(setAsQuezi);
                 myFlyout.Items.Add(setAsZi);
             }
-            myFlyout.Items.Add(resetElem);
+            //myFlyout.Items.Add(resetElem);
             myFlyout.Items.Add(saveElem);
 
             //if you only want to show in left or buttom 
